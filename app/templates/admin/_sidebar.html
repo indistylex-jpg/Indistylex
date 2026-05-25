@@ -1,0 +1,55 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-dark text-white admin-sidebar" id="adminSidebar" style="min-height: calc(100vh - 56px);">
+  <a href="{{ url_for('admin.dashboard') }}" class="d-flex align-items-center mb-3 text-white text-decoration-none">
+    <i class="bi bi-speedometer2 me-2 fs-4"></i>
+    <span class="fs-5 fw-semibold">Admin Panel</span>
+  </a>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item">
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="nav-link text-white {{ 'active' if request.endpoint == 'admin.dashboard' }}">
+        <i class="bi bi-grid me-2"></i>Dashboard
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admin.categories') }}"
+         class="nav-link text-white {{ 'active' if 'categor' in request.endpoint }}">
+        <i class="bi bi-tags me-2"></i>Categories
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admin.products') }}"
+         class="nav-link text-white {{ 'active' if 'product' in request.endpoint }}">
+        <i class="bi bi-box-seam me-2"></i>Products
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admin.orders') }}"
+         class="nav-link text-white {{ 'active' if 'order' in request.endpoint }}">
+        <i class="bi bi-receipt me-2"></i>Orders
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admin.customers') }}"
+         class="nav-link text-white {{ 'active' if request.endpoint == 'admin.customers' }}">
+        <i class="bi bi-people me-2"></i>Customers
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admin.coupons') }}"
+         class="nav-link text-white {{ 'active' if 'coupon' in request.endpoint }}">
+        <i class="bi bi-ticket-perforated me-2"></i>Coupons
+      </a>
+    </li>
+    <li>
+      <a href="{{ url_for('admin.reviews') }}"
+         class="nav-link text-white {{ 'active' if request.endpoint == 'admin.reviews' }}">
+        <i class="bi bi-star me-2"></i>Reviews
+      </a>
+    </li>
+  </ul>
+  <hr>
+  <a href="{{ url_for('main.index') }}" class="nav-link text-white-50 small">
+    <i class="bi bi-arrow-left me-1"></i>Back to Store
+  </a>
+</div>

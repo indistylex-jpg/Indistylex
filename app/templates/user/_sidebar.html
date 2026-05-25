@@ -1,0 +1,36 @@
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-3">
+    <div class="text-center mb-3">
+      <div class="avatar-circle mx-auto mb-2">
+        <span class="initials">{{ current_user.first_name[0] }}{{ current_user.last_name[0] }}</span>
+      </div>
+      <h6 class="mb-0">{{ current_user.first_name }} {{ current_user.last_name }}</h6>
+      <small class="text-muted">{{ current_user.email }}</small>
+    </div>
+    <nav class="nav flex-column">
+      <a class="nav-link {{ 'active fw-semibold' if request.endpoint == 'user.profile' }}"
+         href="{{ url_for('user.profile') }}">
+        <i class="bi bi-person me-2"></i>My Profile
+      </a>
+      <a class="nav-link {{ 'active fw-semibold' if request.endpoint == 'order.order_history' }}"
+         href="{{ url_for('order.order_history') }}">
+        <i class="bi bi-bag me-2"></i>My Orders
+      </a>
+      <a class="nav-link {{ 'active fw-semibold' if request.endpoint == 'user.addresses' }}"
+         href="{{ url_for('user.addresses') }}">
+        <i class="bi bi-geo-alt me-2"></i>Addresses
+      </a>
+      <a class="nav-link {{ 'active fw-semibold' if request.endpoint == 'user.wishlist' }}"
+         href="{{ url_for('user.wishlist') }}">
+        <i class="bi bi-heart me-2"></i>Wishlist
+      </a>
+      <a class="nav-link {{ 'active fw-semibold' if request.endpoint == 'user.change_password' }}"
+         href="{{ url_for('user.change_password') }}">
+        <i class="bi bi-lock me-2"></i>Change Password
+      </a>
+      <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+        <i class="bi bi-box-arrow-right me-2"></i>Logout
+      </a>
+    </nav>
+  </div>
+</div>

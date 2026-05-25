@@ -1,0 +1,54 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Coupons{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">Coupons</h4>
+  <a href="{{ url_for('admin.add_coupon') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus me-1"></i>Add Coupon
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr><th>Code</th><th>Discount</th><th>Min Order</th><th>Usage</th><th>Valid Until</th><th class="text-center">Status</th><th class="text-center">Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for coupon in coupons %}
+            <tr>
+              <td class="td-name fw-semibold font-monospace">{{ coupon.code }}</td>
+              <td>
+                {% if coupon.discount_type == 'percentage' %}
+                  {{ coupon.discount_value }}%
+                {% else %}
+                  ₹{{ "{:,.0f}".format(coupon.discount_value) }}
+                {% endif %}
+              </td>
+              <td>₹{{ "{:,.0f}".format(coupon.min_order_amount) }}</td>
+              <td>{{ coupon.used_count or 0 }} / {{ coupon.max_uses or '∞' }}</td>
+              <td class="text-muted small">{{ coupon.valid_until.strftime('%d %b %Y') if coupon.valid_until else '—' }}</td>
+              <td class="text-center">
+                <span class="badge {{ 'bg-success' if coupon.is_active else 'bg-secondary' }}">
+                  {{ 'Active' if coupon.is_active else 'Inactive' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <form method="POST" action="{{ url_for('admin.delete_coupon', coupon_id=coupon.id) }}"
+                      class="d-inline" onsubmit="return confirm('Delete this coupon?')">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7" class="text-center text-muted py-3">No coupons yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

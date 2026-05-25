@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}My Wishlist — Indistylex{% endblock %}
+
+{% block content %}
+<section class="profile-section py-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3">{% include 'user/_sidebar.html' %}</div>
+      <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-4">My Wishlist</h4>
+            {% if wishlist_items %}
+              <div class="row row-cols-2 row-cols-md-3 g-3">
+                {% for item in wishlist_items %}
+                  {% set product = item.product %}
+                  <div class="col">
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                      {% set img = product.images | selectattr('is_primary') | first %}
+                      <a href="{{ url_for('product.detail', slug=product.slug) }}">
+                        <img src="{{ image_url(img.image_url if img else None) }}"
+                             class="card-img-top" alt="{{ product.name }}" style="height:200px; object-fit:cover;" loading="lazy">
+                      </a>
+                      <div class="card-body p-3">
+                        <h6 class="card-title mb-1">
+                          <a href="{{ url_for('product.detail', slug=product.slug) }}" class="text-dark text-decoration-none">
+                            {{ product.name }}
+                          </a>
+                        </h6>
+                        <p class="fw-bold text-primary mb-2">₹{{ "{:,.0f}".format(product.price) }}</p>
+                        <div class="d-flex gap-2">
+                          <a href="{{ url_for('product.detail', slug=product.slug) }}" class="btn btn-sm btn-primary flex-grow-1">View</a>
+                          <button type="button" class="btn btn-sm btn-outline-danger wishlist-toggle"
+                                  data-product-id="{{ product.id }}" title="Remove">
+                            <i class="bi bi-heart-fill"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="text-center py-4">
+                <i class="bi bi-heart display-4 text-muted"></i>
+                <p class="mt-2 text-muted">Your wishlist is empty</p>
+                <a href="{{ url_for('shop.listing') }}" class="btn btn-outline-primary">Browse Products</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

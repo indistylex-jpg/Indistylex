@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}FAQs — Indistylex{% endblock %}
+{% block meta_description %}Frequently asked questions about Indistylex — shipping, returns, sizing, payments, order tracking & more.{% endblock %}
+{% block content %}
+<section class="py-5"><div class="container"><div class="row justify-content-center"><div class="col-lg-8">
+  <h1 class="fw-bold text-center mb-4">Frequently Asked Questions</h1>
+
+  <div class="accordion" id="faqAccordion">
+    {% set faqs = [
+      ("How do I place an order?", "Simply browse our products, select size and colour, add to cart, and proceed to checkout. You can pay via UPI, debit/credit card, or net banking."),
+      ("What payment methods do you accept?", "We accept UPI, all major debit and credit cards, net banking, and wallets via Razorpay — India's most trusted payment gateway."),
+      ("Do you offer free shipping?", "Yes! Orders above ₹999 qualify for free shipping across India. Standard delivery is ₹99 for orders below ₹999."),
+      ("What is your return policy?", "We offer hassle-free 7-day returns. Items must be unused, unworn, and in original packaging. Simply contact us at support@indistylex.in."),
+      ("How long does delivery take?", "Standard delivery takes 5-7 business days across India. Metro cities may receive orders faster."),
+      ("Can I track my order?", "Yes! Once your order is shipped, you'll receive a tracking link via email. You can also check order status in your account dashboard."),
+      ("How do I find my size?", "Check our <a href='" + url_for('main.size_guide') + "'>Size Guide</a> for detailed measurements across all categories."),
+      ("Can I cancel my order?", "Orders can be cancelled before they are shipped. Contact us immediately at support@indistylex.in for cancellation requests."),
+      ("Is my payment information secure?", "Absolutely. We never store your card details. All payments are processed through Razorpay with 256-bit SSL encryption."),
+      ("How do I contact customer support?", "Email us at support@indistylex.in or call +91 63941 42176 (Mon-Sat, 10AM-7PM IST).")
+    ] %}
+    {% for question, answer in faqs %}
+      <div class="accordion-item border-0 mb-2">
+        <h2 class="accordion-header">
+          <button class="accordion-button {{ '' if loop.first else 'collapsed' }} fw-semibold" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#faq{{ loop.index }}">
+            {{ question }}
+          </button>
+        </h2>
+        <div id="faq{{ loop.index }}" class="accordion-collapse collapse {{ 'show' if loop.first }}" data-bs-parent="#faqAccordion">
+          <div class="accordion-body text-muted">{{ answer | safe }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mt-5">
+    <p class="text-muted">Still have questions?</p>
+    <a href="{{ url_for('main.contact') }}" class="btn btn-primary">Contact Us</a>
+  </div>
+</div></div></div></section>
+{% endblock %}

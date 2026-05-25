@@ -1,0 +1,253 @@
+/* ============================================
+   Indistylex — Admin Panel Styles
+   Fully responsive for mobile, tablet, laptop, desktop
+   ============================================ */
+
+:root {
+  --admin-sidebar-bg: #0F172A;
+  --admin-sidebar-active: #1A56DB;
+  --admin-sidebar-hover: rgba(26,86,219,0.3);
+  --admin-sidebar-width: 260px;
+}
+
+/* === Sidebar === */
+.admin-sidebar {
+  width: var(--admin-sidebar-width);
+  min-height: 100vh;
+  background: var(--admin-sidebar-bg);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+.admin-sidebar .sidebar-brand {
+  padding: 1.25rem 1.5rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.admin-sidebar .nav-link {
+  color: rgba(255,255,255,0.65);
+  padding: 0.65rem 1.5rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s, color 0.15s;
+}
+.admin-sidebar .nav-link i {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+.admin-sidebar .nav-link:hover {
+  background: var(--admin-sidebar-hover);
+  color: #fff;
+}
+.admin-sidebar .nav-link.active {
+  background: var(--admin-sidebar-active);
+  color: #fff;
+}
+
+/* === Main Content === */
+.admin-content {
+  margin-left: var(--admin-sidebar-width);
+  min-height: 100vh;
+  background: #F0F2F5;
+  transition: margin-left 0.3s ease;
+}
+.admin-topbar {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 0.75rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.admin-topbar .sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #333;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+/* === Stat Cards === */
+.stat-card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+.stat-card .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* === Data Tables === */
+.table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7F8C8D;
+  border-bottom-width: 1px;
+  white-space: nowrap;
+}
+.table td {
+  vertical-align: middle;
+}
+.table td.td-name {
+  min-width: 200px;
+  white-space: normal;
+  word-break: break-word;
+}
+.table .product-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Prevent action buttons from wrapping */
+.table td .btn-sm {
+  white-space: nowrap;
+}
+
+/* Ensure tables don't overflow on desktop */
+@media (min-width: 992px) {
+  .table-responsive table {
+    table-layout: auto;
+    width: 100%;
+  }
+}
+
+/* Status badges */
+.badge-status {
+  font-size: 0.75rem;
+  padding: 0.35em 0.75em;
+  border-radius: 20px;
+}
+
+/* === Form Cards === */
+.form-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* === Toggle Switch === */
+.form-switch .form-check-input:checked {
+  background-color: #1A56DB;
+  border-color: #1A56DB;
+}
+
+/* === Sidebar Overlay (mobile) === */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1039;
+}
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ============================================
+   ADMIN RESPONSIVE
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+  .admin-sidebar.show {
+    transform: translateX(0);
+  }
+  .admin-content {
+    margin-left: 0;
+  }
+  .admin-topbar .sidebar-toggle {
+    display: block;
+  }
+  .stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}
+
+/* Phone */
+@media (max-width: 767.98px) {
+  .admin-topbar {
+    padding: 0.5rem 1rem;
+  }
+  .admin-content .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  /* Stack table for mobile */
+  .table-responsive-admin thead {
+    display: none;
+  }
+  .table-responsive-admin tbody tr {
+    display: block;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e5e8e8;
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: #fff;
+  }
+  .table-responsive-admin tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0;
+    border: none;
+  }
+  .table-responsive-admin tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+  .stat-card .card-body {
+    padding: 0.75rem;
+  }
+  .stat-card h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Small phone */
+@media (max-width: 575.98px) {
+  .admin-sidebar .sidebar-brand {
+    font-size: 1.1rem;
+    padding: 1rem 1.25rem;
+  }
+  .admin-sidebar .nav-link {
+    font-size: 0.85rem;
+    padding: 0.6rem 1.25rem;
+  }
+}

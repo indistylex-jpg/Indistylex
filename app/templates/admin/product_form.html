@@ -1,0 +1,112 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin.products') }}" class="text-decoration-none">
+    <i class="bi bi-arrow-left me-1"></i>Back to Products
+  </a>
+</div>
+<h4 class="fw-bold mb-4">{{ title }}</h4>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <form method="POST" enctype="multipart/form-data" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">Product Name</label>
+          {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+          {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Category</label>
+          {{ form.category_id(class="form-select") }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          {{ form.description(class="form-control", rows=4) }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Price (₹)</label>
+          {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else ""), step="0.01") }}
+          {% for error in form.price.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Compare at Price (₹)</label>
+          {{ form.compare_at_price(class="form-control", step="0.01", placeholder="Original price") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Gender</label>
+          {{ form.gender(class="form-select") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Age Group</label>
+          {{ form.age_group(class="form-select") }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Brand</label>
+          {{ form.brand(class="form-control", placeholder="Optional") }}
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            {{ form.is_active(class="form-check-input") }}
+            <label class="form-check-label">Active (visible on store)</label>
+          </div>
+        </div>
+      </div>
+
+      {% if product %}
+        <!-- Existing Variants -->
+        <hr class="my-4">
+        <h5 class="fw-semibold">Variants</h5>
+        <div class="table-responsive mb-3">
+          <table class="table table-sm">
+            <thead><tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th></th></tr></thead>
+            <tbody>
+              {% for v in product.variants %}
+                <tr>
+                  <td>{{ v.size }}</td>
+                  <td>{{ v.color }}</td>
+                  <td class="text-muted small">{{ v.sku }}</td>
+                  <td>{{ v.stock_quantity }}</td>
+                  <td>
+                    <form method="POST" action="{{ url_for('admin.delete_variant', variant_id=v.id) }}" class="d-inline"
+                          onsubmit="return confirm('Delete this variant?')">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <a href="{{ url_for('admin.add_variant', product_id=product.id) }}" class="btn btn-sm btn-outline-primary mb-3">
+          <i class="bi bi-plus me-1"></i>Add Variant
+        </a>
+
+        <!-- Existing Images -->
+        <hr class="my-4">
+        <h5 class="fw-semibold">Images</h5>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          {% for img in product.images | sort(attribute='sort_order') %}
+            <div class="position-relative">
+              <img src="{{ image_url(img.image_url) }}"
+                   class="rounded" style="width:100px; height:100px; object-fit:cover;">
+              {% if img.is_primary %}
+                <span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size:0.6rem;">Primary</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <hr class="my-4">
+      <button type="submit" class="btn btn-primary">Save Product</button>
+      <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

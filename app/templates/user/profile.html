@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}My Profile — Indistylex{% endblock %}
+
+{% block content %}
+<section class="profile-section py-4">
+  <div class="container">
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        {% include 'user/_sidebar.html' %}
+      </div>
+
+      <!-- Profile Content -->
+      <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-4">My Profile</h4>
+
+            <form method="POST" action="{{ url_for('user.profile') }}" novalidate>
+              {{ form.hidden_tag() }}
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">First Name</label>
+                  {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else "")) }}
+                  {% for error in form.first_name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Last Name</label>
+                  {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else "")) }}
+                  {% for error in form.last_name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                  <small class="text-muted">Email cannot be changed</small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone</label>
+                  {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+                  {% for error in form.phone.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary mt-4">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFF5F9"/>
+      <stop offset="100%" stop-color="#FDE8F0"/>
+    </linearGradient>
+    <linearGradient id="onesie" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#FFA030"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5D0B0"/>
+      <stop offset="100%" stop-color="#E8BA94"/>
+    </linearGradient>
+    <linearGradient id="blanket" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="100%" stop-color="#8B6FE0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="500" fill="url(#bg)"/>
+
+  <!-- Decorative soft circles -->
+  <circle cx="60" cy="55" r="30" fill="#FF6B9D" opacity="0.06"/>
+  <circle cx="345" cy="70" r="40" fill="#A78BFA" opacity="0.06"/>
+  <circle cx="50" cy="440" r="35" fill="#FFB347" opacity="0.07"/>
+  <circle cx="355" cy="430" r="45" fill="#FF6B9D" opacity="0.05"/>
+  <circle cx="200" cy="35" r="20" fill="#51CFCF" opacity="0.06"/>
+
+  <!-- Soft stars -->
+  <g fill="#FFB347" opacity="0.12">
+    <polygon points="75,60 77,66 83,66 78,70 80,76 75,72 70,76 72,70 67,66 73,66"/>
+    <polygon points="330,420 332,426 338,426 333,430 335,436 330,432 325,436 327,430 322,426 328,426"/>
+  </g>
+
+  <!-- Small hearts -->
+  <g fill="#FF6B9D" opacity="0.1">
+    <path d="M340,80 C340,76 345,75 345,78 C345,75 350,76 350,80 C350,86 345,89 345,89 C345,89 340,86 340,80 Z"/>
+    <path d="M60,430 C60,426 65,425 65,428 C65,425 70,426 70,430 C70,436 65,439 65,439 C65,439 60,436 60,430 Z"/>
+    <path d="M310,160 C310,157 314,156 314,158 C314,156 318,157 318,160 C318,164 314,166 314,166 C314,166 310,164 310,160 Z"/>
+  </g>
+
+  <!-- Moon (top-right) -->
+  <g transform="translate(340,120)" opacity="0.08">
+    <circle cx="0" cy="0" r="18" fill="#FFB347"/>
+    <circle cx="6" cy="-5" r="14" fill="#FDE8F0"/>
+  </g>
+
+  <!-- Tiny Zzz -->
+  <g fill="#A78BFA" opacity="0.12" font-family="Arial" font-weight="bold">
+    <text x="310" y="200" font-size="18">z</text>
+    <text x="325" y="185" font-size="14">z</text>
+    <text x="335" y="175" font-size="10">z</text>
+  </g>
+
+  <!-- === Baby in Onesie === -->
+  <g transform="translate(200,260)">
+
+    <!-- Soft blanket/mat underneath -->
+    <ellipse cx="0" cy="110" rx="75" ry="20" fill="url(#blanket)" opacity="0.15"/>
+    <ellipse cx="0" cy="110" rx="60" ry="14" fill="url(#blanket)" opacity="0.1"/>
+
+    <!-- Head - big and round (babies have big heads!) -->
+    <ellipse cx="0" cy="-110" rx="42" ry="44" fill="url(#skin)"/>
+
+    <!-- Wispy baby hair -->
+    <path d="M-15,-152 C-10,-160 -5,-158 0,-155 C5,-158 10,-160 15,-152" stroke="#C8A070" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M-8,-155 C-3,-162 3,-162 8,-155" stroke="#C8A070" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M-20,-148 C-18,-152 -15,-153 -12,-150" stroke="#C8A070" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M20,-148 C18,-152 15,-153 12,-150" stroke="#C8A070" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+    <!-- Big baby eyes -->
+    <g transform="translate(-14,-108)">
+      <ellipse cx="0" cy="0" rx="8" ry="9" fill="white"/>
+      <ellipse cx="1" cy="1" rx="5" ry="5.5" fill="#4A3520"/>
+      <circle cx="2" cy="-1" r="2" fill="white"/>
+      <circle cx="-1" cy="2" r="1" fill="white" opacity="0.5"/>
+    </g>
+    <g transform="translate(14,-108)">
+      <ellipse cx="0" cy="0" rx="8" ry="9" fill="white"/>
+      <ellipse cx="-1" cy="1" rx="5" ry="5.5" fill="#4A3520"/>
+      <circle cx="1" cy="-1" r="2" fill="white"/>
+      <circle cx="-2" cy="2" r="1" fill="white" opacity="0.5"/>
+    </g>
+
+    <!-- Tiny cute eyebrows -->
+    <path d="M-20,-118 C-16,-121 -10,-121 -7,-118" stroke="#C8A070" stroke-width="1.2" fill="none"/>
+    <path d="M7,-118 C10,-121 16,-121 20,-118" stroke="#C8A070" stroke-width="1.2" fill="none"/>
+
+    <!-- Rosy cheeks -->
+    <circle cx="-24" cy="-98" r="8" fill="#FFB4B4" opacity="0.25"/>
+    <circle cx="24" cy="-98" r="8" fill="#FFB4B4" opacity="0.25"/>
+
+    <!-- Button nose -->
+    <ellipse cx="0" cy="-98" rx="3.5" ry="3" fill="#E8BA94" opacity="0.5"/>
+
+    <!-- Cute little smile -->
+    <path d="M-8,-90 Q0,-83 8,-90" stroke="#C8907A" stroke-width="1.5" fill="none"/>
+
+    <!-- Tiny ear -->
+    <ellipse cx="-40" cy="-108" rx="7" ry="9" fill="#E8BA94"/>
+    <ellipse cx="40" cy="-108" rx="7" ry="9" fill="#E8BA94"/>
+
+    <!-- Onesie body -->
+    <path d="M-28,-68 C-32,-68 -38,-62 -40,-54
+             L-46,-30 L-38,-22 L-32,-38 L-30,30
+             L30,30 L32,-38 L38,-22 L46,-30 L40,-54
+             C38,-62 32,-68 28,-68 Z"
+          fill="url(#onesie)"/>
+
+    <!-- Onesie collar -->
+    <path d="M-16,-68 Q0,-58 16,-68" stroke="#FFA030" stroke-width="2" fill="none"/>
+
+    <!-- Cute bear face on onesie -->
+    <circle cx="0" cy="-30" r="14" fill="#FFC870" opacity="0.5"/>
+    <circle cx="-5" cy="-34" r="2" fill="#8B6040" opacity="0.6"/>
+    <circle cx="5" cy="-34" r="2" fill="#8B6040" opacity="0.6"/>
+    <ellipse cx="0" cy="-29" rx="3" ry="2" fill="#C89060" opacity="0.5"/>
+    <circle cx="-9" cy="-40" r="5" fill="#FFC870" opacity="0.4"/>
+    <circle cx="9" cy="-40" r="5" fill="#FFC870" opacity="0.4"/>
+
+    <!-- Onesie snap buttons -->
+    <circle cx="-5" cy="-10" r="2" fill="#E89030" opacity="0.5"/>
+    <circle cx="5" cy="-10" r="2" fill="#E89030" opacity="0.5"/>
+    <circle cx="-5" cy="5" r="2" fill="#E89030" opacity="0.5"/>
+    <circle cx="5" cy="5" r="2" fill="#E89030" opacity="0.5"/>
+
+    <!-- Baby arms (short and chubby) -->
+    <path d="M-38,-22 C-42,-10 -40,5 -36,15" stroke="url(#skin)" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <path d="M38,-22 C42,-10 40,5 36,15" stroke="url(#skin)" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+    <!-- Baby hands (chubby) -->
+    <circle cx="-36" cy="17" r="7" fill="#E8BA94"/>
+    <circle cx="36" cy="17" r="7" fill="#E8BA94"/>
+
+    <!-- Onesie legs -->
+    <path d="M-25,28 L-30,65 C-30,70 -25,72 -18,72 L-10,72 C-6,72 -4,68 -5,62 L-8,28 Z" fill="url(#onesie)"/>
+    <path d="M25,28 L30,65 C30,70 25,72 18,72 L10,72 C6,72 4,68 5,62 L8,28 Z" fill="url(#onesie)"/>
+
+    <!-- Tiny baby feet -->
+    <ellipse cx="-18" cy="74" rx="10" ry="6" fill="url(#skin)"/>
+    <ellipse cx="18" cy="74" rx="10" ry="6" fill="url(#skin)"/>
+    <!-- Tiny toes -->
+    <g fill="#E8BA94" opacity="0.4">
+      <circle cx="-22" cy="70" r="1.5"/>
+      <circle cx="-19" cy="69" r="1.5"/>
+      <circle cx="-16" cy="69" r="1.5"/>
+      <circle cx="22" cy="70" r="1.5"/>
+      <circle cx="19" cy="69" r="1.5"/>
+      <circle cx="16" cy="69" r="1.5"/>
+    </g>
+  </g>
+
+  <!-- Rattle (bottom-left) -->
+  <g transform="translate(85,400)" opacity="0.12">
+    <circle cx="0" cy="0" r="12" fill="#FF6B9D"/>
+    <rect x="-2" y="10" width="4" height="18" rx="2" fill="#C8A070"/>
+    <circle cx="-4" cy="-3" r="2" fill="#FFB347"/>
+    <circle cx="4" cy="3" r="2" fill="#A78BFA"/>
+    <circle cx="3" cy="-5" r="2" fill="#51CFCF"/>
+  </g>
+
+  <!-- Pacifier (bottom-right) -->
+  <g transform="translate(320,390)" opacity="0.1">
+    <ellipse cx="0" cy="0" rx="10" ry="8" fill="#A78BFA"/>
+    <circle cx="0" cy="-2" r="5" fill="#C8A0F0"/>
+    <path d="M-12,-2 C-16,-8 -16,4 -12,0" fill="#A78BFA"/>
+  </g>
+</svg>

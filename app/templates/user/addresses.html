@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}My Addresses — Indistylex{% endblock %}
+
+{% block content %}
+<section class="profile-section py-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3">{% include 'user/_sidebar.html' %}</div>
+      <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h4 class="fw-bold mb-0">My Addresses</h4>
+              <a href="{{ url_for('user.add_address') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus me-1"></i>Add Address
+              </a>
+            </div>
+
+            {% if addresses %}
+              <div class="row g-3">
+                {% for address in addresses %}
+                  <div class="col-md-6">
+                    <div class="card h-100 {{ 'border-primary' if address.is_default else '' }}">
+                      <div class="card-body">
+                        {% if address.is_default %}
+                          <span class="badge bg-primary mb-2">Default</span>
+                        {% endif %}
+                        <h6 class="fw-semibold">{{ address.full_name }}</h6>
+                        <p class="text-muted small mb-1">{{ address.address_line1 }}</p>
+                        {% if address.address_line2 %}
+                          <p class="text-muted small mb-1">{{ address.address_line2 }}</p>
+                        {% endif %}
+                        <p class="text-muted small mb-1">{{ address.city }}, {{ address.state }} {{ address.postal_code }}</p>
+                        <p class="text-muted small mb-2">Phone: {{ address.phone }}</p>
+                        <div class="d-flex gap-2">
+                          <a href="{{ url_for('user.edit_address', address_id=address.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                          <form method="POST" action="{{ url_for('user.delete_address', address_id=address.id) }}" class="d-inline"
+                                onsubmit="return confirm('Delete this address?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="text-center py-4">
+                <i class="bi bi-geo-alt display-4 text-muted"></i>
+                <p class="mt-2 text-muted">No saved addresses</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

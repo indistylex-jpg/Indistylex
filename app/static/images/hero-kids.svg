@@ -1,0 +1,367 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 480" width="520" height="480">
+  <defs>
+    <linearGradient id="skinB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5D0B0"/>
+      <stop offset="100%" stop-color="#E8BA94"/>
+    </linearGradient>
+    <linearGradient id="skinG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FADCC8"/>
+      <stop offset="100%" stop-color="#ECBF9E"/>
+    </linearGradient>
+    <linearGradient id="tshirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#51CFCF"/>
+      <stop offset="100%" stop-color="#38B0B0"/>
+    </linearGradient>
+    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF6B9D"/>
+      <stop offset="100%" stop-color="#E8547A"/>
+    </linearGradient>
+    <linearGradient id="shorts" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E3A5F"/>
+      <stop offset="100%" stop-color="#15304D"/>
+    </linearGradient>
+    <!-- sparkle filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Floating confetti / decorations -->
+  <g opacity="0.18">
+    <circle cx="40" cy="60" r="8" fill="#FFB347">
+      <animate attributeName="cy" values="60;45;60" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="480" cy="50" r="6" fill="#A78BFA">
+      <animate attributeName="cy" values="50;35;50" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="260" cy="30" r="5" fill="#FF6B9D">
+      <animate attributeName="cy" values="30;18;30" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="120" cy="440" r="7" fill="#51CFCF">
+      <animate attributeName="cy" values="440;425;440" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="430" r="5" fill="#FFB347">
+      <animate attributeName="cy" values="430;418;430" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Sparkle stars -->
+  <g filter="url(#glow)" opacity="0.3">
+    <polygon points="90,100 93,110 103,110 95,116 98,126 90,120 82,126 85,116 77,110 87,110" fill="#FFB347">
+      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="430,90 432,97 439,97 433,101 435,108 430,104 425,108 427,101 421,97 428,97" fill="#FF6B9D">
+      <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2.5s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="260,455 262,461 268,461 263,465 265,471 260,467 255,471 257,465 252,461 258,461" fill="#A78BFA">
+      <animate attributeName="opacity" values="0.3;0.55;0.3" dur="3s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+
+  <!-- Shopping bags (between them) -->
+  <g transform="translate(260,380)" opacity="0.2">
+    <rect x="-18" y="-25" width="36" height="35" rx="4" fill="#FFB347"/>
+    <path d="M-8,-25 C-8,-38 8,-38 8,-25" stroke="#E89030" stroke-width="2.5" fill="none"/>
+    <rect x="10" y="-18" width="30" height="30" rx="4" fill="#A78BFA"/>
+    <path d="M18,-18 C18,-28 32,-28 32,-18" stroke="#8B6FE0" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- ======================== -->
+  <!--      BOY (LEFT SIDE)      -->
+  <!-- ======================== -->
+  <g transform="translate(165,235)">
+    <!-- Shadow -->
+    <ellipse cx="0" cy="195" rx="55" ry="10" fill="#000" opacity="0.06"/>
+
+    <!-- ---- Hair ---- -->
+    <g fill="#3D1F10">
+      <ellipse cx="0" cy="-170" rx="36" ry="22"/>
+      <rect x="-34" y="-168" width="10" height="22" rx="4"/>
+      <rect x="24" y="-168" width="10" height="22" rx="4"/>
+      <!-- Spiky top -->
+      <path d="M-15,-188 C-10,-198 -5,-195 0,-190" stroke="#3D1F10" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M0,-190 C5,-198 12,-195 16,-186" stroke="#3D1F10" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M-8,-192 C-4,-200 4,-200 8,-192" stroke="#3D1F10" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- Head -->
+    <ellipse cx="0" cy="-148" rx="32" ry="36" fill="url(#skinB)"/>
+
+    <!-- Ears -->
+    <ellipse cx="-32" cy="-145" rx="7" ry="9" fill="#E8BA94"/>
+    <ellipse cx="32" cy="-145" rx="7" ry="9" fill="#E8BA94"/>
+
+    <!-- Eyebrows -->
+    <path d="M-16,-138 C-13,-142 -7,-142 -4,-138" stroke="#3D1F10" stroke-width="2" fill="none"/>
+    <path d="M4,-138 C7,-142 13,-142 16,-138" stroke="#3D1F10" stroke-width="2" fill="none"/>
+
+    <!-- Eyes -->
+    <g transform="translate(-10,-130)">
+      <ellipse cx="0" cy="0" rx="7" ry="7.5" fill="white"/>
+      <ellipse cx="1" cy="1" rx="4.5" ry="5" fill="#2C3E50"/>
+      <circle cx="2" cy="-1.2" r="1.8" fill="white"/>
+      <circle cx="-0.5" cy="2" r="0.8" fill="white" opacity="0.5"/>
+    </g>
+    <g transform="translate(10,-130)">
+      <ellipse cx="0" cy="0" rx="7" ry="7.5" fill="white"/>
+      <ellipse cx="-1" cy="1" rx="4.5" ry="5" fill="#2C3E50"/>
+      <circle cx="1" cy="-1.2" r="1.8" fill="white"/>
+      <circle cx="-1.5" cy="2" r="0.8" fill="white" opacity="0.5"/>
+    </g>
+
+    <!-- Cheeks -->
+    <circle cx="-20" cy="-120" r="7" fill="#FFB4B4" opacity="0.25"/>
+    <circle cx="20" cy="-120" r="7" fill="#FFB4B4" opacity="0.25"/>
+
+    <!-- Nose -->
+    <ellipse cx="0" cy="-121" rx="3" ry="2.5" fill="#E8BA94" opacity="0.5"/>
+
+    <!-- Big smile -->
+    <path d="M-10,-113 Q0,-103 10,-113" stroke="#8B6040" stroke-width="2" fill="none"/>
+    <path d="M-7,-113 Q0,-106 7,-113" fill="#FFB4B4" opacity="0.3"/>
+
+    <!-- Neck -->
+    <rect x="-6" y="-112" width="12" height="14" rx="5" fill="url(#skinB)"/>
+
+    <!-- T-shirt -->
+    <path d="M-26,-100 C-34,-100 -42,-92 -45,-82
+             L-52,-52 L-42,-42 L-35,-62 L-32,-15
+             L32,-15 L35,-62 L42,-42 L52,-52 L45,-82
+             C42,-92 34,-100 26,-100 Z"
+          fill="url(#tshirt)"/>
+    <!-- Collar -->
+    <path d="M-14,-100 Q0,-88 14,-100" stroke="#38B0B0" stroke-width="2.5" fill="none"/>
+    <!-- Star on shirt -->
+    <polygon points="0,-62 4,-50 14,-50 6,-43 9,-33 0,-39 -9,-33 -6,-43 -14,-50 -4,-50" fill="white" opacity="0.35"/>
+    <!-- Shirt stripes -->
+    <line x1="-24" y1="-72" x2="24" y2="-72" stroke="white" stroke-width="1.5" opacity="0.2"/>
+    <line x1="-26" y1="-62" x2="26" y2="-62" stroke="white" stroke-width="1.5" opacity="0.2"/>
+
+    <!-- Arms -->
+    <path d="M-42,-42 C-48,-25 -46,-5 -42,12" stroke="url(#skinB)" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <!-- Right arm - waving! -->
+    <path d="M42,-42 C50,-55 55,-70 48,-85" stroke="url(#skinB)" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+    <!-- Hands -->
+    <circle cx="-42" cy="14" r="7" fill="#E8BA94"/>
+    <!-- Waving hand -->
+    <g transform="translate(48,-87)">
+      <circle cx="0" cy="0" r="8" fill="#E8BA94"/>
+      <!-- Fingers spread (waving) -->
+      <line x1="-3" y1="-6" x2="-5" y2="-14" stroke="#E8BA94" stroke-width="3" stroke-linecap="round"/>
+      <line x1="1" y1="-7" x2="1" y2="-15" stroke="#E8BA94" stroke-width="3" stroke-linecap="round"/>
+      <line x1="5" y1="-5" x2="8" y2="-13" stroke="#E8BA94" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Wristband -->
+    <rect x="-47" y="6" width="10" height="5" rx="2.5" fill="#FFB347"/>
+
+    <!-- Cargo Shorts -->
+    <path d="M-28,-18 L-34,35 L-10,35 L-6,-2 L0,3 L6,-2 L10,35 L34,35 L28,-18 Z" fill="url(#shorts)"/>
+    <!-- Belt -->
+    <rect x="-26" y="-18" width="52" height="5" rx="2" fill="#8B6040"/>
+    <rect x="-3" y="-19" width="6" height="7" rx="2" fill="#C8A060"/>
+    <!-- Pockets -->
+    <rect x="-25" y="-8" width="12" height="12" rx="2" stroke="#2A4A6F" stroke-width="1" fill="none" opacity="0.3"/>
+    <rect x="13" y="-8" width="12" height="12" rx="2" stroke="#2A4A6F" stroke-width="1" fill="none" opacity="0.3"/>
+
+    <!-- Legs -->
+    <line x1="-20" y1="33" x2="-20" y2="80" stroke="url(#skinB)" stroke-width="9" stroke-linecap="round"/>
+    <line x1="20" y1="33" x2="20" y2="80" stroke="url(#skinB)" stroke-width="9" stroke-linecap="round"/>
+
+    <!-- Socks -->
+    <rect x="-25" y="72" width="10" height="12" rx="3" fill="white"/>
+    <rect x="15" y="72" width="10" height="12" rx="3" fill="white"/>
+    <line x1="-24" y1="77" x2="-16" y2="77" stroke="#51CFCF" stroke-width="1"/>
+    <line x1="16" y1="77" x2="24" y2="77" stroke="#51CFCF" stroke-width="1"/>
+
+    <!-- Sneakers -->
+    <path d="M-30,82 L-10,82 L-7,92 L-33,92 Z" fill="#2C3E50"/>
+    <path d="M-28,85 L-13,85" stroke="white" stroke-width="1.2"/>
+    <path d="M-27,88 L-14,88" stroke="white" stroke-width="1"/>
+    <circle cx="-10" cy="85" r="2" fill="#FF6B9D"/>
+    <path d="M10,82 L30,82 L33,92 L7,92 Z" fill="#2C3E50"/>
+    <path d="M13,85 L28,85" stroke="white" stroke-width="1.2"/>
+    <path d="M14,88 L27,88" stroke="white" stroke-width="1"/>
+    <circle cx="30" cy="85" r="2" fill="#FF6B9D"/>
+  </g>
+
+  <!-- ======================== -->
+  <!--     GIRL (RIGHT SIDE)    -->
+  <!-- ======================== -->
+  <g transform="translate(355,235)">
+    <!-- Shadow -->
+    <ellipse cx="0" cy="195" rx="55" ry="10" fill="#000" opacity="0.06"/>
+
+    <!-- Long hair -->
+    <g fill="#5C3317">
+      <path d="M-28,-175 C-34,-190 -16,-200 0,-200 C16,-200 34,-190 28,-175
+               L30,-145 C36,-125 38,-100 35,-80 L33,-70
+               M-30,-145 C-36,-125 -38,-100 -35,-80 L-33,-70"/>
+      <!-- Volume on sides -->
+      <ellipse cx="-32" cy="-130" rx="10" ry="30"/>
+      <ellipse cx="32" cy="-130" rx="10" ry="30"/>
+      <!-- Hair wave -->
+      <path d="M-35,-100 C-38,-80 -36,-60 -30,-45" stroke="#5C3317" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path d="M35,-100 C38,-80 36,-60 30,-45" stroke="#5C3317" stroke-width="14" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- Headband / bow -->
+    <path d="M-26,-178 C-16,-186 16,-186 26,-178" stroke="#FFB347" stroke-width="4" fill="none"/>
+    <!-- Bow -->
+    <g transform="translate(20,-182)">
+      <path d="M0,0 C8,-10 16,-5 10,0 C16,5 8,10 0,0 Z" fill="#FFB347"/>
+      <circle cx="0" cy="0" r="2.5" fill="#E89030"/>
+      <path d="M0,0 C-8,-10 -16,-5 -10,0 C-16,5 -8,10 0,0 Z" fill="#FFB347"/>
+    </g>
+
+    <!-- Head -->
+    <ellipse cx="0" cy="-148" rx="32" ry="36" fill="url(#skinG)"/>
+
+    <!-- Ears (behind hair) -->
+    <ellipse cx="-30" cy="-145" rx="5" ry="7" fill="#ECBF9E"/>
+    <ellipse cx="30" cy="-145" rx="5" ry="7" fill="#ECBF9E"/>
+
+    <!-- Eyelashes -->
+    <g stroke="#5C3317" stroke-width="1" fill="none">
+      <path d="M-18,-138 L-20,-143"/>
+      <path d="M-14,-139 L-15,-144"/>
+      <path d="M-7,-139 L-6,-144"/>
+      <path d="M7,-139 L6,-144"/>
+      <path d="M14,-139 L15,-144"/>
+      <path d="M18,-138 L20,-143"/>
+    </g>
+
+    <!-- Eyes -->
+    <g transform="translate(-10,-130)">
+      <ellipse cx="0" cy="0" rx="7" ry="8" fill="white"/>
+      <ellipse cx="0.5" cy="1" rx="4.5" ry="5" fill="#4A7A3D"/>
+      <circle cx="1.5" cy="-1" r="1.8" fill="white"/>
+      <circle cx="-0.5" cy="2" r="0.8" fill="white" opacity="0.5"/>
+    </g>
+    <g transform="translate(10,-130)">
+      <ellipse cx="0" cy="0" rx="7" ry="8" fill="white"/>
+      <ellipse cx="-0.5" cy="1" rx="4.5" ry="5" fill="#4A7A3D"/>
+      <circle cx="1" cy="-1" r="1.8" fill="white"/>
+      <circle cx="-1" cy="2" r="0.8" fill="white" opacity="0.5"/>
+    </g>
+
+    <!-- Cheeks -->
+    <circle cx="-20" cy="-118" r="8" fill="#FFB4B4" opacity="0.22"/>
+    <circle cx="20" cy="-118" r="8" fill="#FFB4B4" opacity="0.22"/>
+
+    <!-- Nose -->
+    <ellipse cx="0" cy="-120" rx="2.5" ry="2" fill="#ECBF9E" opacity="0.5"/>
+
+    <!-- Happy smile with dimples -->
+    <path d="M-9,-112 Q0,-102 9,-112" stroke="#A0705A" stroke-width="1.8" fill="none"/>
+    <path d="M-7,-112 Q0,-105 7,-112" fill="#FFB4B4" opacity="0.25"/>
+    <!-- Dimples -->
+    <circle cx="-12" cy="-110" r="1.5" fill="#ECBF9E" opacity="0.3"/>
+    <circle cx="12" cy="-110" r="1.5" fill="#ECBF9E" opacity="0.3"/>
+
+    <!-- Neck -->
+    <rect x="-5" y="-112" width="10" height="14" rx="4" fill="url(#skinG)"/>
+
+    <!-- Dress -->
+    <path d="M-22,-100 C-28,-100 -34,-94 -36,-86
+             L-40,-68 L-34,-60 L-28,-72
+             L-38,-5 C-42,20 -48,50 -50,65
+             L50,65 C48,50 42,20 38,-5
+             L28,-72 L34,-60 L40,-68 L36,-86
+             C34,-94 28,-100 22,-100 Z"
+          fill="url(#dress)"/>
+
+    <!-- Dress collar / neckline -->
+    <path d="M-12,-100 Q0,-90 12,-100" stroke="#E8547A" stroke-width="2" fill="none"/>
+
+    <!-- Dress pattern — polka dots -->
+    <g fill="white" opacity="0.18">
+      <circle cx="-15" cy="-60" r="3"/>
+      <circle cx="10" cy="-50" r="3"/>
+      <circle cx="-5" cy="-35" r="3"/>
+      <circle cx="18" cy="-25" r="3"/>
+      <circle cx="-20" cy="-20" r="3"/>
+      <circle cx="5" cy="-8" r="3"/>
+      <circle cx="-12" cy="5" r="3"/>
+      <circle cx="22" cy="5" r="3"/>
+      <circle cx="-25" cy="25" r="3"/>
+      <circle cx="10" cy="25" r="3"/>
+      <circle cx="-8" cy="42" r="3"/>
+      <circle cx="28" cy="40" r="3"/>
+      <circle cx="-30" cy="50" r="3"/>
+      <circle cx="15" cy="55" r="3"/>
+    </g>
+
+    <!-- Dress hem ruffle -->
+    <path d="M-50,63 Q-42,72 -34,63 Q-26,72 -18,63 Q-10,72 -2,63 Q6,72 14,63 Q22,72 30,63 Q38,72 46,63 Q50,67 50,65" stroke="#E8547A" stroke-width="1.5" fill="url(#dress)" opacity="0.7"/>
+
+    <!-- Belt/sash -->
+    <path d="M-32,-40 Q0,-35 32,-40" stroke="#FFB347" stroke-width="4" fill="none"/>
+    <!-- Bow on belt -->
+    <g transform="translate(0,-38)">
+      <path d="M0,0 C6,-6 12,-3 8,0 C12,3 6,6 0,0 Z" fill="#FFB347"/>
+      <path d="M0,0 C-6,-6 -12,-3 -8,0 C-12,3 -6,6 0,0 Z" fill="#FFB347"/>
+      <circle cx="0" cy="0" r="2" fill="#E89030"/>
+    </g>
+
+    <!-- Arms -->
+    <path d="M-34,-60 C-40,-42 -38,-22 -35,-5" stroke="url(#skinG)" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <!-- Right arm - holding a small flower -->
+    <path d="M34,-60 C40,-45 42,-28 38,-12" stroke="url(#skinG)" stroke-width="9" stroke-linecap="round" fill="none"/>
+
+    <!-- Hands -->
+    <circle cx="-35" cy="-3" r="6.5" fill="#ECBF9E"/>
+    <circle cx="38" cy="-10" r="6.5" fill="#ECBF9E"/>
+
+    <!-- Flower in hand -->
+    <g transform="translate(42,-18)">
+      <line x1="0" y1="0" x2="0" y2="18" stroke="#5A8A40" stroke-width="2"/>
+      <circle cx="0" cy="-2" r="4" fill="#FFB347"/>
+      <circle cx="-5" cy="-5" r="3.5" fill="#FF6B9D" opacity="0.8"/>
+      <circle cx="5" cy="-5" r="3.5" fill="#FF6B9D" opacity="0.8"/>
+      <circle cx="5" cy="1" r="3.5" fill="#FF6B9D" opacity="0.8"/>
+      <circle cx="-5" cy="1" r="3.5" fill="#FF6B9D" opacity="0.8"/>
+      <circle cx="0" cy="-7" r="3.5" fill="#FF6B9D" opacity="0.8"/>
+      <circle cx="0" cy="-2" r="2.5" fill="#FFB347"/>
+    </g>
+
+    <!-- Bracelet -->
+    <rect x="-40" y="-10" width="10" height="4" rx="2" fill="#A78BFA" opacity="0.6"/>
+
+    <!-- Legs -->
+    <line x1="-15" y1="63" x2="-15" y2="105" stroke="url(#skinG)" stroke-width="8" stroke-linecap="round"/>
+    <line x1="15" y1="63" x2="15" y2="105" stroke="url(#skinG)" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Socks with lace top -->
+    <rect x="-20" y="90" width="10" height="18" rx="3" fill="white"/>
+    <rect x="10" y="90" width="10" height="18" rx="3" fill="white"/>
+    <path d="M-21,92 Q-17,88 -13,92 Q-9,88 -8,92" stroke="white" stroke-width="1.5" fill="none"/>
+    <path d="M9,92 Q13,88 17,92 Q21,88 22,92" stroke="white" stroke-width="1.5" fill="none"/>
+
+    <!-- Mary Jane shoes -->
+    <path d="M-25,106 L-5,106 L-2,115 L-28,115 Z" fill="#2C3E50"/>
+    <path d="M-22,109 L-8,109" stroke="#FF6B9D" stroke-width="1.5"/>
+    <circle cx="-15" cy="109" r="1.5" fill="#FFB347"/>
+    <path d="M5,106 L25,106 L28,115 L2,115 Z" fill="#2C3E50"/>
+    <path d="M8,109 L22,109" stroke="#FF6B9D" stroke-width="1.5"/>
+    <circle cx="15" cy="109" r="1.5" fill="#FFB347"/>
+  </g>
+
+  <!-- Hearts floating between them -->
+  <g>
+    <path d="M250,130 C250,124 257,122 257,127 C257,122 264,124 264,130 C264,138 257,142 257,142 C257,142 250,138 250,130 Z" fill="#FF6B9D" opacity="0.25">
+      <animate attributeName="opacity" values="0.15;0.35;0.15" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="transform" values="translate(0,0);translate(0,-8);translate(0,0)" dur="2.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M270,170 C270,166 275,165 275,168 C275,165 280,166 280,170 C280,176 275,179 275,179 C275,179 270,176 270,170 Z" fill="#A78BFA" opacity="0.2">
+      <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="transform" values="translate(0,0);translate(0,-6);translate(0,0)" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M240,200 C240,197 244,196 244,198 C244,196 248,197 248,200 C248,204 244,206 244,206 C244,206 240,204 240,200 Z" fill="#FFB347" opacity="0.2">
+      <animate attributeName="opacity" values="0.12;0.28;0.12" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="transform" values="translate(0,0);translate(0,-5);translate(0,0)" dur="3.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

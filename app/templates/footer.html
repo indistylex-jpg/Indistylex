@@ -1,0 +1,87 @@
+<!-- Newsletter Section -->
+<section class="newsletter-section py-4 py-md-5">
+    <div class="container text-center">
+        <h3 class="section-title mb-2">Stay in the Loop &#128140;</h3>
+        <p class="text-white-50 mb-4">Subscribe for exclusive offers, new arrivals & parenting tips!</p>
+        <form class="row g-2 justify-content-center mx-auto" id="newsletter-form" style="max-width:500px;">
+            <div class="col-12 col-sm-8">
+                <input type="email" class="form-control" placeholder="Enter your email..." required>
+            </div>
+            <div class="col-12 col-sm-4">
+                <button type="submit" class="btn btn-primary w-100">Subscribe</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer bg-dark text-white pt-4 pt-md-5 pb-3">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Brand -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <h5 class="brand-text text-white mb-3">Indistylex &#11088;</h5>
+                <p class="text-white-50 small">Premium fashion for everyone. Quality fabrics, trendy designs, and lasting comfort — proudly Indian.</p>
+                <div class="social-links mt-3">
+                    <a href="#" class="text-white-50"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="text-white-50"><i class="bi bi-instagram fs-5"></i></a>
+                    <a href="#" class="text-white-50"><i class="bi bi-twitter-x fs-5"></i></a>
+                    <a href="#" class="text-white-50"><i class="bi bi-pinterest fs-5"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-3 col-md-6 col-6">
+                <h6 class="text-white mb-3">Quick Links</h6>
+                <ul class="list-unstyled footer-links">
+                    {% for cat in nav_categories %}
+                    <li><a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name }}</a></li>
+                    {% endfor %}
+                    <li><a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a></li>
+                </ul>
+            </div>
+
+            <!-- Customer Care -->
+            <div class="col-lg-3 col-md-6 col-6">
+                <h6 class="text-white mb-3">Customer Care</h6>
+                <ul class="list-unstyled footer-links">
+                    <li><a href="{{ url_for('main.contact') }}">Contact Us</a></li>
+                    <li><a href="{{ url_for('main.faq') }}">FAQs</a></li>
+                    <li><a href="{{ url_for('main.size_guide') }}">Size Guide</a></li>
+                    <li><a href="{{ url_for('main.terms') }}">Shipping & Returns</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <h6 class="text-white mb-3">Get in Touch</h6>
+                <ul class="list-unstyled text-white-50 small">
+                    <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>MIG 79, Dhoomanganj, Prayagraj, UP 211011</li>
+                    <li class="mb-2"><i class="bi bi-envelope me-2"></i>support@indistylex.in</li>
+                    <li class="mb-2"><i class="bi bi-telephone me-2"></i>+91 63941 42176</li>
+                    <li class="mb-2"><i class="bi bi-card-text me-2"></i>GSTIN: 09GVUPP6447P1Z3</li>
+                </ul>
+                <!-- Payment Icons -->
+                <div class="mt-3 d-flex flex-wrap gap-1">
+                    <span class="badge bg-secondary">UPI</span>
+                    <span class="badge bg-secondary">Visa</span>
+                    <span class="badge bg-secondary">Mastercard</span>
+                    <span class="badge bg-secondary">RuPay</span>
+                    <span class="badge bg-secondary">Net Banking</span>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-secondary my-3 my-md-4">
+
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <small class="text-white-50">&copy; 2026 Indistylex (Prop: Satyam Pandey). All rights reserved.</small>
+            </div>
+            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                <a href="{{ url_for('main.privacy_policy') }}" class="text-white-50 small me-3">Privacy Policy</a>
+                <a href="{{ url_for('main.terms') }}" class="text-white-50 small">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>

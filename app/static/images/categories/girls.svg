@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFF0F5"/>
+      <stop offset="100%" stop-color="#FFE4EE"/>
+    </linearGradient>
+    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#C2185B"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5D0B0"/>
+      <stop offset="100%" stop-color="#E8BA94"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+  <!-- Decorative elements -->
+  <circle cx="60" cy="65" r="35" fill="#2563EB" opacity="0.06"/>
+  <circle cx="345" cy="80" r="50" fill="#60A5FA" opacity="0.05"/>
+  <circle cx="50" cy="430" r="45" fill="#2563EB" opacity="0.04"/>
+  <circle cx="360" cy="420" r="50" fill="#1A56DB" opacity="0.04"/>
+
+  <!-- Sparkle stars -->
+  <g fill="#60A5FA" opacity="0.12">
+    <polygon points="70,420 73,430 83,430 75,436 78,446 70,440 62,446 65,436 57,430 67,430"/>
+    <polygon points="340,65 343,72 350,72 344,76 346,83 340,79 334,83 336,76 330,72 337,72"/>
+    <polygon points="60,140 62,146 68,146 63,150 65,156 60,152 55,156 57,150 52,146 58,146"/>
+  </g>
+
+  <!-- Small hearts -->
+  <g fill="#2563EB" opacity="0.08">
+    <path d="M340,380 C340,375 347,373 347,378 C347,373 354,375 354,380 C354,388 347,392 347,392 C347,392 340,388 340,380 Z"/>
+    <path d="M55,310 C55,306 60,305 60,308 C60,305 65,306 65,310 C65,315 60,318 60,318 C60,318 55,315 55,310 Z"/>
+  </g>
+
+  <!-- === Girl in cute dress === -->
+  <g transform="translate(200,250)">
+    <!-- Hair with pigtails -->
+    <path d="M-22,-125 C-26,-140 -12,-152 0,-152 C12,-152 26,-140 22,-125 L24,-108
+             C28,-95 30,-75 28,-60 L26,-50
+             M-24,-108 C-28,-95 -30,-75 -28,-60 L-26,-50" fill="#3D1F10"/>
+    <!-- Right pigtail -->
+    <path d="M26,-130 C38,-132 44,-120 42,-105 C40,-88 34,-75 30,-68" stroke="#3D1F10" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <!-- Left pigtail -->
+    <path d="M-26,-130 C-38,-132 -44,-120 -42,-105 C-40,-88 -34,-75 -30,-68" stroke="#3D1F10" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <!-- Hair ribbons -->
+    <path d="M26,-132 L35,-140 L32,-130 L40,-128 Z" fill="#2563EB"/>
+    <path d="M-26,-132 L-35,-140 L-32,-130 L-40,-128 Z" fill="#2563EB"/>
+
+    <!-- Head -->
+    <ellipse cx="0" cy="-118" rx="20" ry="24" fill="url(#skin)"/>
+    <!-- Hair bangs -->
+    <path d="M-18,-138 C-12,-148 12,-148 18,-138 L16,-128 C10,-134 -10,-134 -16,-128 Z" fill="#3D1F10"/>
+    <!-- Cute bangs fringe -->
+    <path d="M-14,-132 C-8,-138 8,-138 14,-132" stroke="#4A2515" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+    <!-- Big cute eyes -->
+    <g transform="translate(-7,-120)">
+      <ellipse cx="0" cy="0" rx="4" ry="4.5" fill="white"/>
+      <ellipse cx="0.5" cy="0.5" rx="2.8" ry="3" fill="#3D1F10"/>
+      <circle cx="1.5" cy="-1" r="1" fill="white"/>
+      <path d="M-4,-3 Q0,-5 4,-3" stroke="#3D1F10" stroke-width="0.8" fill="none"/>
+    </g>
+    <g transform="translate(7,-120)">
+      <ellipse cx="0" cy="0" rx="4" ry="4.5" fill="white"/>
+      <ellipse cx="-0.5" cy="0.5" rx="2.8" ry="3" fill="#3D1F10"/>
+      <circle cx="0.5" cy="-1" r="1" fill="white"/>
+      <path d="M-4,-3 Q0,-5 4,-3" stroke="#3D1F10" stroke-width="0.8" fill="none"/>
+    </g>
+    <!-- Blush cheeks -->
+    <circle cx="-12" cy="-115" r="4" fill="#FFB4B4" opacity="0.4"/>
+    <circle cx="12" cy="-115" r="4" fill="#FFB4B4" opacity="0.4"/>
+    <!-- Happy smile -->
+    <path d="M-4,-111 Q0,-107 4,-111" stroke="#1E40AF" stroke-width="1.2" fill="#FFB4B4" opacity="0.5"/>
+    <!-- Little nose -->
+    <circle cx="0" cy="-115" r="1.5" fill="#E8BA94" opacity="0.5"/>
+
+    <!-- Neck -->
+    <rect x="-4" y="-95" width="8" height="10" rx="3" fill="url(#skin)"/>
+
+    <!-- Cute peter-pan collar dress -->
+    <!-- Collar -->
+    <path d="M-15,-86 Q-22,-82 -18,-76 Q-12,-80 -6,-85 Z" fill="white" stroke="#E0D0D0" stroke-width="0.3"/>
+    <path d="M15,-86 Q22,-82 18,-76 Q12,-80 6,-85 Z" fill="white" stroke="#E0D0D0" stroke-width="0.3"/>
+    <!-- Neckline bow -->
+    <path d="M-6,-85 L-10,-80 L-4,-82 L0,-78 L4,-82 L10,-80 L6,-85" fill="#60A5FA"/>
+    <circle cx="0" cy="-82" r="2" fill="#60A5FA" stroke="#3B82F6" stroke-width="0.3"/>
+
+    <!-- Dress bodice -->
+    <path d="M-16,-86 L-18,-36 L18,-36 L16,-86 C10,-92 -10,-92 -16,-86 Z" fill="url(#dress)"/>
+    <!-- Puff sleeves -->
+    <ellipse cx="-22" cy="-72" rx="10" ry="12" fill="#2563EB"/>
+    <ellipse cx="22" cy="-72" rx="10" ry="12" fill="#2563EB"/>
+    <path d="M-28,-62 C-26,-58 -22,-56 -18,-58" stroke="#C2185B" stroke-width="0.5" fill="none" opacity="0.3"/>
+    <path d="M28,-62 C26,-58 22,-56 18,-58" stroke="#C2185B" stroke-width="0.5" fill="none" opacity="0.3"/>
+
+    <!-- Full skirt -->
+    <path d="M-18,-36 C-22,-36 -48,30 -50,60 L-48,65 Q0,55 48,65 L50,60 C48,30 22,-36 18,-36 Z" fill="url(#dress)"/>
+    <!-- Skirt folds -->
+    <path d="M-10,-36 C-14,0 -26,40 -30,60" stroke="#C2185B" stroke-width="0.6" fill="none" opacity="0.15"/>
+    <path d="M10,-36 C14,0 26,40 30,60" stroke="#C2185B" stroke-width="0.6" fill="none" opacity="0.15"/>
+    <path d="M0,-36 C0,0 0,35 0,60" stroke="#C2185B" stroke-width="0.4" fill="none" opacity="0.1"/>
+    <!-- Hem lace trim -->
+    <path d="M-48,63 Q-44,58 -40,63 Q-36,58 -32,63 Q-28,58 -24,63 Q-20,58 -16,63 Q-12,58 -8,63 Q-4,58 0,63 Q4,58 8,63 Q12,58 16,63 Q20,58 24,63 Q28,58 32,63 Q36,58 40,63 Q44,58 48,63" stroke="#FFB4C2" stroke-width="1.5" fill="none" opacity="0.5"/>
+    <!-- Waistband -->
+    <rect x="-19" y="-38" width="38" height="5" rx="2" fill="#60A5FA" opacity="0.8"/>
+    <!-- Tiny flower on waistband -->
+    <circle cx="-8" cy="-35.5" r="2" fill="#FFB4C2"/>
+    <circle cx="-8" cy="-35.5" r="1" fill="#60A5FA"/>
+    <circle cx="8" cy="-35.5" r="2" fill="#FFB4C2"/>
+    <circle cx="8" cy="-35.5" r="1" fill="#60A5FA"/>
+
+    <!-- Arms -->
+    <path d="M-28,-62 C-30,-48 -32,-30 -28,-15" stroke="url(#skin)" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M28,-62 C30,-48 32,-30 28,-15" stroke="url(#skin)" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <!-- Hands -->
+    <ellipse cx="-28" cy="-13" rx="4" ry="5" fill="#E8BA94"/>
+    <ellipse cx="28" cy="-13" rx="4" ry="5" fill="#E8BA94"/>
+
+    <!-- Legs with socks -->
+    <line x1="-10" y1="62" x2="-12" y2="90" stroke="url(#skin)" stroke-width="5.5" stroke-linecap="round"/>
+    <line x1="10" y1="62" x2="12" y2="90" stroke="url(#skin)" stroke-width="5.5" stroke-linecap="round"/>
+    <!-- Cute socks -->
+    <rect x="-16" y="82" width="8" height="12" rx="3" fill="white"/>
+    <rect x="8" y="82" width="8" height="12" rx="3" fill="white"/>
+    <line x1="-15" y1="87" x2="-9" y2="87" stroke="#FFB4C2" stroke-width="1"/>
+    <line x1="9" y1="87" x2="15" y2="87" stroke="#FFB4C2" stroke-width="1"/>
+    <!-- Mary Jane shoes -->
+    <path d="M-18,92 L-6,92 L-4,97 L-20,97 Z" fill="#3D1F10"/>
+    <path d="M-16,92 L-14,88 L-10,92" stroke="#3D1F10" stroke-width="1" fill="none"/>
+    <path d="M6,92 L18,92 L20,97 L4,97 Z" fill="#3D1F10"/>
+    <path d="M10,92 L12,88 L14,92" stroke="#3D1F10" stroke-width="1" fill="none"/>
+  </g>
+</svg>

@@ -1,0 +1,31 @@
+<!-- Indistylex AI Chatbot Widget -->
+<button class="chatbot-toggle" id="chatbotToggle" aria-label="Open chat assistant">
+    <i class="bi bi-chat-dots-fill"></i>
+    <span class="badge-dot"></span>
+</button>
+
+<div class="chatbot-window" id="chatbotWindow" role="dialog" aria-label="Chat assistant">
+    <!-- Header -->
+    <div class="chatbot-header">
+        <div class="avatar"><i class="bi bi-robot"></i></div>
+        <div class="info">
+            <h6>Indistylex Assistant</h6>
+            <small>Online — typically replies instantly</small>
+        </div>
+        <button class="close-chat" id="chatbotClose" aria-label="Close chat">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chatbot-messages" id="chatMessages"></div>
+
+    <!-- Quick Reply Chips -->
+    <div class="chatbot-suggestions" id="chatSuggestions"></div>
+
+    <!-- Input -->
+    <div class="chatbot-input">
+        <input type="text" id="chatInput" placeholder="Type your message…" autocomplete="off" maxlength="500">
+        <button id="chatSendBtn" aria-label="Send message"><i class="bi bi-send-fill"></i></button>
+    </div>
+</div>

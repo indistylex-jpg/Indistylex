@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Payment — Indistylex{% endblock %}
+
+{% block extra_css %}
+<style>
+  .payment-card { max-width: 550px; margin: 0 auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="payment-section py-5">
+  <div class="container">
+    <div class="payment-card">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <div class="text-center mb-4">
+            <h3 class="fw-bold">Complete Payment</h3>
+            <p class="text-muted">Order #{{ order.order_number }}</p>
+          </div>
+
+          <div class="bg-light rounded p-3 mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Items ({{ order.items | length }})</span>
+              <span>₹{{ "{:,.0f}".format(order.subtotal) }}</span>
+            </div>
+            {% if order.discount > 0 %}
+              <div class="d-flex justify-content-between mb-1 text-success">
+                <span>Discount</span>
+                <span>−₹{{ "{:,.0f}".format(order.discount) }}</span>
+              </div>
+            {% endif %}
+            <div class="d-flex justify-content-between mb-1">
+              <span>Shipping</span>
+              <span>{{ "Free" if order.shipping_cost == 0 else "₹{:,.0f}".format(order.shipping_cost) }}</span>
+            </div>
+            {% if order.tax > 0 %}
+              <div class="d-flex justify-content-between mb-1">
+                <span>Tax</span>
+                <span>₹{{ "{:,.0f}".format(order.tax) }}</span>
+              </div>
+            {% endif %}
+            <hr class="my-2">
+            <div class="d-flex justify-content-between fw-bold h5 mb-0">
+              <span>Total</span>
+              <span>₹{{ "{:,.0f}".format(order.total) }}</span>
+            </div>
+          </div>
+
+          <button id="payBtn" class="btn btn-primary btn-lg w-100">
+            <i class="bi bi-lock-fill me-2"></i>Pay ₹{{ "{:,.0f}".format(order.total) }}
+          </button>
+
+          <div class="text-center mt-3 small text-muted">
+            <i class="bi bi-shield-check me-1"></i>Secured by Razorpay | 256-bit SSL Encryption
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById('payBtn').addEventListener('click', function() {
+    var options = {
+      key: '{{ razorpay_key }}',
+      amount: {{ razorpay_order.amount }},
+      currency: '{{ razorpay_order.currency }}',
+      name: 'Indistylex',
+      description: 'Order #{{ order.order_number }}',
+      order_id: '{{ razorpay_order.id }}',
+      handler: function(response) {
+        // Submit payment details to server
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("checkout.verify") }}';
+
+        var fields = {
+          'csrf_token': '{{ csrf_token() }}',
+          'razorpay_payment_id': response.razorpay_payment_id,
+          'razorpay_order_id': response.razorpay_order_id,
+          'razorpay_signature': response.razorpay_signature,
+          'order_id': '{{ order.id }}'
+        };
+
+        for (var key in fields) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = fields[key];
+          form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      },
+      prefill: {
+        name: '{{ order.shipping_address.split(",")[0] if order.shipping_address else "" }}',
+        email: '{{ current_user.email if current_user.is_authenticated else "" }}',
+        contact: '{{ current_user.phone if current_user.is_authenticated else "" }}'
+      },
+      theme: {
+        color: '#1A56DB'
+      },
+      modal: {
+        ondismiss: function() {
+          // Payment cancelled
+        }
+      }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(response) {
+      alert('Payment failed. Please try again.');
+    });
+    rzp.open();
+  });
+</script>
+{% endblock %}
