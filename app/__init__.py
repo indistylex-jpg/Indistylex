@@ -76,6 +76,7 @@ def create_app(config_name=None):
     from app.routes.admin import admin_bp
     from app.routes.chatbot import chatbot_bp
     from app.routes.oauth import oauth_bp, init_oauth
+    from app.routes.api import api_bp
 
     # Initialize OAuth providers
     init_oauth(app)
@@ -91,6 +92,7 @@ def create_app(config_name=None):
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
     app.register_blueprint(oauth_bp, url_prefix='/oauth')
+    app.register_blueprint(api_bp)
 
     # Context processors
     @app.context_processor
