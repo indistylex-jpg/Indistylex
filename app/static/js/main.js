@@ -4,6 +4,17 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  /* --- Hero Carousel auto-slide fix --- */
+  var heroEl = document.getElementById('heroCarousel');
+  if (heroEl) {
+    new bootstrap.Carousel(heroEl, {
+      interval: 4500,
+      ride: 'carousel',
+      pause: 'hover',
+      wrap: true
+    });
+  }
+
   /* --- Flash message auto-dismiss --- */
   document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
     setTimeout(function () {
