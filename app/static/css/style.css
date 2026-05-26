@@ -71,6 +71,39 @@ img {
 .navbar-brand-text:hover {
     color: var(--primary);
 }
+
+/* Brand Logo & Monogram */
+.brand-monogram {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: var(--primary);
+    color: var(--accent);
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
+}
+.brand-monogram-footer {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent);
+}
+.brand-logo {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--primary);
+}
+.navbar-brand:hover .brand-logo {
+    color: var(--primary);
+}
+.navbar-brand:hover .brand-monogram {
+    background: #333;
+}
 .nav-link-main {
     font-size: 0.8rem;
     font-weight: 500;
