@@ -1,62 +1,61 @@
 <form method="GET" action="{{ url_for('shop.listing') }}" id="filterForm">
-  {% if request.args.get('q') %}
+    {% if request.args.get('q') %}
     <input type="hidden" name="q" value="{{ request.args.get('q') }}">
-  {% endif %}
+    {% endif %}
 
-  <!-- Categories -->
-  <div class="filter-group mb-4">
-    <h6 class="fw-semibold mb-2">Categories</h6>
-    {% for cat in categories %}
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="category"
-               value="{{ cat.slug }}" id="filter-cat-{{ cat.id }}"
-               {{ "checked" if request.args.get('category') == cat.slug }}>
-        <label class="form-check-label small" for="filter-cat-{{ cat.id }}">{{ cat.name }}</label>
-      </div>
-    {% endfor %}
-  </div>
-
-  <!-- Gender -->
-  <div class="filter-group mb-4">
-    <h6 class="fw-semibold mb-2">For</h6>
-    {% for g, label in [('kids', 'All Kids'), ('girls', 'Girls')] %}
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="gender"
-               value="{{ g }}" id="filter-gender-{{ g }}"
-               {{ "checked" if request.args.get('gender') == g }}>
-        <label class="form-check-label small" for="filter-gender-{{ g }}">{{ label }}</label>
-      </div>
-    {% endfor %}
-  </div>
-
-  <!-- Age Group -->
-  <div class="filter-group mb-4">
-    <h6 class="fw-semibold mb-2">Age Group</h6>
-    {% for ag, label in [('0-2', '0–2 Years'), ('2-4', '2–4 Years'), ('4-6', '4–6 Years'), ('6-8', '6–8 Years'), ('8-12', '8–12 Years')] %}
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="age_group"
-               value="{{ ag }}" id="filter-age-{{ ag }}"
-               {{ "checked" if request.args.get('age_group') == ag }}>
-        <label class="form-check-label small" for="filter-age-{{ ag }}">{{ label }}</label>
-      </div>
-    {% endfor %}
-  </div>
-
-  <!-- Price Range -->
-  <div class="filter-group mb-4">
-    <h6 class="fw-semibold mb-2">Price Range</h6>
-    <div class="row g-2">
-      <div class="col-6">
-        <input type="number" class="form-control form-control-sm" name="min_price"
-               placeholder="₹ Min" value="{{ request.args.get('min_price', '') }}">
-      </div>
-      <div class="col-6">
-        <input type="number" class="form-control form-control-sm" name="max_price"
-               placeholder="₹ Max" value="{{ request.args.get('max_price', '') }}">
-      </div>
+    <!-- Categories -->
+    <div class="filter-group">
+        <h6 class="filter-group-title">Categories</h6>
+        <ul class="filter-list">
+            {% for cat in categories %}
+            <li class="filter-list-item">
+                <input class="filter-checkbox" type="radio" name="category"
+                       value="{{ cat.slug }}" id="fcat-{{ cat.id }}"
+                       {{ "checked" if request.args.get('category') == cat.slug }}>
+                <label for="fcat-{{ cat.id }}">{{ cat.name }}</label>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
-  </div>
 
-  <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-  <a href="{{ url_for('shop.listing') }}" class="btn btn-outline-secondary w-100 mt-2">Clear All</a>
+    <!-- Color -->
+    <div class="filter-group">
+        <h6 class="filter-group-title">Color</h6>
+        <div class="filter-color-grid">
+            {% for color in ['Black', 'White', 'Blue', 'Red', 'Green', 'Brown', 'Grey', 'Navy'] %}
+            <label class="filter-color-swatch" title="{{ color }}">
+                <input type="radio" name="color" value="{{ color|lower }}" {{ "checked" if request.args.get('color') == color|lower }}>
+                <span class="filter-swatch" style="background: {{ color|lower }};"></span>
+                <span class="filter-color-name">{{ color }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Size -->
+    <div class="filter-group">
+        <h6 class="filter-group-title">Size</h6>
+        <div class="filter-size-grid">
+            {% for size in ['XS', 'S', 'M', 'L', 'XL', 'XXL'] %}
+            <label class="filter-size-box">
+                <input type="radio" name="size" value="{{ size }}" {{ "checked" if request.args.get('size') == size }}>
+                <span>{{ size }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Price Range -->
+    <div class="filter-group">
+        <h6 class="filter-group-title">Price</h6>
+        <div class="filter-price-inputs">
+            <input type="number" class="filter-price-input" name="min_price"
+                   placeholder="₹ Min" value="{{ request.args.get('min_price', '') }}">
+            <span class="filter-price-sep">–</span>
+            <input type="number" class="filter-price-input" name="max_price"
+                   placeholder="₹ Max" value="{{ request.args.get('max_price', '') }}">
+        </div>
+    </div>
+
+    <button type="submit" class="filter-apply-btn">APPLY</button>
 </form>

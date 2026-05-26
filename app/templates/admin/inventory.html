@@ -1,0 +1,252 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<div class="dash-header">
+  <div>
+    <h4 class="fw-bold mb-1">Inventory Management</h4>
+    <p class="text-muted mb-0">Track and manage stock levels across all product variants.</p>
+  </div>
+</div>
+
+<!-- Inventory Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-info">
+          <p class="stat-label">Total SKUs</p>
+          <h3 class="stat-value">{{ "{:,}".format(total_variants) }}</h3>
+        </div>
+        <div class="stat-icon" style="background:#EFF6FF;color:#2563EB;">
+          <i class="bi bi-upc-scan"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-info">
+          <p class="stat-label">Total Stock Units</p>
+          <h3 class="stat-value">{{ "{:,}".format(total_stock) }}</h3>
+        </div>
+        <div class="stat-icon" style="background:#F0FDF4;color:#16A34A;">
+          <i class="bi bi-box-seam"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-info">
+          <p class="stat-label">Low Stock</p>
+          <h3 class="stat-value">{{ low_stock_count }}</h3>
+          <span class="stat-change negative"><i class="bi bi-exclamation-triangle"></i> &le;10 units</span>
+        </div>
+        <div class="stat-icon" style="background:#FFFBEB;color:#D97706;">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-info">
+          <p class="stat-label">Out of Stock</p>
+          <h3 class="stat-value">{{ out_of_stock_count }}</h3>
+          <span class="stat-change negative"><i class="bi bi-x-circle"></i> 0 units</span>
+        </div>
+        <div class="stat-icon" style="background:#FEF2F2;color:#DC2626;">
+          <i class="bi bi-x-octagon"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="dash-card mb-4">
+  <div class="dash-card-body">
+    <form method="GET" action="{{ url_for('admin.inventory') }}" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small fw-medium">Search</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input type="text" name="search" class="form-control" placeholder="Product name or SKU..." value="{{ search }}">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-medium">Stock Level</label>
+        <select name="stock" class="form-select">
+          <option value="">All Stock</option>
+          <option value="low" {{ 'selected' if stock_filter == 'low' }}>Low Stock (&le;10)</option>
+          <option value="out" {{ 'selected' if stock_filter == 'out' }}>Out of Stock</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-medium">Category</label>
+        <select name="category" class="form-select">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {{ 'selected' if category_id == cat.id|string }}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-dark w-100"><i class="bi bi-funnel me-1"></i>Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Inventory Table -->
+<div class="dash-card">
+  <div class="dash-card-header">
+    <h6 class="dash-card-title">
+      Inventory Items
+      <span class="badge bg-secondary ms-2">{{ variants.total }}</span>
+    </h6>
+    <form method="POST" action="{{ url_for('admin.bulk_update_stock') }}" id="bulkForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="view-all-btn" onclick="return confirm('Save all stock changes?')">
+        <i class="bi bi-save me-1"></i>Save All Changes
+      </button>
+    </form>
+  </div>
+  <div class="dash-card-body p-0">
+    <div class="table-responsive">
+      <table class="table dash-table mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Size</th>
+            <th>Color</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for variant in variants.items %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="product-thumb-wrapper small">
+                  {% if variant.product.images.first() %}
+                  <img src="{{ variant.product.images.first().image_url }}" alt="" class="product-thumb-img">
+                  {% else %}
+                  <div class="product-thumb-placeholder small"><i class="bi bi-image"></i></div>
+                  {% endif %}
+                </div>
+                <span class="product-name">{{ variant.product.name }}</span>
+              </div>
+            </td>
+            <td><code class="small">{{ variant.sku }}</code></td>
+            <td>{{ variant.size }}</td>
+            <td>
+              <span class="d-inline-flex align-items-center gap-1">
+                <span class="color-dot" style="background:{{ variant.color|lower if variant.color|lower in ['red','blue','green','black','white','pink','yellow','orange','purple','navy','grey','gray','brown','beige'] else '#ccc' }};"></span>
+                {{ variant.color }}
+              </span>
+            </td>
+            <td><span class="badge bg-light text-dark">{{ variant.product.category.name if variant.product.category else 'N/A' }}</span></td>
+            <td class="fw-medium">₹{{ "{:,.0f}".format(variant.product.price) }}</td>
+            <td>
+              <input type="number" name="stock_{{ variant.id }}" value="{{ variant.stock_quantity }}"
+                     class="form-control form-control-sm stock-input {{ 'stock-danger' if variant.stock_quantity == 0 else 'stock-warning' if variant.stock_quantity <= 10 else '' }}"
+                     min="0" form="bulkForm">
+            </td>
+            <td>
+              {% if variant.stock_quantity == 0 %}
+              <span class="status-badge status-cancelled">Out of Stock</span>
+              {% elif variant.stock_quantity <= 10 %}
+              <span class="status-badge status-processing">Low Stock</span>
+              {% else %}
+              <span class="status-badge status-delivered">In Stock</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.update_stock', variant_id=variant.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="stock_quantity" value="{{ variant.stock_quantity }}" class="single-stock-input">
+                <button type="button" class="btn btn-sm btn-outline-secondary quick-update-btn" title="Quick Update" data-variant-id="{{ variant.id }}">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="text-center text-muted py-4">
+              <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+              No inventory items found matching your filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if variants.pages > 1 %}
+<nav class="mt-4 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if variants.has_prev %}
+    <li class="page-item">
+      <a class="page-link" href="{{ url_for('admin.inventory', page=variants.prev_num, search=search, stock=stock_filter, category=category_id) }}">&laquo;</a>
+    </li>
+    {% endif %}
+    {% for p in variants.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+      <li class="page-item {{ 'active' if p == variants.page }}">
+        <a class="page-link" href="{{ url_for('admin.inventory', page=p, search=search, stock=stock_filter, category=category_id) }}">{{ p }}</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if variants.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="{{ url_for('admin.inventory', page=variants.next_num, search=search, stock=stock_filter, category=category_id) }}">&raquo;</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .stock-input {
+    width: 75px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .stock-input.stock-danger {
+    background: #FEF2F2;
+    border-color: #FECACA;
+    color: #DC2626;
+  }
+  .stock-input.stock-warning {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+    color: #D97706;
+  }
+  .color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+</style>
+{% endblock %}

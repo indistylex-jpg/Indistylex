@@ -1,5 +1,5 @@
 /* ============================================
-   Indistylex — Admin Panel JS
+   Silkensway — Admin Panel JS v5
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', function () {

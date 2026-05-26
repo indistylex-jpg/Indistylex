@@ -175,7 +175,7 @@ def create_app(config_name=None):
 def _seed_admin(app):
     """Create default admin user if not exists."""
     from app.models.user import User
-    from sqlalchemy.exc import OperationalError
+    from sqlalchemy.exc import OperationalError, ProgrammingError
 
     admin_email = app.config.get('ADMIN_EMAIL')
     try:
@@ -190,6 +190,6 @@ def _seed_admin(app):
             admin.set_password(app.config.get('ADMIN_PASSWORD', 'admin123'))
             db.session.add(admin)
             db.session.commit()
-    except OperationalError:
+    except (OperationalError, ProgrammingError):
         # Tables not created yet — skip seeding
         db.session.rollback()

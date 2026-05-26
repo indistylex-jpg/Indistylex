@@ -1,130 +1,164 @@
 {% extends "base.html" %}
-{% block title %}{{ "Search: " + request.args.get('q', '') if request.args.get('q') else category.name if category else "Shop All" }} — Indistylex{% endblock %}
-{% block meta_description %}{{ "Browse " + category.name + " collection" if category else "Shop all clothing" }} at Indistylex. Premium fashion for men, women & kids. Free shipping above ₹999.{% endblock %}
-{% block meta_keywords %}{{ category.name + ", " if category else "" }}shop clothing online, Indistylex, fashion India, buy clothes{% endblock %}
+{% block title %}{{ category.name if category else "Shop All" }} — Indistylex{% endblock %}
+{% block meta_description %}{{ "Browse " + category.name + " collection" if category else "Shop all clothing" }} at Indistylex. Premium fashion. Free shipping above ₹999.{% endblock %}
 
 {% block content %}
-<section class="shop-section py-3 py-md-4">
-  <div class="container">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-3">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
-        {% if category %}
-          <li class="breadcrumb-item active">{{ category.name }}</li>
-        {% else %}
-          <li class="breadcrumb-item active">Shop</li>
-        {% endif %}
-      </ol>
-    </nav>
-
-    <div class="row">
-      <!-- Sidebar Filters — Desktop (hidden on mobile, shown as offcanvas) -->
-      <div class="col-lg-3 d-none d-lg-block mb-4">
-        <div class="filter-sidebar">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold mb-0">Filters</h5>
-            <a href="{{ url_for('shop.listing') }}" class="btn btn-sm btn-outline-secondary">Clear All</a>
-          </div>
-          {% include 'shop/_filter_form.html' %}
-        </div>
-      </div>
-
-      <!-- Mobile Filter Offcanvas -->
-      <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">Filters</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-          {% include 'shop/_filter_form.html' %}
-        </div>
-      </div>
-
-      <!-- Product Grid -->
-      <div class="col-lg-9">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-2">
-            <!-- Mobile Filter Toggle -->
-            <button class="btn btn-outline-primary btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-              <i class="bi bi-funnel me-1"></i>Filters
-            </button>
-            <p class="text-muted mb-0 small">
-              Showing <strong>{{ products.total }}</strong> products
-              {% if request.args.get('q') %}
-                for "<strong>{{ request.args.get('q') }}</strong>"
-              {% endif %}
-            </p>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <label class="form-label mb-0 small text-nowrap d-none d-sm-inline">Sort by:</label>
-            <select class="form-select form-select-sm" id="sortSelect" style="width:auto; min-width:140px;">
-              <option value="newest" {{ "selected" if request.args.get('sort') == 'newest' }}>Newest</option>
-              <option value="price_low" {{ "selected" if request.args.get('sort') == 'price_low' }}>Price: Low to High</option>
-              <option value="price_high" {{ "selected" if request.args.get('sort') == 'price_high' }}>Price: High to Low</option>
-              <option value="name_az" {{ "selected" if request.args.get('sort') == 'name_az' }}>Name: A-Z</option>
-            </select>
-          </div>
-        </div>
-
-        {% if products.items %}
-          <div class="row g-2 g-md-3 g-lg-4">
-            {% for product in products.items %}
-              {% include 'components/product_card.html' %}
-            {% endfor %}
-          </div>
-
-          <!-- Pagination -->
-          {% if products.pages > 1 %}
-            {% set pagination_args = {} %}
-            {% for key, val in request.args.items() if key != 'page' %}
-              {% if pagination_args.update({key: val}) %}{% endif %}
-            {% endfor %}
-            <nav class="mt-4" aria-label="Product pagination">
-              <ul class="pagination pagination-sm justify-content-center flex-wrap">
-                <li class="page-item {{ 'disabled' if not products.has_prev }}">
-                  <a class="page-link" href="{{ url_for('shop.listing', page=products.prev_num, **pagination_args) }}">
-                    <i class="bi bi-chevron-left"></i>
-                  </a>
-                </li>
-                {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
-                  {% if page_num %}
-                    <li class="page-item {{ 'active' if page_num == products.page }}">
-                      <a class="page-link" href="{{ url_for('shop.listing', page=page_num, **pagination_args) }}">{{ page_num }}</a>
-                    </li>
-                  {% else %}
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                  {% endif %}
-                {% endfor %}
-                <li class="page-item {{ 'disabled' if not products.has_next }}">
-                  <a class="page-link" href="{{ url_for('shop.listing', page=products.next_num, **pagination_args) }}">
-                    <i class="bi bi-chevron-right"></i>
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          {% endif %}
-        {% else %}
-          <div class="text-center py-5">
-            <i class="bi bi-search display-1 text-muted"></i>
-            <h4 class="mt-3">No products found</h4>
-            <p class="text-muted">Try adjusting your filters or search terms</p>
-            <a href="{{ url_for('shop.listing') }}" class="btn btn-outline-primary">View All Products</a>
-          </div>
-        {% endif %}
-      </div>
+<!-- Category Hero Banner (if viewing a category) -->
+{% if category %}
+<section class="category-hero" style="background-image: url('{{ category.image_url or 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80' }}');">
+    <div class="category-hero-overlay"></div>
+    <div class="category-hero-content">
+        <h1 class="category-hero-title">{{ category.name }}</h1>
+        <p class="category-hero-subtitle">{{ category.description or 'Explore our collection' }}</p>
     </div>
-  </div>
+</section>
+{% endif %}
+
+<section class="shop-listing-section py-4">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                {% if category %}
+                <li class="breadcrumb-item"><a href="{{ url_for('shop.listing') }}">Shop</a></li>
+                <li class="breadcrumb-item active">{{ category.name }}</li>
+                {% else %}
+                <li class="breadcrumb-item active">Shop</li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        <!-- Page Title for non-category pages -->
+        {% if not category %}
+        <div class="shop-page-header mb-4">
+            <h1 class="shop-page-title">
+                {% if search_query %}Search: "{{ search_query }}"{% else %}All Products{% endif %}
+            </h1>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="filter-sidebar">
+                    <div class="filter-sidebar-header">
+                        <h5 class="filter-sidebar-title">Filters</h5>
+                        <a href="{{ url_for('shop.listing') }}" class="filter-clear-link">Clear All</a>
+                    </div>
+                    {% include 'shop/_filter_form.html' %}
+                </div>
+            </div>
+
+            <!-- Mobile Filter Offcanvas -->
+            <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="filterOffcanvas">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title fw-bold">Filters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body">
+                    {% include 'shop/_filter_form.html' %}
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="col-lg-9">
+                <!-- Toolbar -->
+                <div class="shop-toolbar">
+                    <div class="shop-toolbar-left">
+                        <button class="btn-filter-mobile d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                            <i class="bi bi-sliders"></i> Filters
+                        </button>
+                        <span class="shop-result-count">
+                            Showing {{ products.total }} results
+                            {% if search_query %} for "<strong>{{ search_query }}</strong>"{% endif %}
+                        </span>
+                    </div>
+                    <div class="shop-toolbar-right">
+                        <span class="sort-label">SORT BY:</span>
+                        <select class="sort-select" id="sortSelect">
+                            <option value="newest" {{ "selected" if current_sort == 'newest' }}>Newest</option>
+                            <option value="popular" {{ "selected" if current_sort == 'popular' }}>Popular</option>
+                            <option value="price_low" {{ "selected" if current_sort == 'price_low' }}>Price: Low → High</option>
+                            <option value="price_high" {{ "selected" if current_sort == 'price_high' }}>Price: High → Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Products -->
+                {% if products.items %}
+                <div class="row g-3 g-md-4 mt-1">
+                    {% for product in products.items %}
+                    <div class="col-6 col-md-4">
+                        <div class="product-card-minimal">
+                            <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-img-link">
+                                <div class="product-card-img-wrap">
+                                    <img src="{{ product.primary_image }}" alt="{{ product.name }}" loading="lazy">
+                                    {% if product.discount_percent > 0 %}
+                                    <span class="product-badge-sale">-{{ product.discount_percent }}%</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            <div class="product-card-info">
+                                <div class="product-card-name-row">
+                                    <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-name">{{ product.name }}</a>
+                                    <button class="product-card-heart" title="Add to Wishlist"><i class="bi bi-heart"></i></button>
+                                </div>
+                                <div class="product-card-price">₹{{ "%.0f"|format(product.price) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if products.pages > 1 %}
+                <nav class="shop-pagination mt-5">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {{ 'disabled' if not products.has_prev }}">
+                            <a class="page-link" href="{{ url_for('shop.listing', page=products.prev_num, category=current_category, sort=current_sort, q=search_query) }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == products.page }}">
+                            <a class="page-link" href="{{ url_for('shop.listing', page=page_num, category=current_category, sort=current_sort, q=search_query) }}">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                        {% endfor %}
+                        <li class="page-item {{ 'disabled' if not products.has_next }}">
+                            <a class="page-link" href="{{ url_for('shop.listing', page=products.next_num, category=current_category, sort=current_sort, q=search_query) }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
+
+                {% else %}
+                <div class="shop-empty text-center py-5">
+                    <i class="bi bi-search display-3 text-muted"></i>
+                    <h4 class="mt-3">No products found</h4>
+                    <p class="text-muted">Try adjusting your filters or search terms</p>
+                    <a href="{{ url_for('shop.listing') }}" class="btn-primary-custom">VIEW ALL PRODUCTS</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.getElementById('sortSelect').addEventListener('change', function() {
+document.getElementById('sortSelect').addEventListener('change', function() {
     var url = new URL(window.location);
     url.searchParams.set('sort', this.value);
     url.searchParams.delete('page');
     window.location = url;
-  });
+});
 </script>
 {% endblock %}

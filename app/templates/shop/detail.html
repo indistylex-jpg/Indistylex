@@ -1,334 +1,247 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }} — Indistylex{% endblock %}
-{% block meta_description %}{{ product.short_description or product.description[:160] | striptags }}{% endblock %}
-{% block meta_keywords %}{{ product.name }}, {{ product.brand or 'Indistylex' }}, {{ product.category.name if product.category else 'clothing' }}, buy online, fashion India{% endblock %}
-{% block og_type %}product{% endblock %}
-{% block og_title %}{{ product.name }} — ₹{{ product.price }}{% endblock %}
-{% block og_description %}{{ product.short_description or product.description[:200] | striptags }}{% endblock %}
-{% block og_image %}{% set primary_image = product.images | selectattr('is_primary') | first %}{{ image_url(primary_image.image_url if primary_image else None) }}{% endblock %}
-
-{% block structured_data %}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "{{ product.name }}",
-    "description": "{{ product.short_description or product.description[:300] | striptags | e }}",
-    "image": "{% set primary_image = product.images | selectattr('is_primary') | first %}{{ image_url(primary_image.image_url if primary_image else None) }}",
-    "brand": {
-        "@type": "Brand",
-        "name": "{{ product.brand or 'Indistylex' }}"
-    },
-    "offers": {
-        "@type": "Offer",
-        "url": "{{ request.url }}",
-        "priceCurrency": "INR",
-        "price": "{{ product.price }}",
-        "availability": "https://schema.org/InStock",
-        "seller": {
-            "@type": "Organization",
-            "name": "Indistylex"
-        }
-    }
-    {% set approved_reviews = product.reviews | selectattr('is_approved') | list %}
-    {% if approved_reviews | length > 0 %}
-    ,"aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "{{ product.average_rating }}",
-        "reviewCount": "{{ approved_reviews | length }}"
-    }
-    {% endif %}
-}
-</script>
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ url_for('main.index', _external=True) }}"},
-        {"@type": "ListItem", "position": 2, "name": "Shop", "item": "{{ url_for('shop.listing', _external=True) }}"}
-        {% if product.category %}
-        ,{"@type": "ListItem", "position": 3, "name": "{{ product.category.name }}", "item": "{{ url_for('shop.listing', category=product.category.slug, _external=True) }}"}
-        ,{"@type": "ListItem", "position": 4, "name": "{{ product.name }}"}
-        {% else %}
-        ,{"@type": "ListItem", "position": 3, "name": "{{ product.name }}"}
-        {% endif %}
-    ]
-}
-</script>
-{% endblock %}
+{% block meta_description %}{{ product.description[:160] | striptags }}{% endblock %}
 
 {% block content %}
-<section class="product-detail py-4">
-  <div class="container">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-3">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('shop.listing') }}">Shop</a></li>
-        {% if product.category %}
-          <li class="breadcrumb-item"><a href="{{ url_for('shop.listing', category=product.category.slug) }}">{{ product.category.name }}</a></li>
-        {% endif %}
-        <li class="breadcrumb-item active">{{ product.name }}</li>
-      </ol>
-    </nav>
+<section class="product-detail-section py-4">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                {% if product.category %}
+                <li class="breadcrumb-item"><a href="{{ url_for('shop.category', slug=product.category.slug) }}">{{ product.category.name }}</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active">{{ product.name }}</li>
+            </ol>
+        </nav>
 
-    <div class="row g-4">
-      <!-- Product Images -->
-      <div class="col-lg-6">
-        <div class="product-gallery">
-          {% set all_images = product.images.all() %}
-          {% set primary_image = all_images | selectattr('is_primary') | first %}
-          <div class="main-image mb-3">
-            <img src="{{ image_url(primary_image.image_url if primary_image else None) }}"
-                 alt="{{ product.name }}" class="img-fluid rounded" id="mainImage">
-          </div>
-          {% if all_images | length > 1 %}
-            <div class="d-flex gap-2 thumbnail-row">
-              {% for img in all_images | sort(attribute='sort_order') %}
-                <div class="thumbnail-item {{ 'active' if img.is_primary }}" onclick="changeImage(this, '{{ image_url(img.image_url) }}')">
-                  <img src="{{ image_url(img.image_url) }}"
-                       alt="{{ product.name }}" class="img-fluid rounded" loading="lazy">
-                </div>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Product Info -->
-      <div class="col-lg-6">
-        <div class="product-info">
-          {% if product.brand %}
-            <p class="text-muted small text-uppercase mb-1">{{ product.brand }}</p>
-          {% endif %}
-
-          <h1 class="product-title h3 fw-bold">{{ product.name }}</h1>
-
-          <!-- Rating -->
-          {% if product.reviews %}
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <div class="star-rating">
-                {% set avg = product.average_rating %}
-                {% for i in range(1, 6) %}
-                  {% if i <= avg %}
-                    <i class="bi bi-star-fill text-warning"></i>
-                  {% elif i - 0.5 <= avg %}
-                    <i class="bi bi-star-half text-warning"></i>
-                  {% else %}
-                    <i class="bi bi-star text-warning"></i>
-                  {% endif %}
-                {% endfor %}
-              </div>
-              <span class="text-muted small">({{ product.reviews | selectattr('is_approved') | list | length }} reviews)</span>
-            </div>
-          {% endif %}
-
-          <!-- Price -->
-          <div class="product-price mb-3">
-            {% if product.compare_at_price and product.compare_at_price > product.price %}
-              <span class="h4 fw-bold text-primary">₹{{ "{:,.0f}".format(product.price) }}</span>
-              <span class="text-muted text-decoration-line-through ms-2">₹{{ "{:,.0f}".format(product.compare_at_price) }}</span>
-              <span class="badge bg-accent ms-2">{{ product.discount_percentage }}% OFF</span>
-            {% else %}
-              <span class="h4 fw-bold text-primary">₹{{ "{:,.0f}".format(product.price) }}</span>
-            {% endif %}
-          </div>
-
-          <p class="text-muted mb-4">{{ product.description }}</p>
-
-          <!-- Add to Cart Form -->
-          <form method="POST" action="{{ url_for('cart.add_to_cart') }}" id="addToCartForm">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-
-            <!-- Size Selection -->
-            {% set sizes = product.variants | map(attribute='size') | unique | list %}
-            {% if sizes %}
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Size</label>
-                <div class="d-flex flex-wrap gap-2" id="sizeOptions">
-                  {% for size in sizes %}
-                    <button type="button" class="btn btn-outline-dark size-btn" data-size="{{ size }}">{{ size }}</button>
-                  {% endfor %}
-                </div>
-                <input type="hidden" name="size" id="selectedSize" required>
-              </div>
-            {% endif %}
-
-            <!-- Color Selection -->
-            {% set colors = product.variants | map(attribute='color') | unique | list %}
-            {% if colors %}
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Color</label>
-                <div class="d-flex flex-wrap gap-2" id="colorOptions">
-                  {% for color in colors %}
-                    <button type="button" class="btn btn-outline-dark color-btn" data-color="{{ color }}">{{ color }}</button>
-                  {% endfor %}
-                </div>
-                <input type="hidden" name="color" id="selectedColor" required>
-              </div>
-            {% endif %}
-
-            <!-- Quantity -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">Quantity</label>
-              <div class="input-group" style="width: 140px;">
-                <button type="button" class="btn btn-outline-dark qty-btn" data-action="decrease">−</button>
-                <input type="number" class="form-control text-center" name="quantity" value="1" min="1" max="10" id="qtyInput">
-                <button type="button" class="btn btn-outline-dark qty-btn" data-action="increase">+</button>
-              </div>
-              <small class="text-muted" id="stockInfo"></small>
-            </div>
-
-            <div class="d-flex gap-3 mb-4">
-              <button type="submit" class="btn btn-primary btn-lg flex-grow-1" id="addToCartBtn">
-                <i class="bi bi-cart-plus me-2"></i>Add to Cart
-              </button>
-              {% if current_user.is_authenticated %}
-                <button type="button" class="btn btn-outline-dark btn-lg wishlist-toggle"
-                        data-product-id="{{ product.id }}" title="Add to Wishlist">
-                  <i class="bi bi-heart{{ '-fill text-danger' if product.id in wishlist_ids else '' }}"></i>
-                </button>
-              {% endif %}
-            </div>
-          </form>
-
-          <!-- Trust badges -->
-          <div class="row g-2 text-center small text-muted border-top pt-3">
-            <div class="col-4"><i class="bi bi-truck me-1"></i>Free Delivery</div>
-            <div class="col-4"><i class="bi bi-arrow-return-left me-1"></i>Easy Returns</div>
-            <div class="col-4"><i class="bi bi-shield-check me-1"></i>Secure Payment</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reviews Section -->
-    <div class="row mt-5">
-      <div class="col-12">
-        <ul class="nav nav-tabs" id="productTabs" role="tablist">
-          <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#reviews">
-              Reviews ({{ product.reviews | selectattr('is_approved') | list | length }})
-            </button>
-          </li>
-        </ul>
-        <div class="tab-content pt-4" id="productTabContent">
-          <div class="tab-pane fade show active" id="reviews">
-            {% set approved_reviews = product.reviews | selectattr('is_approved') | list %}
-            {% if approved_reviews %}
-              {% for review in approved_reviews %}
-                <div class="review-card border-bottom pb-3 mb-3">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <strong>{{ review.user.first_name }} {{ review.user.last_name[0] }}.</strong>
-                      <div class="star-rating small">
-                        {% for i in range(1, 6) %}
-                          <i class="bi bi-star{{ '-fill' if i <= review.rating else '' }} text-warning"></i>
+        <div class="row g-4 g-lg-5">
+            <!-- Product Gallery -->
+            <div class="col-lg-6">
+                <div class="pdp-gallery">
+                    {% set all_images = product.images.all() %}
+                    {% set primary_image = all_images | selectattr('is_primary') | first %}
+                    <div class="pdp-main-image">
+                        <img src="{{ primary_image.image_url if primary_image else product.primary_image }}" alt="{{ product.name }}" id="mainImage">
+                    </div>
+                    {% if all_images | length > 1 %}
+                    <div class="pdp-thumbnails">
+                        {% for img in all_images | sort(attribute='sort_order') %}
+                        <div class="pdp-thumb {{ 'active' if img.is_primary }}" onclick="changeImage(this, '{{ img.image_url }}')">
+                            <img src="{{ img.image_url }}" alt="{{ product.name }}" loading="lazy">
+                        </div>
                         {% endfor %}
-                      </div>
                     </div>
-                    <small class="text-muted">{{ review.created_at.strftime('%d %b %Y') }}</small>
-                  </div>
-                  {% if review.comment %}
-                    <p class="mt-2 mb-0">{{ review.comment }}</p>
-                  {% endif %}
+                    {% endif %}
                 </div>
-              {% endfor %}
-            {% else %}
-              <p class="text-muted">No reviews yet. Be the first to review!</p>
-            {% endif %}
-
-            {% if current_user.is_authenticated %}
-              <div class="mt-4">
-                <h6 class="fw-semibold">Write a Review</h6>
-                <form method="POST" action="{{ url_for('product.add_review', product_id=product.id) }}">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <div class="mb-2">
-                    <label class="form-label">Rating</label>
-                    <div class="rating-input">
-                      {% for i in range(5, 0, -1) %}
-                        <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" required>
-                        <label for="star{{ i }}"><i class="bi bi-star-fill"></i></label>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <textarea class="form-control" name="comment" rows="3" placeholder="Share your experience..."></textarea>
-                  </div>
-                  <button type="submit" class="btn btn-outline-primary btn-sm">Submit Review</button>
-                </form>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Related Products -->
-    {% if related_products %}
-      <div class="mt-5">
-        <h4 class="section-title text-center mb-4">You May Also Like</h4>
-        <div class="row row-cols-2 row-cols-md-4 g-3">
-          {% for product in related_products %}
-            <div class="col">
-              {% include 'components/product_card.html' %}
             </div>
-          {% endfor %}
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <div class="pdp-info">
+                    <h1 class="pdp-title">{{ product.name }}</h1>
+
+                    <!-- Price -->
+                    <div class="pdp-price-block">
+                        <span class="pdp-price">₹{{ "{:,.0f}".format(product.price) }}</span>
+                        {% if product.compare_at_price and product.compare_at_price > product.price %}
+                        <span class="pdp-price-original">₹{{ "{:,.0f}".format(product.compare_at_price) }}</span>
+                        <span class="pdp-discount-badge">{{ product.discount_percent }}% OFF</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Rating -->
+                    {% set approved_reviews = product.reviews.filter_by(is_approved=True).all() %}
+                    {% if approved_reviews %}
+                    <div class="pdp-rating">
+                        <div class="pdp-stars">
+                            {% set avg = product.average_rating %}
+                            {% for i in range(1, 6) %}
+                            {% if i <= avg|int %}
+                            <i class="bi bi-star-fill"></i>
+                            {% elif i - avg < 1 %}
+                            <i class="bi bi-star-half"></i>
+                            {% else %}
+                            <i class="bi bi-star"></i>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="pdp-review-count">({{ approved_reviews|length }} Reviews)</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Description -->
+                    <p class="pdp-description">{{ product.description }}</p>
+
+                    <!-- Add to Cart Form -->
+                    <form method="POST" action="{{ url_for('cart.add_to_cart') }}" id="addToCartForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+
+                        <!-- Size Selection -->
+                        {% set sizes = product.variants | map(attribute='size') | unique | list %}
+                        {% if sizes %}
+                        <div class="pdp-option-group">
+                            <label class="pdp-option-label">SIZE</label>
+                            <div class="pdp-size-options">
+                                {% for size in sizes %}
+                                <button type="button" class="pdp-size-btn" data-size="{{ size }}">{{ size }}</button>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="size" id="selectedSize" required>
+                        </div>
+                        {% endif %}
+
+                        <!-- Color Selection -->
+                        {% set colors = product.variants | map(attribute='color') | unique | list %}
+                        {% if colors %}
+                        <div class="pdp-option-group">
+                            <label class="pdp-option-label">COLOR</label>
+                            <div class="pdp-color-options">
+                                {% for color in colors %}
+                                <button type="button" class="pdp-color-btn" data-color="{{ color }}">{{ color }}</button>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="color" id="selectedColor" required>
+                        </div>
+                        {% endif %}
+
+                        <!-- Quantity -->
+                        <div class="pdp-option-group">
+                            <label class="pdp-option-label">QTY</label>
+                            <div class="pdp-qty-control">
+                                <button type="button" class="pdp-qty-btn" data-action="decrease">−</button>
+                                <input type="number" name="quantity" value="1" min="1" max="10" id="qtyInput" class="pdp-qty-input">
+                                <button type="button" class="pdp-qty-btn" data-action="increase">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pdp-actions">
+                            <button type="submit" class="pdp-btn-cart" id="addToCartBtn">ADD TO CART</button>
+                            <a href="{{ url_for('checkout.checkout_page') }}" class="pdp-btn-buy">BUY NOW</a>
+                        </div>
+                    </form>
+
+                    <!-- Accordions -->
+                    <div class="pdp-accordions">
+                        <div class="pdp-accordion-item">
+                            <button class="pdp-accordion-btn" data-bs-toggle="collapse" data-bs-target="#pdpDetails">
+                                <span>Product Details</span>
+                                <i class="bi bi-plus"></i>
+                            </button>
+                            <div class="collapse" id="pdpDetails">
+                                <div class="pdp-accordion-body">
+                                    <ul>
+                                        {% if product.material %}<li>Material: {{ product.material }}</li>{% endif %}
+                                        {% if product.brand %}<li>Brand: {{ product.brand }}</li>{% endif %}
+                                        <li>Category: {{ product.category.name if product.category else 'N/A' }}</li>
+                                        {% if product.care_instructions %}<li>Care: {{ product.care_instructions }}</li>{% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pdp-accordion-item">
+                            <button class="pdp-accordion-btn" data-bs-toggle="collapse" data-bs-target="#pdpShipping">
+                                <span>Shipping & Returns</span>
+                                <i class="bi bi-plus"></i>
+                            </button>
+                            <div class="collapse" id="pdpShipping">
+                                <div class="pdp-accordion-body">
+                                    <ul>
+                                        <li>Free shipping on orders above ₹999</li>
+                                        <li>Standard delivery: 5-7 business days</li>
+                                        <li>Easy 7-day return policy</li>
+                                        <li>Cash on Delivery available</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Share -->
+                    <div class="pdp-share">
+                        <span class="pdp-share-label">Share this product</span>
+                        <div class="pdp-share-icons">
+                            <a href="#"><i class="bi bi-twitter-x"></i></a>
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-whatsapp"></i></a>
+                            <a href="#"><i class="bi bi-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    {% endif %}
-  </div>
+
+        <!-- You May Also Like -->
+        {% if related %}
+        <section class="pdp-related mt-5 pt-5 border-top">
+            <h2 class="section-heading mb-4">You May Also Like</h2>
+            <div class="row g-3 g-md-4">
+                {% for product in related %}
+                <div class="col-6 col-md-3">
+                    <div class="product-card-minimal">
+                        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-img-link">
+                            <div class="product-card-img-wrap">
+                                <img src="{{ product.primary_image }}" alt="{{ product.name }}" loading="lazy">
+                            </div>
+                        </a>
+                        <div class="product-card-info">
+                            <div class="product-card-name-row">
+                                <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-name">{{ product.name }}</a>
+                            </div>
+                            <div class="product-card-price">₹{{ "%.0f"|format(product.price) }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
 </section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  // Size & Color selection
-  document.querySelectorAll('.size-btn').forEach(btn => {
+// Size selection
+document.querySelectorAll('.pdp-size-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active', 'btn-dark'));
-      this.classList.add('active', 'btn-dark');
-      document.getElementById('selectedSize').value = this.dataset.size;
+        document.querySelectorAll('.pdp-size-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('selectedSize').value = this.dataset.size;
     });
-  });
-  document.querySelectorAll('.color-btn').forEach(btn => {
+});
+// Color selection
+document.querySelectorAll('.pdp-color-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active', 'btn-dark'));
-      this.classList.add('active', 'btn-dark');
-      document.getElementById('selectedColor').value = this.dataset.color;
+        document.querySelectorAll('.pdp-color-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('selectedColor').value = this.dataset.color;
     });
-  });
-  // Quantity buttons
-  document.querySelectorAll('.qty-btn').forEach(btn => {
+});
+// Quantity
+document.querySelectorAll('.pdp-qty-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      const input = document.getElementById('qtyInput');
-      let val = parseInt(input.value);
-      if (this.dataset.action === 'increase' && val < 10) input.value = val + 1;
-      if (this.dataset.action === 'decrease' && val > 1) input.value = val - 1;
+        const input = document.getElementById('qtyInput');
+        let val = parseInt(input.value);
+        if (this.dataset.action === 'increase' && val < 10) input.value = val + 1;
+        if (this.dataset.action === 'decrease' && val > 1) input.value = val - 1;
     });
-  });
-  // Validate size & color before submit
-  document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+});
+// Validate
+document.getElementById('addToCartForm').addEventListener('submit', function(e) {
     const sizeEl = document.getElementById('selectedSize');
     const colorEl = document.getElementById('selectedColor');
-    if (sizeEl && !sizeEl.value) {
-      e.preventDefault();
-      alert('Please select a size.');
-      return;
-    }
-    if (colorEl && !colorEl.value) {
-      e.preventDefault();
-      alert('Please select a color.');
-      return;
-    }
-  });
-  // Image gallery
-  function changeImage(el, src) {
+    if (sizeEl && !sizeEl.value) { e.preventDefault(); alert('Please select a size.'); return; }
+    if (colorEl && !colorEl.value) { e.preventDefault(); alert('Please select a color.'); return; }
+});
+// Gallery
+function changeImage(el, src) {
     document.getElementById('mainImage').src = src;
-    document.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-  }
+}
 </script>
 {% endblock %}

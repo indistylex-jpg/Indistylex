@@ -78,6 +78,52 @@ def dashboard():
     top_product_names = [r.product_name for r in top_products_rows]
     top_product_qty = [int(r.total_qty) for r in top_products_rows]
 
+    # Top selling products with images and prices for the sidebar list
+    top_products = []
+    for row in top_products_rows[:5]:
+        product = Product.query.filter_by(name=row.product_name).first()
+        if product:
+            image = product.images[0].image_url if product.images else None
+            top_products.append({
+                'name': product.name,
+                'price': float(product.price),
+                'image': image,
+                'qty_sold': int(row.total_qty)
+            })
+        else:
+            top_products.append({
+                'name': row.product_name,
+                'price': 0,
+                'image': None,
+                'qty_sold': int(row.total_qty)
+            })
+
+    # If no order data, show top products from catalog
+    if not top_products:
+        for p in Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).limit(5).all():
+            image = p.images[0].image_url if p.images else None
+            top_products.append({
+                'name': p.name,
+                'price': float(p.price),
+                'image': image,
+                'qty_sold': 0
+            })
+
+    # Category product counts for donut chart
+    category_rows = db.session.query(
+        Category.name,
+        func.count(Product.id).label('count')
+    ).join(Product, Product.category_id == Category.id).filter(
+        Product.is_active == True
+    ).group_by(Category.name).order_by(func.count(Product.id).desc()).limit(5).all()
+    category_names = [r.name for r in category_rows]
+    category_counts = [int(r.count) for r in category_rows]
+
+    # Date range for header
+    today = datetime.utcnow()
+    week_ago = today - timedelta(days=6)
+    today_range = f"{week_ago.strftime('%b %d')} - {today.strftime('%b %d, %Y')}"
+
     return render_template('admin/dashboard.html',
                            total_orders=total_orders,
                            total_revenue=total_revenue,
@@ -94,7 +140,11 @@ def dashboard():
                            status_labels=json.dumps(status_labels),
                            status_counts=json.dumps(status_counts),
                            top_product_names=json.dumps(top_product_names),
-                           top_product_qty=json.dumps(top_product_qty))
+                           top_product_qty=json.dumps(top_product_qty),
+                           top_products=top_products,
+                           category_names=json.dumps(category_names),
+                           category_counts=json.dumps(category_counts),
+                           today_range=today_range)
 
 
 # ── Categories ────────────────────────────────────────────────────────
@@ -550,3 +600,105 @@ def reject_review(review_id):
     db.session.commit()
     flash('Review rejected and removed.', 'info')
     return redirect(url_for('admin.reviews'))
+
+
+# ── Inventory ─────────────────────────────────────────────────────────
+@admin_bp.route('/inventory')
+@login_required
+@admin_required
+def inventory():
+    """Full inventory view with filtering and stock management."""
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config.get('ADMIN_ITEMS_PER_PAGE', 20)
+
+    # Filters
+    search = request.args.get('search', '').strip()
+    stock_filter = request.args.get('stock', '')  # all, low, out
+    category_id = request.args.get('category', '', type=str)
+
+    query = ProductVariant.query.join(Product).filter(Product.is_active == True)
+
+    if search:
+        query = query.filter(
+            db.or_(
+                Product.name.ilike(f'%{search}%'),
+                ProductVariant.sku.ilike(f'%{search}%')
+            )
+        )
+
+    if stock_filter == 'low':
+        query = query.filter(ProductVariant.stock_quantity <= 10, ProductVariant.stock_quantity > 0)
+    elif stock_filter == 'out':
+        query = query.filter(ProductVariant.stock_quantity == 0)
+
+    if category_id:
+        query = query.filter(Product.category_id == int(category_id))
+
+    variants = query.order_by(Product.name, ProductVariant.size).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    # Summary stats
+    total_variants = ProductVariant.query.join(Product).filter(Product.is_active == True).count()
+    total_stock = db.session.query(func.sum(ProductVariant.stock_quantity)).join(Product).filter(
+        Product.is_active == True
+    ).scalar() or 0
+    low_stock_count = ProductVariant.query.join(Product).filter(
+        Product.is_active == True,
+        ProductVariant.stock_quantity <= 10,
+        ProductVariant.stock_quantity > 0
+    ).count()
+    out_of_stock_count = ProductVariant.query.join(Product).filter(
+        Product.is_active == True,
+        ProductVariant.stock_quantity == 0
+    ).count()
+
+    categories = Category.query.order_by(Category.name).all()
+
+    return render_template('admin/inventory.html',
+                           variants=variants,
+                           total_variants=total_variants,
+                           total_stock=total_stock,
+                           low_stock_count=low_stock_count,
+                           out_of_stock_count=out_of_stock_count,
+                           categories=categories,
+                           search=search,
+                           stock_filter=stock_filter,
+                           category_id=category_id)
+
+
+@admin_bp.route('/inventory/<int:variant_id>/update-stock', methods=['POST'])
+@login_required
+@admin_required
+def update_stock(variant_id):
+    """Update stock quantity for a variant."""
+    variant = ProductVariant.query.get_or_404(variant_id)
+    new_stock = request.form.get('stock_quantity', type=int)
+
+    if new_stock is None or new_stock < 0:
+        flash('Invalid stock quantity.', 'danger')
+        return redirect(url_for('admin.inventory'))
+
+    variant.stock_quantity = new_stock
+    db.session.commit()
+    flash(f'Stock updated for {variant.product.name} ({variant.size}/{variant.color}).', 'success')
+    return redirect(request.referrer or url_for('admin.inventory'))
+
+
+@admin_bp.route('/inventory/bulk-update', methods=['POST'])
+@login_required
+@admin_required
+def bulk_update_stock():
+    """Bulk update stock from form."""
+    updates = 0
+    for key, value in request.form.items():
+        if key.startswith('stock_'):
+            variant_id = int(key.replace('stock_', ''))
+            new_qty = int(value)
+            variant = ProductVariant.query.get(variant_id)
+            if variant and variant.stock_quantity != new_qty and new_qty >= 0:
+                variant.stock_quantity = new_qty
+                updates += 1
+    db.session.commit()
+    flash(f'{updates} stock quantities updated.', 'success')
+    return redirect(url_for('admin.inventory'))
