@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import login_required, current_user
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from app.extensions import db, limiter
 from app.utils.decorators import admin_required
 from app.models.user import User
@@ -39,14 +39,20 @@ def dashboard():
 
     # Monthly revenue (last 6 months)
     six_months_ago = datetime.utcnow() - timedelta(days=180)
+    db_engine = db.engine.dialect.name
+    if db_engine == 'sqlite':
+        month_expr = func.strftime('%Y-%m', Order.created_at)
+    else:
+        month_expr = func.date_format(Order.created_at, '%Y-%m')
+
     monthly_revenue_rows = db.session.query(
-        func.strftime('%Y-%m', Order.created_at).label('month'),
+        month_expr.label('month'),
         func.sum(Order.total).label('revenue'),
         func.count(Order.id).label('orders')
     ).filter(
         Order.created_at >= six_months_ago,
         Order.status.notin_(['cancelled', 'refunded'])
-    ).group_by(func.strftime('%Y-%m', Order.created_at)).order_by('month').all()
+    ).group_by(month_expr).order_by('month').all()
 
     monthly_labels = [r.month for r in monthly_revenue_rows]
     monthly_revenue = [float(r.revenue or 0) for r in monthly_revenue_rows]
