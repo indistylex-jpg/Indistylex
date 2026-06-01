@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import current_user, login_user
-from app.extensions import db, bcrypt
+from app.extensions import db, bcrypt, limiter
 from app.models.user import User, Address
 from app.models.product import Product, Category, ProductVariant, ProductImage
 from app.models.cart import Cart, CartItem
@@ -15,6 +15,7 @@ from app.models.wishlist import Wishlist
 from app.models.order import Order, OrderItem, Payment
 from app.models.review import Review
 from app.models.coupon import Coupon
+from app.utils.helpers import sanitize_input
 import jwt
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
@@ -24,9 +25,10 @@ api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
 def generate_token(user_id):
     """Generate a JWT token for the user."""
+    lifetime = current_app.config.get('JWT_TOKEN_LIFETIME_DAYS', 7)
     payload = {
         'user_id': user_id,
-        'exp': datetime.utcnow() + timedelta(days=30),
+        'exp': datetime.utcnow() + timedelta(days=lifetime),
         'iat': datetime.utcnow()
     }
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
@@ -78,6 +80,7 @@ def token_optional(f):
 # ── Auth Endpoints ─────────────────────────────────────────────────────────
 
 @api_bp.route('/auth/register', methods=['POST'])
+@limiter.limit("5 per minute")
 def register():
     """Register a new user."""
     data = request.get_json()
@@ -94,9 +97,9 @@ def register():
 
     user = User(
         email=data['email'].lower().strip(),
-        first_name=data['first_name'].strip(),
-        last_name=data['last_name'].strip(),
-        phone=data.get('phone', '').strip()
+        first_name=sanitize_input(data['first_name']),
+        last_name=sanitize_input(data['last_name']),
+        phone=sanitize_input(data.get('phone', ''))
     )
     user.set_password(data['password'])
     db.session.add(user)
@@ -110,6 +113,7 @@ def register():
 
 
 @api_bp.route('/auth/login', methods=['POST'])
+@limiter.limit("10 per minute")
 def login():
     """Login with email and password."""
     data = request.get_json()
@@ -134,6 +138,7 @@ def login():
 
 
 @api_bp.route('/auth/google', methods=['POST'])
+@limiter.limit("10 per minute")
 def google_auth():
     """Authenticate with Google ID token."""
     data = request.get_json()

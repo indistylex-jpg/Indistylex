@@ -9,6 +9,26 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
 MAX_IMAGE_SIZE = (1200, 1200)
 THUMBNAIL_SIZE = (400, 400)
 
+# Magic bytes for allowed image types
+MAGIC_BYTES = {
+    b'\xff\xd8\xff': 'jpeg',
+    b'\x89PNG\r\n\x1a\n': 'png',
+    b'RIFF': 'webp',  # WebP starts with RIFF
+}
+
+
+def _validate_magic_bytes(file_stream):
+    """Validate file content matches an allowed image type by checking magic bytes."""
+    header = file_stream.read(12)
+    file_stream.seek(0)
+    for magic, fmt in MAGIC_BYTES.items():
+        if header.startswith(magic):
+            return True
+    # WebP has RIFF at start and WEBP at byte 8
+    if header[:4] == b'RIFF' and header[8:12] == b'WEBP':
+        return True
+    return False
+
 
 def allowed_file(filename):
     """Check if file extension is allowed."""
@@ -18,6 +38,10 @@ def allowed_file(filename):
 def save_image(file, subfolder='products'):
     """Save and process uploaded image. Returns relative URL path."""
     if not file or not allowed_file(file.filename):
+        return None
+
+    # Validate magic bytes to prevent disguised files
+    if not _validate_magic_bytes(file.stream):
         return None
 
     # Generate unique filename

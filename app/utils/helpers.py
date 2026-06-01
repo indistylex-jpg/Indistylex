@@ -1,5 +1,21 @@
 import uuid
 from decimal import Decimal
+import bleach
+
+
+def sanitize_input(text):
+    """Strip all HTML tags from user input to prevent XSS."""
+    if not text:
+        return text
+    return bleach.clean(str(text), tags=[], attributes={}, strip=True).strip()
+
+
+def sanitize_rich_text(text):
+    """Allow limited safe HTML tags for product descriptions."""
+    if not text:
+        return text
+    allowed_tags = ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h3', 'h4']
+    return bleach.clean(str(text), tags=allowed_tags, attributes={}, strip=True)
 
 
 def generate_session_id():

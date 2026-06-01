@@ -63,9 +63,17 @@ class Config:
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = 1800  # 30 minutes
     SESSION_COOKIE_NAME = '__indistylex_sid'
+    SESSION_REFRESH_EACH_REQUEST = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_DURATION = 604800  # 7 days
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
 
     # Password hashing
     BCRYPT_LOG_ROUNDS = 13
+
+    # JWT
+    JWT_TOKEN_LIFETIME_DAYS = 7
 
     # Security headers
     SEND_FILE_MAX_AGE_DEFAULT = 31536000  # 1 year cache for static files

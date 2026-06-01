@@ -5,6 +5,7 @@ from app.extensions import db, limiter
 from app.forms.auth_forms import LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm
 from app.models.user import User
 from app.services.email_service import send_welcome_email, send_password_reset_email
+from app.utils.helpers import sanitize_input
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -65,9 +66,9 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
-            email=form.email.data.lower(),
-            first_name=form.first_name.data.strip(),
-            last_name=form.last_name.data.strip(),
+            email=form.email.data.lower().strip(),
+            first_name=sanitize_input(form.first_name.data),
+            last_name=sanitize_input(form.last_name.data),
             phone=form.phone.data,
         )
         user.set_password(form.password.data)

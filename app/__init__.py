@@ -42,7 +42,10 @@ def create_app(config_name=None):
         # Referrer policy
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         # Permissions policy
-        response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+        response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=(), payment=(self)'
+        # Cross-Origin policies
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+        response.headers['Cross-Origin-Resource-Policy'] = 'same-site'
         # Content Security Policy
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
@@ -53,11 +56,13 @@ def create_app(config_name=None):
             "connect-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; "
             "frame-src https://api.razorpay.com https://checkout.razorpay.com; "
             "base-uri 'self'; "
-            "form-action 'self' https://accounts.google.com https://www.facebook.com;"
+            "form-action 'self' https://accounts.google.com https://www.facebook.com; "
+            "object-src 'none'; "
+            "frame-ancestors 'self';"
         )
         # Strict Transport Security (browsers will enforce HTTPS)
         if not app.debug:
-            response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+            response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload'
         # Cache static assets aggressively, don't cache HTML
         if 'text/html' in response.content_type:
             response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
