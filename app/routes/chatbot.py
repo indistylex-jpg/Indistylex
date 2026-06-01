@@ -11,7 +11,7 @@ STORE_INFO = {
     'name': 'Indistylex',
     'email': 'support@indistylex.in',
     'phone': '+91-6394142176',
-    'hours': 'Mon–Sat, 10 AM – 7 PM IST',
+    'hours': 'Mon–Sun, 10 AM – 9:30 PM IST',
     'shipping_time': '3–7 business days',
     'free_shipping_above': 999,
     'return_window': '7 days',
