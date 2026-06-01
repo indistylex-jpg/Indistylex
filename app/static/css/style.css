@@ -429,6 +429,8 @@ img {
     overflow: hidden;
     background: var(--light-bg);
     margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 .product-card-img-wrap img {
     width: 100%;
@@ -1032,11 +1034,13 @@ img {
 }
 .btn-filter-mobile {
     border: 1px solid var(--primary);
-    background: var(--white);
-    padding: 6px 14px;
+    background: var(--primary);
+    color: var(--white);
+    padding: 8px 18px;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.5px;
+    border-radius: 4px;
 }
 
 /* ===== FILTER SIDEBAR ===== */

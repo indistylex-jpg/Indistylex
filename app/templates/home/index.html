@@ -164,8 +164,9 @@
             {% for cat in categories %}
             <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="category-circle-item text-decoration-none">
                 <div class="category-circle-img">
-                    {% set fallback_img = category_images.get(cat.slug.split('-')[0]|lower, 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80') %}
-                    <img src="{{ cat.image_url or fallback_img }}" alt="{{ cat.name }}">
+                    {% set slug_key = cat.slug.split('-')[0]|lower %}
+                    {% set circle_img = category_images.get(slug_key, 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80') %}
+                    <img src="{{ circle_img }}" alt="{{ cat.name }}">
                 </div>
                 <span class="category-circle-name">{{ cat.name|upper }}</span>
                 <span class="category-circle-link">VIEW ALL <i class="bi bi-arrow-right"></i></span>
