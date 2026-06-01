@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db, limiter
 from app.forms.auth_forms import LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm
 from app.models.user import User
-from app.services.email_service import send_welcome_email
+from app.services.email_service import send_welcome_email, send_password_reset_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -97,6 +97,13 @@ def logout():
 def forgot_password():
     form = ForgotPasswordForm()
     if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data.lower()).first()
+        if user and user.is_active:
+            token = user.generate_reset_token()
+            db.session.commit()
+            reset_url = url_for('auth.reset_password', token=token, _external=True)
+            send_password_reset_email(user, reset_url)
+
         # Always show same message to prevent user enumeration
         flash('If an account exists with that email, a reset link has been sent.', 'info')
         return redirect(url_for('auth.login'))
@@ -105,8 +112,16 @@ def forgot_password():
 
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+    user = User.verify_reset_token(token)
+    if not user:
+        flash('Invalid or expired reset link.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+
     form = ResetPasswordForm()
     if form.validate_on_submit():
+        user.set_password(form.password.data)
+        user.clear_reset_token()
+        db.session.commit()
         flash('Your password has been reset. You can now log in.', 'success')
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)

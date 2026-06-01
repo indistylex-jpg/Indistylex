@@ -5,7 +5,14 @@
 {% block content %}
 <!-- Category Hero Banner (if viewing a category) -->
 {% if category %}
-<section class="category-hero" style="background-image: url('{{ category.image_url or 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80' }}');">
+{% set category_hero_images = {
+    'newborn': 'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=1920&q=80',
+    'toddler': 'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=1920&q=80',
+    'boys': 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=1920&q=80',
+    'girls': 'https://images.unsplash.com/photo-1621452773781-0f992fd1f5cb?w=1920&q=80'
+} %}
+{% set hero_img = category.image_url or category_hero_images.get(category.slug.split('-')[0]|lower, 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80') %}
+<section class="category-hero" style="background-image: url('{{ hero_img }}');">
     <div class="category-hero-overlay"></div>
     <div class="category-hero-content">
         <h1 class="category-hero-title">{{ category.name }}</h1>

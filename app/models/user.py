@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import secrets
 from flask_login import UserMixin
 from app.extensions import db, bcrypt
 
@@ -18,6 +19,8 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     failed_login_attempts = db.Column(db.Integer, default=0)
     locked_until = db.Column(db.DateTime)
+    reset_token = db.Column(db.String(100), unique=True)
+    reset_token_expiry = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -51,6 +54,22 @@ class User(UserMixin, db.Model):
 
     def default_address(self):
         return self.addresses.filter_by(is_default=True).first()
+
+    def generate_reset_token(self):
+        self.reset_token = secrets.token_urlsafe(32)
+        self.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+        return self.reset_token
+
+    @staticmethod
+    def verify_reset_token(token):
+        user = User.query.filter_by(reset_token=token).first()
+        if user and user.reset_token_expiry and user.reset_token_expiry > datetime.utcnow():
+            return user
+        return None
+
+    def clear_reset_token(self):
+        self.reset_token = None
+        self.reset_token_expiry = None
 
     def __repr__(self):
         return f'<User {self.email}>'

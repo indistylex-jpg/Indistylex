@@ -153,17 +153,19 @@
 <!-- Category Circles -->
 <section class="py-5 category-circles-section">
     <div class="container">
+        <h2 class="text-center section-heading mb-4">SHOP BY AGE</h2>
         <div class="d-flex flex-wrap justify-content-center align-items-start gap-4 gap-md-5">
+            {% set category_images = {
+                'newborn': 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&q=80',
+                'toddler': 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80',
+                'boys': 'https://images.unsplash.com/photo-1542652694-40abf526446e?w=400&q=80',
+                'girls': 'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&q=80'
+            } %}
             {% for cat in categories %}
             <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="category-circle-item text-decoration-none">
                 <div class="category-circle-img">
-                    {% if cat.image_url %}
-                    <img src="{{ cat.image_url }}" alt="{{ cat.name }}">
-                    {% else %}
-                    <div class="category-circle-placeholder">
-                        <i class="bi bi-grid"></i>
-                    </div>
-                    {% endif %}
+                    {% set fallback_img = category_images.get(cat.slug.split('-')[0]|lower, 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80') %}
+                    <img src="{{ cat.image_url or fallback_img }}" alt="{{ cat.name }}">
                 </div>
                 <span class="category-circle-name">{{ cat.name|upper }}</span>
                 <span class="category-circle-link">VIEW ALL <i class="bi bi-arrow-right"></i></span>
