@@ -1,13 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
-  <defs>
-    <linearGradient id="logoGrad" x1="0" y1="0" x2="240" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#4F46E5"/>
-      <stop offset="100%" stop-color="#7C3AED"/>
-    </linearGradient>
-  </defs>
   <!-- Icon mark -->
-  <rect x="2" y="10" width="40" height="40" rx="8" fill="url(#logoGrad)"/>
-  <text x="22" y="38" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-size="22" font-weight="bold" fill="#F59E0B">iX</text>
+  <rect x="2" y="10" width="40" height="40" rx="8" fill="#1A1A1A"/>
+  <text x="22" y="38" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="22" font-weight="bold" fill="#C8A962">iX</text>
   <!-- Wordmark -->
-  <text x="52" y="40" font-family="'Poppins','Inter',Arial,sans-serif" font-size="28" font-weight="700" fill="url(#logoGrad)">Indistylex</text>
+  <text x="52" y="40" font-family="'Playfair Display','Inter',Arial,sans-serif" font-size="28" font-weight="700" fill="#1A1A1A">Indistylex</text>
+  <!-- Gold accent line -->
+  <rect x="52" y="46" width="60" height="1.5" rx="0.75" fill="#C8A962"/>
 </svg>
