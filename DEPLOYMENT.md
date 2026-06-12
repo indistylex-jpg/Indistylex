@@ -12,14 +12,14 @@
 | **Python**        | 3.11+              | 3.12                         |
 | **RAM**           | 2 GB               | 8 GB                         |
 | **Disk**          | 20 GB SSD          | Available                    |
-| **Domain**        | Optional           | Using IP: 78.46.145.88       |
+| **Domain**        | indistylex.com     | HTTPS live on 138.201.50.228 |
 
 ---
 
 ## Quick Deploy (Existing Server)
 
 ```bash
-ssh root@78.46.145.88
+ssh root@138.201.50.228
 cd /var/www/indistylex
 git fetch origin kids && git reset --hard origin/kids
 chown -R www-data:www-data /var/www/indistylex

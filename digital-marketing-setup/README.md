@@ -13,6 +13,7 @@ Complete step-by-step instructions to set up every digital marketing tool and pl
 | 03 | [Instagram Business](03-INSTAGRAM-BUSINESS.md) | IG Business account, Shop, Bio optimization |
 | 04 | [Google Ads & Merchant](04-GOOGLE-ADS-SETUP.md) | Ads account, Merchant Center, product feed |
 | 05 | [Website Tracking](05-TRACKING-SETUP.md) | GA4, Meta Pixel, Clarity, GTM |
+| — | [**Tracking Credentials (IDs)**](TRACKING-CREDENTIALS.md) | **All tracking IDs & install locations** |
 | 06 | [Email Marketing](06-EMAIL-SETUP.md) | Brevo account, domain verification, flows |
 | 07 | [WhatsApp Business](07-WHATSAPP-SETUP.md) | WhatsApp Business API, catalog, auto-replies |
 | 08 | [Domain & DNS](08-DOMAIN-DNS.md) | Domain verification, DNS records, SPF/DKIM |

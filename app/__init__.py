@@ -49,11 +49,14 @@ def create_app(config_name=None):
         # Content Security Policy
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://checkout.razorpay.com; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://checkout.razorpay.com "
+            "https://www.googletagmanager.com https://www.google-analytics.com; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
             "img-src 'self' data: https:; "
-            "connect-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; "
+            "connect-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com "
+            "https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com "
+            "https://region1.google-analytics.com https://region1.analytics.google.com; "
             "frame-src https://api.razorpay.com https://checkout.razorpay.com; "
             "base-uri 'self'; "
             "form-action 'self' https://accounts.google.com https://www.facebook.com; "

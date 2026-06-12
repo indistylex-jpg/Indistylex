@@ -186,6 +186,77 @@ def google_auth():
     })
 
 
+@api_bp.route('/auth/facebook', methods=['POST'])
+@limiter.limit("10 per minute")
+def facebook_auth():
+    """Authenticate with Facebook access token."""
+    data = request.get_json()
+    if not data or not data.get('access_token'):
+        return jsonify({'error': 'Facebook access token required'}), 400
+
+    import requests as http_requests
+
+    app_id = current_app.config.get('FACEBOOK_CLIENT_ID')
+    app_secret = current_app.config.get('FACEBOOK_CLIENT_SECRET')
+    if not app_id or not app_secret:
+        return jsonify({'error': 'Facebook login not configured on server'}), 503
+
+    try:
+        # Verify token and get user info
+        debug_resp = http_requests.get(
+            'https://graph.facebook.com/debug_token',
+            params={
+                'input_token': data['access_token'],
+                'access_token': f'{app_id}|{app_secret}',
+            },
+            timeout=10,
+        )
+        debug_data = debug_resp.json()
+        if not debug_data.get('data', {}).get('is_valid'):
+            return jsonify({'error': 'Invalid Facebook token'}), 401
+
+        user_resp = http_requests.get(
+            'https://graph.facebook.com/me',
+            params={
+                'fields': 'id,email,first_name,last_name',
+                'access_token': data['access_token'],
+            },
+            timeout=10,
+        )
+        fb_user = user_resp.json()
+        email = fb_user.get('email')
+        if not email:
+            return jsonify({'error': 'Email permission required from Facebook'}), 400
+
+        first_name = fb_user.get('first_name', '')
+        last_name = fb_user.get('last_name', '')
+        oauth_id = fb_user.get('id')
+    except Exception:
+        return jsonify({'error': 'Invalid Facebook token'}), 401
+
+    user = User.query.filter_by(email=email.lower().strip()).first()
+    if not user:
+        user = User(
+            email=email.lower().strip(),
+            first_name=first_name,
+            last_name=last_name,
+            oauth_provider='facebook',
+            oauth_id=oauth_id,
+        )
+        db.session.add(user)
+        db.session.commit()
+    elif not user.oauth_provider:
+        user.oauth_provider = 'facebook'
+        user.oauth_id = oauth_id
+        db.session.commit()
+
+    token = generate_token(user.id)
+    return jsonify({
+        'token': token,
+        'user': _serialize_user(user)
+    })
+
+
 @api_bp.route('/auth/me', methods=['GET'])
 @token_required
 def get_me(user):
