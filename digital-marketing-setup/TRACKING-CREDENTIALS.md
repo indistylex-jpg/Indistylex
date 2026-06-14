@@ -248,6 +248,8 @@ Record who has access to each platform (fill in as you set up):
 | Brevo (email) | | Admin | |
 | Razorpay | | Admin | |
 
+> **Secrets (tokens, passwords):** store in `CREDENTIALS.md` at project root — **local only, gitignored, never push to GitHub.**
+
 ---
 
 *Keep this file updated whenever you add a new tracking ID, pixel, or marketing tool.*
