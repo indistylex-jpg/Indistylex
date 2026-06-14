@@ -10,7 +10,7 @@
 
 | Tool | ID / Value | Status | Installed in |
 |------|------------|--------|--------------|
-| **Google Analytics 4** | `G-QDWLPKC8L4` | ✅ Installed | `app/templates/base.html` |
+| **Google Analytics 4** | `G-QXW7GBCQNJ` | ✅ Installed | `app/templates/base.html` |
 | **Google Tag Manager** | `GTM-KH75QZKH` | ✅ Installed | `app/templates/base.html` |
 | Meta Pixel | _Add when created_ | ⏳ Pending | GTM or `base.html` |
 | Microsoft Clarity | _Add when created_ | ⏳ Pending | GTM or `base.html` |
@@ -23,7 +23,7 @@
 
 ### Measurement ID
 ```
-G-QDWLPKC8L4
+G-QXW7GBCQNJ
 ```
 
 ### Install method
@@ -33,13 +33,14 @@ G-QDWLPKC8L4
 File: `app/templates/base.html` — immediately after `<head>`:
 
 ```html
-<!-- Google tag (gtag.js) — GA4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QDWLPKC8L4"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QXW7GBCQNJ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-QDWLPKC8L4');
+
+  gtag('config', 'G-QXW7GBCQNJ');
 </script>
 ```
 
@@ -100,7 +101,7 @@ File: `app/templates/base.html` — in `<head>` and `<body>` (noscript fallback)
 https://tagmanager.google.com
 
 ### ⚠️ Important — Avoid double counting
-GA4 is installed **directly via gtag** (`G-QDWLPKC8L4`).  
+GA4 is installed **directly via gtag** (`G-QXW7GBCQNJ`).  
 **Do NOT** also add a GA4 Configuration tag with the same ID inside GTM — that would count every pageview twice.
 
 **Use GTM for:**
@@ -109,7 +110,7 @@ GA4 is installed **directly via gtag** (`G-QDWLPKC8L4`).
 - Other third-party tags
 
 **Use direct gtag for:**
-- GA4 (`G-QDWLPKC8L4`) — already installed
+- GA4 (`G-QXW7GBCQNJ`) — already installed
 
 ---
 
