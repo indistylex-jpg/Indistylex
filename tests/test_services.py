@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models.product import ProductVariant
 from app.services.inventory_service import (
     check_stock, reduce_stock, restore_stock, get_low_stock_products,
+    record_b2b_sale, cancel_b2b_sale,
 )
 
 
@@ -78,3 +79,44 @@ class TestInventoryService:
         # All have 10 stock, threshold 5 → none
         low = get_low_stock_products(threshold=5)
         assert len(low) == 0
+
+    def test_record_b2b_sale(self, db, sample_product, admin_user):
+        variant = sample_product.variants.first()
+        initial_stock = variant.stock_quantity
+
+        sale, error = record_b2b_sale(
+            shop_name='Fashion Point',
+            items=[{'variant_id': variant.id, 'quantity': 3}],
+            created_by_id=admin_user.id,
+            shop_city='Prayagraj',
+        )
+        assert error is None
+        assert sale.sale_number.startswith('B2B-')
+        assert sale.item_count == 3
+        db.session.refresh(variant)
+        assert variant.stock_quantity == initial_stock - 3
+
+    def test_record_b2b_sale_insufficient_stock(self, db, sample_product, admin_user):
+        variant = sample_product.variants.first()
+        sale, error = record_b2b_sale(
+            shop_name='Test Shop',
+            items=[{'variant_id': variant.id, 'quantity': 999}],
+            created_by_id=admin_user.id,
+        )
+        assert sale is None
+        assert 'available' in error.lower()
+
+    def test_cancel_b2b_sale_restores_stock(self, db, sample_product, admin_user):
+        variant = sample_product.variants.first()
+        initial_stock = variant.stock_quantity
+
+        sale, _ = record_b2b_sale(
+            shop_name='Test Shop',
+            items=[{'variant_id': variant.id, 'quantity': 2}],
+            created_by_id=admin_user.id,
+        )
+        ok, error = cancel_b2b_sale(sale.id)
+        assert ok is True
+        assert error is None
+        db.session.refresh(variant)
+        assert variant.stock_quantity == initial_stock

@@ -12,7 +12,10 @@ from app.models.review import Review
 from app.models.coupon import Coupon
 from app.forms.product_forms import ProductForm, CategoryForm, ProductVariantForm
 from app.services.image_service import save_image, delete_image
-from app.services.inventory_service import get_low_stock_products
+from app.services.inventory_service import (
+    get_low_stock_products, record_b2b_sale, cancel_b2b_sale,
+)
+from app.models.b2b_sale import B2BSale
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -708,3 +711,137 @@ def bulk_update_stock():
     db.session.commit()
     flash(f'{updates} stock quantities updated.', 'success')
     return redirect(url_for('admin.inventory'))
+
+
+# ── B2B Shop Sales ────────────────────────────────────────────────────
+@admin_bp.route('/b2b-sales')
+@login_required
+@admin_required
+def b2b_sales():
+    """List B2B shop sales history."""
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '').strip()
+
+    query = B2BSale.query
+    if search:
+        query = query.filter(
+            db.or_(
+                B2BSale.shop_name.ilike(f'%{search}%'),
+                B2BSale.sale_number.ilike(f'%{search}%'),
+            )
+        )
+
+    sales = query.order_by(B2BSale.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+
+    recent_shops = db.session.query(B2BSale.shop_name).filter(
+        B2BSale.is_cancelled == False
+    ).distinct().order_by(B2BSale.shop_name).limit(20).all()
+    recent_shops = [s[0] for s in recent_shops]
+
+    return render_template('admin/b2b_sales.html',
+                           sales=sales, search=search, recent_shops=recent_shops)
+
+
+@admin_bp.route('/b2b-sales/record', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def record_b2b_sale_view():
+    """Record a B2B shop sale and deduct website stock."""
+    if request.method == 'POST':
+        shop_name = request.form.get('shop_name', '').strip()
+        shop_phone = request.form.get('shop_phone', '').strip()
+        shop_city = request.form.get('shop_city', '').strip()
+        payment_terms = request.form.get('payment_terms', 'cod')
+        notes = request.form.get('notes', '').strip()
+
+        items = []
+        skus = request.form.getlist('sku[]')
+        quantities = request.form.getlist('quantity[]')
+        prices = request.form.getlist('unit_price[]')
+
+        for sku, qty, price in zip(skus, quantities, prices):
+            sku = sku.strip()
+            if not sku:
+                continue
+            variant = ProductVariant.query.filter_by(sku=sku).first()
+            if not variant:
+                flash(f'SKU not found: {sku}', 'danger')
+                return redirect(url_for('admin.record_b2b_sale_view'))
+
+            items.append({
+                'variant_id': variant.id,
+                'quantity': qty,
+                'unit_price': price if price else None,
+            })
+
+        sale, error = record_b2b_sale(
+            shop_name=shop_name,
+            items=items,
+            created_by_id=current_user.id,
+            shop_phone=shop_phone,
+            shop_city=shop_city,
+            payment_terms=payment_terms,
+            notes=notes,
+        )
+
+        if error:
+            flash(error, 'danger')
+            return redirect(url_for('admin.record_b2b_sale_view'))
+
+        flash(
+            f'B2B sale {sale.sale_number} recorded. '
+            f'{sale.item_count} items sold to {sale.shop_name}. Stock updated.',
+            'success',
+        )
+        return redirect(url_for('admin.b2b_sales'))
+
+    recent_shops = db.session.query(B2BSale.shop_name).filter(
+        B2BSale.is_cancelled == False
+    ).distinct().order_by(B2BSale.shop_name).limit(15).all()
+    recent_shops = [s[0] for s in recent_shops]
+
+    in_stock_variants = ProductVariant.query.join(Product).filter(
+        Product.is_active == True,
+        ProductVariant.is_active == True,
+        ProductVariant.stock_quantity > 0,
+    ).order_by(Product.name, ProductVariant.size).limit(200).all()
+
+    return render_template('admin/record_b2b_sale.html',
+                           recent_shops=recent_shops,
+                           variants=in_stock_variants)
+
+
+@admin_bp.route('/b2b-sales/<int:sale_id>/cancel', methods=['POST'])
+@login_required
+@admin_required
+def cancel_b2b_sale_view(sale_id):
+    """Cancel B2B sale and restore stock."""
+    ok, error = cancel_b2b_sale(sale_id)
+    if ok:
+        flash('B2B sale cancelled. Stock restored.', 'success')
+    else:
+        flash(error, 'danger')
+    return redirect(url_for('admin.b2b_sales'))
+
+
+@admin_bp.route('/api/variant-by-sku/<sku>')
+@login_required
+@admin_required
+def variant_by_sku(sku):
+    """Lookup variant by SKU for B2B sale form."""
+    variant = ProductVariant.query.filter_by(sku=sku.strip()).first()
+    if not variant or not variant.is_active:
+        return jsonify({'error': 'SKU not found'}), 404
+
+    return jsonify({
+        'id': variant.id,
+        'sku': variant.sku,
+        'product_name': variant.product.name,
+        'size': variant.size,
+        'color': variant.color,
+        'stock': variant.stock_quantity,
+        'retail_price': float(variant.product.price),
+        'suggested_wholesale': round(float(variant.product.price) * 0.7, 2),
+    })

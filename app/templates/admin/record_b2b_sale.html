@@ -1,0 +1,231 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Record B2B Sale{% endblock %}
+
+{% block content %}
+<div class="dash-header d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Record B2B Shop Sale</h4>
+    <p class="text-muted mb-0">Sell to a shop — stock deducts from website inventory automatically.</p>
+  </div>
+  <a href="{{ url_for('admin.b2b_sales') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-clock-history me-1"></i>Sales History
+  </a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="dash-card">
+      <div class="dash-card-body">
+        <form method="POST" action="{{ url_for('admin.record_b2b_sale_view') }}" id="b2bSaleForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <h6 class="fw-semibold mb-3">Shop Details</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label small fw-medium">Shop Name *</label>
+              <input type="text" name="shop_name" class="form-control" required
+                     list="shopList" placeholder="e.g. Fashion Point">
+              <datalist id="shopList">
+                {% for shop in recent_shops %}
+                <option value="{{ shop }}">
+                {% endfor %}
+              </datalist>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-medium">Phone</label>
+              <input type="text" name="shop_phone" class="form-control" placeholder="91XXXXXXXXXX">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-medium">City</label>
+              <input type="text" name="shop_city" class="form-control" placeholder="Prayagraj">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-medium">Payment Terms</label>
+              <select name="payment_terms" class="form-select">
+                <option value="cod">COD (Cash on Delivery)</option>
+                <option value="credit">Credit (7–15 days)</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-medium">Notes</label>
+              <input type="text" name="notes" class="form-control" placeholder="Optional note">
+            </div>
+          </div>
+
+          <h6 class="fw-semibold mb-3">Items</h6>
+          <div class="table-responsive mb-3">
+            <table class="table table-sm align-middle" id="itemsTable">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:28%">SKU *</th>
+                  <th>Product</th>
+                  <th style="width:10%">Stock</th>
+                  <th style="width:10%">Qty *</th>
+                  <th style="width:12%">Price (₹)</th>
+                  <th style="width:10%">Line Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody">
+                <tr class="item-row">
+                  <td>
+                    <input type="text" name="sku[]" class="form-control form-control-sm sku-input"
+                           placeholder="IX-FRK-001-2-3Y-PNK" required list="skuList">
+                  </td>
+                  <td class="product-info text-muted small">—</td>
+                  <td class="stock-info text-muted small">—</td>
+                  <td>
+                    <input type="number" name="quantity[]" class="form-control form-control-sm qty-input"
+                           min="1" value="1" required>
+                  </td>
+                  <td>
+                    <input type="number" name="unit_price[]" class="form-control form-control-sm price-input"
+                           min="0" step="0.01" placeholder="Auto">
+                  </td>
+                  <td class="line-total fw-medium">—</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-row" disabled>
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <datalist id="skuList">
+            {% for v in variants %}
+            <option value="{{ v.sku }}">{{ v.product.name }} ({{ v.size }}/{{ v.color }}) — {{ v.stock_quantity }} in stock</option>
+            {% endfor %}
+          </datalist>
+
+          <button type="button" class="btn btn-sm btn-outline-secondary mb-4" id="addRowBtn">
+            <i class="bi bi-plus-lg me-1"></i>Add Item
+          </button>
+
+          <div class="d-flex justify-content-between align-items-center border-top pt-3">
+            <div>
+              <span class="text-muted small">Order Total:</span>
+              <span class="fs-5 fw-bold ms-2" id="orderTotal">₹0</span>
+            </div>
+            <button type="submit" class="btn btn-dark px-4" onclick="return confirm('Record this B2B sale and deduct stock?')">
+              <i class="bi bi-shop me-1"></i>Record Sale & Deduct Stock
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="dash-card">
+      <div class="dash-card-body">
+        <h6 class="fw-semibold mb-3"><i class="bi bi-info-circle me-1"></i>How it works</h6>
+        <ol class="small text-muted ps-3 mb-0">
+          <li class="mb-2">Enter shop name and items sold</li>
+          <li class="mb-2">Type SKU — product details auto-fill</li>
+          <li class="mb-2">Click <strong>Record Sale</strong></li>
+          <li class="mb-2">Website stock reduces instantly</li>
+          <li>Out-of-stock shows on website automatically</li>
+        </ol>
+      </div>
+    </div>
+    <div class="dash-card mt-3">
+      <div class="dash-card-body">
+        <h6 class="fw-semibold mb-2">Wholesale price tip</h6>
+        <p class="small text-muted mb-0">Leave price blank to use 70% of retail price. You can override per item.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+
+  function formatMoney(n) {
+    return '₹' + (n || 0).toLocaleString('en-IN', {maximumFractionDigits: 0});
+  }
+
+  function updateLineTotal(row) {
+    const qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+    const price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+    const el = row.querySelector('.line-total');
+    if (el) el.textContent = qty && price ? formatMoney(qty * price) : '—';
+    updateOrderTotal();
+  }
+
+  function updateOrderTotal() {
+    let total = 0;
+    document.querySelectorAll('.item-row').forEach(row => {
+      const qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+      const price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+      total += qty * price;
+    });
+    const el = document.getElementById('orderTotal');
+    if (el) el.textContent = formatMoney(total);
+  }
+
+  async function lookupSku(row) {
+    const sku = row.querySelector('.sku-input')?.value?.trim();
+    const info = row.querySelector('.product-info');
+    const stock = row.querySelector('.stock-info');
+    const priceInput = row.querySelector('.price-input');
+    if (!sku) return;
+
+    try {
+      const res = await fetch(`/admin/api/variant-by-sku/${encodeURIComponent(sku)}`);
+      const data = await res.json();
+      if (!res.ok) {
+        info.textContent = data.error || 'Not found';
+        info.className = 'product-info text-danger small';
+        stock.textContent = '—';
+        return;
+      }
+      info.textContent = `${data.product_name} (${data.size}/${data.color})`;
+      info.className = 'product-info small';
+      stock.textContent = data.stock;
+      stock.className = 'stock-info small ' + (data.stock <= 5 ? 'text-warning' : 'text-success');
+      if (!priceInput.value) priceInput.value = data.suggested_wholesale;
+      updateLineTotal(row);
+    } catch (e) {
+      info.textContent = 'Lookup failed';
+      info.className = 'product-info text-danger small';
+    }
+  }
+
+  function bindRow(row) {
+    const skuInput = row.querySelector('.sku-input');
+    skuInput?.addEventListener('change', () => lookupSku(row));
+    skuInput?.addEventListener('blur', () => lookupSku(row));
+    row.querySelector('.qty-input')?.addEventListener('input', () => updateLineTotal(row));
+    row.querySelector('.price-input')?.addEventListener('input', () => updateLineTotal(row));
+    row.querySelector('.remove-row')?.addEventListener('click', () => {
+      if (document.querySelectorAll('.item-row').length > 1) {
+        row.remove();
+        updateOrderTotal();
+      }
+    });
+  }
+
+  document.getElementById('addRowBtn')?.addEventListener('click', () => {
+    const tbody = document.getElementById('itemsBody');
+    const first = tbody.querySelector('.item-row');
+    const clone = first.cloneNode(true);
+    clone.querySelector('.sku-input').value = '';
+    clone.querySelector('.product-info').textContent = '—';
+    clone.querySelector('.stock-info').textContent = '—';
+    clone.querySelector('.qty-input').value = '1';
+    clone.querySelector('.price-input').value = '';
+    clone.querySelector('.line-total').textContent = '—';
+    clone.querySelector('.remove-row').disabled = false;
+    tbody.appendChild(clone);
+    bindRow(clone);
+  });
+
+  document.querySelectorAll('.item-row').forEach(bindRow);
+})();
+</script>
+{% endblock %}

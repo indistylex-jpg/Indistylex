@@ -311,6 +311,27 @@ class TestAdminRoutes:
         resp = client.get('/admin/coupons/add')
         assert resp.status_code == 200
 
+    def test_admin_b2b_sales_page(self, client, admin_user):
+        login_admin(client)
+        resp = client.get('/admin/b2b-sales')
+        assert resp.status_code == 200
+
+    def test_admin_record_b2b_sale(self, client, admin_user, sample_product):
+        login_admin(client)
+        variant = sample_product.variants.first()
+        resp = client.post('/admin/b2b-sales/record', data={
+            'shop_name': 'Fashion Point',
+            'shop_city': 'Prayagraj',
+            'payment_terms': 'cod',
+            'sku[]': variant.sku,
+            'quantity[]': '2',
+            'unit_price[]': '350',
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b'B2B-' in resp.data or b'recorded' in resp.data.lower()
+        db.session.refresh(variant)
+        assert variant.stock_quantity == 8
+
 
 # ────────────────────────── Checkout Routes ──────────────────────────
 

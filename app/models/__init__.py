@@ -5,6 +5,7 @@ from app.models.order import Order, OrderItem, Payment
 from app.models.review import Review
 from app.models.coupon import Coupon
 from app.models.wishlist import Wishlist
+from app.models.b2b_sale import B2BSale, B2BSaleItem
 
 __all__ = [
     'User', 'Address',
@@ -14,4 +15,5 @@ __all__ = [
     'Review',
     'Coupon',
     'Wishlist',
+    'B2BSale', 'B2BSaleItem',
 ]

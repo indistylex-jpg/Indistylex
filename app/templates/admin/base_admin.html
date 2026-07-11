@@ -57,6 +57,11 @@
           </a>
         </li>
         <li class="nav-item">
+          <a href="{{ url_for('admin.b2b_sales') }}" class="nav-link {{ 'active' if 'b2b' in request.endpoint }}">
+            <i class="bi bi-shop"></i><span>B2B Sales</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="{{ url_for('admin.coupons') }}" class="nav-link {{ 'active' if 'coupon' in request.endpoint }}">
             <i class="bi bi-ticket-perforated-fill"></i><span>Coupons</span>
           </a>

@@ -1,0 +1,136 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}B2B Sales{% endblock %}
+
+{% block content %}
+<div class="dash-header d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">B2B Shop Sales</h4>
+    <p class="text-muted mb-0">Sales to wholesale shops — synced with website inventory.</p>
+  </div>
+  <a href="{{ url_for('admin.record_b2b_sale_view') }}" class="btn btn-dark">
+    <i class="bi bi-plus-lg me-1"></i>Record B2B Sale
+  </a>
+</div>
+
+<!-- Search -->
+<div class="dash-card mb-4">
+  <div class="dash-card-body py-3">
+    <form method="GET" class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input type="text" name="search" class="form-control" placeholder="Search shop or sale number..."
+                 value="{{ search }}">
+        </div>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-outline-secondary">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="dash-card">
+  <div class="dash-card-header">
+    <h6 class="dash-card-title">Sales History <span class="badge bg-secondary ms-2">{{ sales.total }}</span></h6>
+  </div>
+  <div class="dash-card-body p-0">
+    <div class="table-responsive">
+      <table class="table dash-table mb-0">
+        <thead>
+          <tr>
+            <th>Sale #</th>
+            <th>Shop</th>
+            <th>City</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sale in sales.items %}
+          <tr class="{{ 'opacity-50' if sale.is_cancelled }}">
+            <td><code class="small">{{ sale.sale_number }}</code></td>
+            <td class="fw-medium">{{ sale.shop_name }}</td>
+            <td class="text-muted small">{{ sale.shop_city or '—' }}</td>
+            <td>{{ sale.item_count }} pcs</td>
+            <td class="fw-medium">₹{{ "{:,.0f}".format(sale.total) }}</td>
+            <td>
+              <span class="badge {{ 'bg-warning text-dark' if sale.payment_terms == 'credit' else 'bg-light text-dark' }}">
+                {{ sale.payment_terms | upper }}
+              </span>
+            </td>
+            <td class="text-muted small">{{ sale.created_at.strftime('%d %b %Y') }}</td>
+            <td>
+              {% if sale.is_cancelled %}
+              <span class="status-badge status-cancelled">Cancelled</span>
+              {% else %}
+              <span class="status-badge status-delivered">Recorded</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not sale.is_cancelled %}
+              <form method="POST" action="{{ url_for('admin.cancel_b2b_sale_view', sale_id=sale.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Cancel sale and restore stock?')" title="Cancel & restore stock">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% if sale.items.count() %}
+          <tr class="table-light {{ 'opacity-50' if sale.is_cancelled }}">
+            <td colspan="9" class="small py-2">
+              {% for item in sale.items %}
+              <span class="me-3">
+                <code>{{ item.sku }}</code>
+                {{ item.product_name }} ({{ item.size }}/{{ item.color }})
+                × {{ item.quantity }} @ ₹{{ "{:,.0f}".format(item.unit_price) }}
+              </span>
+              {% endfor %}
+              {% if sale.notes %}<span class="text-muted">— {{ sale.notes }}</span>{% endif %}
+            </td>
+          </tr>
+          {% endif %}
+          {% else %}
+          <tr>
+            <td colspan="9" class="text-center text-muted py-5">
+              <i class="bi bi-shop fs-3 d-block mb-2"></i>
+              No B2B sales yet.
+              <a href="{{ url_for('admin.record_b2b_sale_view') }}">Record your first sale</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if sales.pages > 1 %}
+<nav class="mt-4 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if sales.has_prev %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.b2b_sales', page=sales.prev_num, search=search) }}">&laquo;</a></li>
+    {% endif %}
+    {% for p in sales.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+      <li class="page-item {{ 'active' if p == sales.page }}">
+        <a class="page-link" href="{{ url_for('admin.b2b_sales', page=p, search=search) }}">{{ p }}</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if sales.has_next %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.b2b_sales', page=sales.next_num, search=search) }}">&raquo;</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
