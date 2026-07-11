@@ -92,7 +92,8 @@ def dashboard():
     for row in top_products_rows[:5]:
         product = Product.query.filter_by(name=row.product_name).first()
         if product:
-            image = product.images[0].image_url if product.images else None
+            img = product.images.first()
+            image = img.image_url if img else None
             top_products.append({
                 'name': product.name,
                 'price': float(product.price),
@@ -110,7 +111,8 @@ def dashboard():
     # If no order data, show top products from catalog
     if not top_products:
         for p in Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).limit(5).all():
-            image = p.images[0].image_url if p.images else None
+            img = p.images.first()
+            image = img.image_url if img else None
             top_products.append({
                 'name': p.name,
                 'price': float(p.price),

@@ -99,6 +99,7 @@ def seed_dummy_data():
                 qty = random.randint(1, 3)
                 price = float(product.price)
                 subtotal += price * qty
+                img = product.images.first()
                 order_items.append({
                     'variant_id': variant.id if variant else None,
                     'product_name': product.name,
@@ -107,7 +108,7 @@ def seed_dummy_data():
                     'color': variant.color if variant else 'Default',
                     'price': price,
                     'quantity': qty,
-                    'image_url': product.images[0].image_url if product.images else None
+                    'image_url': img.image_url if img else None
                 })
 
             tax = round(subtotal * 0.05, 2)
