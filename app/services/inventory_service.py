@@ -61,7 +61,8 @@ def generate_b2b_sale_number():
 
 
 def record_b2b_sale(shop_name, items, created_by_id, shop_phone='', shop_city='',
-                    payment_terms='cod', notes=''):
+                    payment_terms='cod', notes='', extra_discount=0, discount_percent=0,
+                    discount_reason=''):
     """
     Record a B2B shop sale and deduct stock from website inventory.
 
@@ -113,6 +114,31 @@ def record_b2b_sale(shop_name, items, created_by_id, shop_phone='', shop_city=''
             'line_total': unit_price * quantity,
         })
 
+    subtotal = sum(row['line_total'] for row in parsed)
+
+    try:
+        extra_discount = Decimal(str(extra_discount or 0))
+        discount_percent = Decimal(str(discount_percent or 0))
+    except Exception:
+        return None, 'Invalid discount value.'
+
+    if extra_discount < 0 or discount_percent < 0:
+        return None, 'Discount cannot be negative.'
+    if discount_percent > 100:
+        return None, 'Discount percent cannot exceed 100%.'
+    if extra_discount > 0 and discount_percent > 0:
+        return None, 'Use either flat discount (₹) or percent (%), not both.'
+
+    if discount_percent > 0:
+        discount_applied = subtotal * discount_percent / Decimal('100')
+    else:
+        discount_applied = extra_discount
+
+    if discount_applied > subtotal:
+        return None, 'Discount cannot exceed subtotal.'
+
+    final_total = subtotal - discount_applied
+
     sale = B2BSale(
         sale_number=generate_b2b_sale_number(),
         shop_name=shop_name.strip(),
@@ -120,12 +146,15 @@ def record_b2b_sale(shop_name, items, created_by_id, shop_phone='', shop_city=''
         shop_city=shop_city.strip() if shop_city else None,
         payment_terms=payment_terms or 'cod',
         notes=notes.strip() if notes else None,
+        subtotal=subtotal,
+        extra_discount=extra_discount,
+        discount_percent=discount_percent,
+        discount_reason=discount_reason.strip() if discount_reason else None,
         created_by_id=created_by_id,
     )
     db.session.add(sale)
     db.session.flush()
 
-    total = Decimal('0')
     for row in parsed:
         variant = row['variant']
         if not reduce_stock(variant.id, row['quantity']):
@@ -144,9 +173,8 @@ def record_b2b_sale(shop_name, items, created_by_id, shop_phone='', shop_city=''
             line_total=row['line_total'],
         )
         db.session.add(item)
-        total += row['line_total']
 
-    sale.total = total
+    sale.total = final_total
     db.session.commit()
     return sale, None
 

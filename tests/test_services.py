@@ -120,3 +120,29 @@ class TestInventoryService:
         assert error is None
         db.session.refresh(variant)
         assert variant.stock_quantity == initial_stock
+
+    def test_record_b2b_sale_with_flat_discount(self, db, sample_product, admin_user):
+        variant = sample_product.variants.first()
+        sale, error = record_b2b_sale(
+            shop_name='Fashion Point',
+            items=[{'variant_id': variant.id, 'quantity': 2, 'unit_price': 100}],
+            created_by_id=admin_user.id,
+            extra_discount=50,
+            discount_reason='Shop requested',
+        )
+        assert error is None
+        assert float(sale.subtotal) == 200
+        assert float(sale.total) == 150
+        assert sale.discount_reason == 'Shop requested'
+
+    def test_record_b2b_sale_with_percent_discount(self, db, sample_product, admin_user):
+        variant = sample_product.variants.first()
+        sale, error = record_b2b_sale(
+            shop_name='Fashion Point',
+            items=[{'variant_id': variant.id, 'quantity': 2, 'unit_price': 100}],
+            created_by_id=admin_user.id,
+            discount_percent=10,
+        )
+        assert error is None
+        assert float(sale.subtotal) == 200
+        assert float(sale.total) == 180

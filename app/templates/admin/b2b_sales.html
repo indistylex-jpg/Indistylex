@@ -57,7 +57,12 @@
             <td class="fw-medium">{{ sale.shop_name }}</td>
             <td class="text-muted small">{{ sale.shop_city or '—' }}</td>
             <td>{{ sale.item_count }} pcs</td>
-            <td class="fw-medium">₹{{ "{:,.0f}".format(sale.total) }}</td>
+            <td class="fw-medium">
+              ₹{{ "{:,.0f}".format(sale.total) }}
+              {% if sale.discount_amount > 0 %}
+              <span class="text-success small d-block">−₹{{ "{:,.0f}".format(sale.discount_amount) }} off</span>
+              {% endif %}
+            </td>
             <td>
               <span class="badge {{ 'bg-warning text-dark' if sale.payment_terms == 'credit' else 'bg-light text-dark' }}">
                 {{ sale.payment_terms | upper }}
@@ -93,6 +98,7 @@
                 × {{ item.quantity }} @ ₹{{ "{:,.0f}".format(item.unit_price) }}
               </span>
               {% endfor %}
+              {% if sale.discount_reason %}<span class="text-success">Discount: {{ sale.discount_reason }}</span>{% endif %}
               {% if sale.notes %}<span class="text-muted">— {{ sale.notes }}</span>{% endif %}
             </td>
           </tr>

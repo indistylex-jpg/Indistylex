@@ -12,6 +12,10 @@ class B2BSale(db.Model):
     shop_city = db.Column(db.String(100))
     payment_terms = db.Column(db.String(20), default='cod', nullable=False)  # cod, credit
     notes = db.Column(db.Text)
+    subtotal = db.Column(db.Numeric(10, 2), default=0, nullable=False)
+    extra_discount = db.Column(db.Numeric(10, 2), default=0, nullable=False)  # flat ₹ off
+    discount_percent = db.Column(db.Numeric(5, 2), default=0, nullable=False)  # % off subtotal
+    discount_reason = db.Column(db.String(200))
     total = db.Column(db.Numeric(10, 2), default=0, nullable=False)
     created_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -24,6 +28,15 @@ class B2BSale(db.Model):
     @property
     def item_count(self):
         return sum(item.quantity for item in self.items)
+
+    @property
+    def discount_amount(self):
+        """Total discount applied (flat or percent)."""
+        from decimal import Decimal
+        subtotal = Decimal(str(self.subtotal or 0))
+        if self.discount_percent and Decimal(str(self.discount_percent)) > 0:
+            return subtotal * Decimal(str(self.discount_percent)) / Decimal('100')
+        return Decimal(str(self.extra_discount or 0))
 
     def __repr__(self):
         return f'<B2BSale {self.sale_number}>'

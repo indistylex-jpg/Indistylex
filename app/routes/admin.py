@@ -757,6 +757,9 @@ def record_b2b_sale_view():
         shop_city = request.form.get('shop_city', '').strip()
         payment_terms = request.form.get('payment_terms', 'cod')
         notes = request.form.get('notes', '').strip()
+        extra_discount = request.form.get('extra_discount', '0').strip()
+        discount_percent = request.form.get('discount_percent', '0').strip()
+        discount_reason = request.form.get('discount_reason', '').strip()
 
         items = []
         skus = request.form.getlist('sku[]')
@@ -786,6 +789,9 @@ def record_b2b_sale_view():
             shop_city=shop_city,
             payment_terms=payment_terms,
             notes=notes,
+            extra_discount=extra_discount,
+            discount_percent=discount_percent,
+            discount_reason=discount_reason,
         )
 
         if error:
