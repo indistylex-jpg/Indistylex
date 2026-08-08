@@ -300,6 +300,28 @@ class TestAdminRoutes:
         login_admin(client)
         resp = client.get('/admin/products/add')
         assert resp.status_code == 200
+        assert b'name="images"' in resp.data
+        assert b'variant_size[]' in resp.data
+
+    def test_admin_create_product_with_variant(self, client, admin_user, sample_category):
+        login_admin(client)
+        resp = client.post('/admin/products/add', data={
+            'name': 'Full Set Romper',
+            'category_id': sample_category.id,
+            'price': '599.00',
+            'gender': 'kids',
+            'age_group': '0-2',
+            'is_active': 'y',
+            'variant_size[]': '6-9M',
+            'variant_color[]': 'Pink',
+            'variant_sku[]': 'FULL-ROM-PINK',
+            'variant_stock[]': '10',
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        product = Product.query.filter_by(name='Full Set Romper').first()
+        assert product is not None
+        assert product.variants.count() == 1
+        assert product.variants.first().sku == 'FULL-ROM-PINK'
 
     def test_admin_add_variant(self, client, admin_user, sample_product):
         login_admin(client)

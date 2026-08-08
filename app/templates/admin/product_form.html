@@ -9,6 +9,36 @@
 </div>
 <h4 class="fw-bold mb-4">{{ title }}</h4>
 
+{% if product and product.variants.count() %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-4">
+    <h5 class="fw-semibold mb-3">Existing Variants</h5>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th></th></tr></thead>
+        <tbody>
+          {% for v in product.variants %}
+          <tr>
+            <td>{{ v.size }}</td>
+            <td>{{ v.color }}</td>
+            <td class="text-muted small">{{ v.sku }}</td>
+            <td>{{ v.stock_quantity }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.delete_variant', variant_id=v.id) }}" class="d-inline"
+                    onsubmit="return confirm('Delete this variant?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="card border-0 shadow-sm">
   <div class="card-body p-4">
     <form method="POST" enctype="multipart/form-data" novalidate>
@@ -23,6 +53,10 @@
         <div class="col-md-4">
           <label class="form-label">Category</label>
           {{ form.category_id(class="form-select") }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Short Description</label>
+          {{ form.short_description(class="form-control", placeholder="Brief line for product cards") }}
         </div>
         <div class="col-12">
           <label class="form-label">Description</label>
@@ -45,84 +79,74 @@
           <label class="form-label">Age Group</label>
           {{ form.age_group(class="form-select") }}
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
           <label class="form-label">Brand</label>
           {{ form.brand(class="form-control", placeholder="Optional") }}
         </div>
-        <div class="col-12">
-          <div class="form-check">
+        <div class="col-md-4">
+          <label class="form-label">Material</label>
+          {{ form.material(class="form-control", placeholder="e.g. 100% Cotton") }}
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-4">
             {{ form.is_active(class="form-check-input") }}
             <label class="form-check-label">Active (visible on store)</label>
           </div>
         </div>
       </div>
 
-      {% if product %}
-        <!-- Existing Variants -->
-        <hr class="my-4">
-        <h5 class="fw-semibold">Variants</h5>
-        <div class="table-responsive mb-3">
-          <table class="table table-sm">
-            <thead><tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th></th></tr></thead>
-            <tbody>
-              {% for v in product.variants %}
-                <tr>
-                  <td>{{ v.size }}</td>
-                  <td>{{ v.color }}</td>
-                  <td class="text-muted small">{{ v.sku }}</td>
-                  <td>{{ v.stock_quantity }}</td>
-                  <td>
-                    <form method="POST" action="{{ url_for('admin.delete_variant', variant_id=v.id) }}" class="d-inline"
-                          onsubmit="return confirm('Delete this variant?')">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                      <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                    </form>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <form method="POST" action="{{ url_for('admin.add_variant', product_id=product.id) }}" class="row g-2 align-items-end mb-3">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div class="col-md-2">
-            <label class="form-label small mb-1">Size</label>
-            <input type="text" name="size" class="form-control form-control-sm" placeholder="e.g. 3-6M" required>
-          </div>
-          <div class="col-md-2">
-            <label class="form-label small mb-1">Color</label>
-            <input type="text" name="color" class="form-control form-control-sm" placeholder="e.g. Blue" required>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label small mb-1">SKU</label>
-            <input type="text" name="sku" class="form-control form-control-sm" placeholder="Unique SKU" required>
-          </div>
-          <div class="col-md-2">
-            <label class="form-label small mb-1">Stock</label>
-            <input type="number" name="stock_quantity" class="form-control form-control-sm" value="0" min="0">
-          </div>
-          <div class="col-md-3">
-            <button type="submit" class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-plus me-1"></i>Add Variant
-            </button>
-          </div>
-        </form>
+      <hr class="my-4">
+      <h5 class="fw-semibold">Product Images</h5>
+      <p class="text-muted small mb-3">Upload one or more photos (JPG, PNG, WebP). First image becomes the main photo.</p>
 
-        <!-- Existing Images -->
-        <hr class="my-4">
-        <h5 class="fw-semibold">Images</h5>
-        <div class="d-flex flex-wrap gap-3 mb-3">
-          {% for img in product.images | sort(attribute='sort_order') %}
-            <div class="position-relative">
-              <img src="{{ image_url(img.image_url) }}"
-                   class="rounded" style="width:100px; height:100px; object-fit:cover;">
-              {% if img.is_primary %}
-                <span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size:0.6rem;">Primary</span>
-              {% endif %}
-            </div>
-          {% endfor %}
+      {% if product and images %}
+      <div class="d-flex flex-wrap gap-3 mb-3">
+        {% for img in images %}
+        <div class="position-relative">
+          <img src="{{ image_url(img.image_url) }}"
+               class="rounded border" style="width:100px; height:100px; object-fit:cover;">
+          {% if img.is_primary %}
+          <span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size:0.6rem;">Primary</span>
+          {% endif %}
         </div>
+        {% endfor %}
+      </div>
       {% endif %}
+
+      <div class="mb-2">
+        <input type="file" name="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
+      </div>
+      <div id="image-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+
+      <hr class="my-4">
+      <h5 class="fw-semibold">{{ 'Add More Variants' if product else 'Variants' }}</h5>
+      <p class="text-muted small mb-3">Add size, color, SKU and stock for each variant. Use “Add another variant” for more rows.</p>
+
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-2">
+          <thead>
+            <tr>
+              <th style="width:18%">Size</th>
+              <th style="width:18%">Color</th>
+              <th style="width:34%">SKU</th>
+              <th style="width:15%">Stock</th>
+              <th style="width:15%"></th>
+            </tr>
+          </thead>
+          <tbody id="variant-rows">
+            <tr class="variant-row">
+              <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="e.g. 3-6M"></td>
+              <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="e.g. Blue"></td>
+              <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="Unique SKU"></td>
+              <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="0" min="0"></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="add-variant-row">
+        <i class="bi bi-plus-lg me-1"></i>Add another variant
+      </button>
 
       <hr class="my-4">
       <button type="submit" class="btn btn-primary">Save Product</button>
@@ -130,4 +154,54 @@
     </form>
   </div>
 </div>
+
+<template id="variant-row-template">
+  <tr class="variant-row">
+    <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="e.g. 3-6M"></td>
+    <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="e.g. Blue"></td>
+    <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="Unique SKU"></td>
+    <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="0" min="0"></td>
+    <td>
+      <button type="button" class="btn btn-sm btn-outline-danger remove-variant-row" title="Remove row">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </td>
+  </tr>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const rows = document.getElementById('variant-rows');
+  const addBtn = document.getElementById('add-variant-row');
+  const tpl = document.getElementById('variant-row-template');
+  const imageInput = document.querySelector('input[name="images"]');
+  const preview = document.getElementById('image-preview');
+
+  addBtn?.addEventListener('click', function () {
+    rows.appendChild(tpl.content.cloneNode(true));
+  });
+
+  rows?.addEventListener('click', function (e) {
+    const btn = e.target.closest('.remove-variant-row');
+    if (!btn) return;
+    const row = btn.closest('.variant-row');
+    if (rows.querySelectorAll('.variant-row').length > 1) {
+      row.remove();
+    }
+  });
+
+  imageInput?.addEventListener('change', function () {
+    preview.innerHTML = '';
+    Array.from(this.files || []).forEach(function (file) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.className = 'rounded border';
+      img.style.cssText = 'width:80px;height:80px;object-fit:cover;';
+      preview.appendChild(img);
+    });
+  });
+})();
+</script>
 {% endblock %}

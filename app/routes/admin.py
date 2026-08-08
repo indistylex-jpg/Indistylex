@@ -26,6 +26,70 @@ from app.services.expense_service import (
 admin_bp = Blueprint('admin', __name__)
 
 
+def _save_product_images(product):
+    """Attach uploaded images to a product. Returns count saved."""
+    images = request.files.getlist('images')
+    existing_count = product.images.count()
+    has_primary = product.images.filter_by(is_primary=True).count() > 0
+    saved = 0
+
+    for i, img_file in enumerate(images):
+        if not img_file or not img_file.filename:
+            continue
+        url = save_image(img_file, subfolder='products')
+        if not url:
+            continue
+        img = ProductImage(
+            product_id=product.id,
+            image_url=url,
+            is_primary=(not has_primary and saved == 0),
+            sort_order=existing_count + saved,
+        )
+        db.session.add(img)
+        saved += 1
+
+    return saved
+
+
+def _save_variants_from_request(product):
+    """Create variants from variant_*[] form fields. Returns (added_count, skipped_skus)."""
+    sizes = request.form.getlist('variant_size[]')
+    colors = request.form.getlist('variant_color[]')
+    skus = request.form.getlist('variant_sku[]')
+    stocks = request.form.getlist('variant_stock[]')
+
+    added = 0
+    skipped = []
+
+    for size, color, sku, stock in zip(sizes, colors, skus, stocks):
+        size = (size or '').strip()
+        color = (color or '').strip()
+        sku = (sku or '').strip()
+        if not all([size, color, sku]):
+            continue
+
+        if ProductVariant.query.filter_by(sku=sku).first():
+            skipped.append(sku)
+            continue
+
+        try:
+            stock_qty = int(stock or 0)
+        except (TypeError, ValueError):
+            stock_qty = 0
+
+        variant = ProductVariant(
+            product_id=product.id,
+            size=size,
+            color=color,
+            sku=sku,
+            stock_quantity=max(0, stock_qty),
+        )
+        db.session.add(variant)
+        added += 1
+
+    return added, skipped
+
+
 # ── Dashboard ─────────────────────────────────────────────────────────
 @admin_bp.route('/')
 @login_required
@@ -311,6 +375,7 @@ def add_product():
             category_id=form.category_id.data,
             brand=form.brand.data,
             gender=form.gender.data or None,
+            age_group=form.age_group.data or None,
             material=form.material.data,
             care_instructions=form.care_instructions.data,
             is_active=form.is_active.data,
@@ -318,25 +383,21 @@ def add_product():
             is_trending=form.is_trending.data,
         )
         db.session.add(product)
+        db.session.flush()
+
+        image_count = _save_product_images(product)
+        variant_count, skipped_skus = _save_variants_from_request(product)
         db.session.commit()
 
-        # Handle image uploads
-        images = request.files.getlist('images')
-        for i, img_file in enumerate(images):
-            if img_file and img_file.filename:
-                url = save_image(img_file, subfolder='products')
-                if url:
-                    img = ProductImage(
-                        product_id=product.id,
-                        image_url=url,
-                        is_primary=(i == 0),
-                        sort_order=i,
-                    )
-                    db.session.add(img)
-
-        db.session.commit()
-        flash(f'Product "{product.name}" created. Add variants now.', 'success')
-        return redirect(url_for('admin.edit_product', product_id=product.id))
+        parts = [f'Product "{product.name}" created']
+        if image_count:
+            parts.append(f'{image_count} image(s)')
+        if variant_count:
+            parts.append(f'{variant_count} variant(s)')
+        flash('. '.join(parts) + '.', 'success')
+        for sku in skipped_skus:
+            flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+        return redirect(url_for('admin.products'))
 
     return render_template('admin/product_form.html', form=form, title='Add Product')
 
@@ -357,23 +418,18 @@ def edit_product(product_id):
         product.gender = form.gender.data or None
         product.age_group = form.age_group.data or None
 
-        # Handle new image uploads
-        images = request.files.getlist('images')
-        existing_count = product.images.count()
-        for i, img_file in enumerate(images):
-            if img_file and img_file.filename:
-                url = save_image(img_file, subfolder='products')
-                if url:
-                    img = ProductImage(
-                        product_id=product.id,
-                        image_url=url,
-                        is_primary=(existing_count == 0 and i == 0),
-                        sort_order=existing_count + i,
-                    )
-                    db.session.add(img)
-
+        image_count = _save_product_images(product)
+        variant_count, skipped_skus = _save_variants_from_request(product)
         db.session.commit()
-        flash(f'Product "{product.name}" updated.', 'success')
+
+        parts = [f'Product "{product.name}" updated']
+        if image_count:
+            parts.append(f'{image_count} new image(s)')
+        if variant_count:
+            parts.append(f'{variant_count} new variant(s)')
+        flash('. '.join(parts) + '.', 'success')
+        for sku in skipped_skus:
+            flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
         return redirect(url_for('admin.products'))
 
     variants = product.variants.all()
