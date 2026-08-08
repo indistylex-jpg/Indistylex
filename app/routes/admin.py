@@ -11,7 +11,7 @@ from app.models.order import Order, OrderItem, Payment
 from app.models.review import Review
 from app.models.coupon import Coupon
 from app.forms.product_forms import ProductForm, CategoryForm, ProductVariantForm
-from app.utils.product_ages import AGE_GROUP_CHOICES
+from app.utils.product_ages import AGE_GROUP_SECTIONS
 from app.services.image_service import save_image, delete_image
 from app.services.inventory_service import (
     get_low_stock_products, record_b2b_sale, cancel_b2b_sale,
@@ -491,7 +491,7 @@ def add_product():
         'admin/product_form.html',
         form=form,
         title='Add Product',
-        age_group_choices=AGE_GROUP_CHOICES,
+        age_group_sections=AGE_GROUP_SECTIONS,
         selected_age_groups=[],
     )
 
@@ -538,7 +538,7 @@ def edit_product(product_id):
         product=product,
         variants=variants,
         images=images,
-        age_group_choices=AGE_GROUP_CHOICES,
+        age_group_sections=AGE_GROUP_SECTIONS,
         selected_age_groups=product.age_groups_list,
     )
 

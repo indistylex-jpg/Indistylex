@@ -32,6 +32,27 @@
         </div>
     </div>
 
+    <!-- Age / Size -->
+    <div class="filter-group">
+        <h6 class="filter-group-title">Age</h6>
+        <p class="filter-group-hint">Pick your child&apos;s age or size band</p>
+        {% for section in age_group_sections %}
+        <div class="filter-age-section">
+            <div class="filter-age-section-title">{{ section.title }}</div>
+            <ul class="filter-list filter-age-list">
+                {% for value, label in section.choices %}
+                <li class="filter-list-item">
+                    <input class="filter-checkbox" type="radio" name="age_group"
+                           value="{{ value }}" id="fage-{{ value }}"
+                           {{ "checked" if request.args.get('age_group') == value }}>
+                    <label for="fage-{{ value }}">{{ label }}</label>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+
     <!-- Size -->
     <div class="filter-group">
         <h6 class="filter-group-title">Size</h6>

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, current_app
 from app.models.product import Product, Category
 from app.extensions import cache
-from app.utils.product_ages import apply_age_group_filter
+from app.utils.product_ages import apply_age_group_filter, AGE_GROUP_SECTIONS
 
 shop_bp = Blueprint('shop', __name__)
 
@@ -77,6 +77,7 @@ def listing():
     return render_template('shop/listing.html',
                            products=products,
                            categories=categories,
+                           age_group_sections=AGE_GROUP_SECTIONS,
                            current_category=category_slug,
                            current_sort=sort,
                            search_query=search)
@@ -103,6 +104,7 @@ def category(slug):
                            products=products,
                            category=cat,
                            current_category=slug,
+                           age_group_sections=AGE_GROUP_SECTIONS,
                            categories=Category.query.filter_by(is_active=True, parent_id=None).all())
 
 
@@ -131,4 +133,5 @@ def search():
     return render_template('shop/listing.html',
                            products=products,
                            search_query=q,
+                           age_group_sections=AGE_GROUP_SECTIONS,
                            categories=Category.query.filter_by(is_active=True, parent_id=None).all())

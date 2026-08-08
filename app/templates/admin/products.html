@@ -54,7 +54,7 @@
                     <div>
                     <span class="fw-semibold">{{ product.name }}</span><br>
                     <small class="text-muted">
-                      {{ (product.gender or '') | title }}
+                      {{ product.gender_label }}
                       {% if product.age_groups_label %} · {{ product.age_groups_label }}{% endif %}
                     </small>
                     </div>

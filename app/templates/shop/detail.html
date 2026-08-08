@@ -75,8 +75,8 @@
                     <div class="pdp-option-group mb-3">
                         <label class="pdp-option-label">SUITABLE FOR</label>
                         <div class="d-flex flex-wrap gap-2">
-                            {% for label in product.age_groups_badges %}
-                            <span class="badge bg-light text-dark border">{{ label }}</span>
+                            {% for part in product.age_groups_label.split(', ') if part %}
+                            <span class="badge bg-light text-dark border">{{ part }}</span>
                             {% endfor %}
                         </div>
                     </div>

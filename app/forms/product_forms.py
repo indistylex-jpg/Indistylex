@@ -4,6 +4,8 @@ from wtforms import (StringField, TextAreaField, DecimalField, IntegerField,
                      SelectField, BooleanField, SubmitField, FieldList, FormField)
 from wtforms.validators import DataRequired, Length, NumberRange, Optional
 
+from app.utils.product_genders import GENDER_CHOICES
+
 
 class ProductImageForm(FlaskForm):
     class Meta:
@@ -33,11 +35,7 @@ class ProductForm(FlaskForm):
     compare_at_price = DecimalField('Compare at Price (₹)', validators=[Optional(), NumberRange(min=0)], places=2)
     category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
     brand = StringField('Brand', validators=[Optional(), Length(max=100)])
-    gender = SelectField('Gender', choices=[
-        ('', 'Select Gender'),
-        ('kids', 'Kids (Unisex)'),
-        ('girls', 'Girls'),
-    ], validators=[Optional()])
+    gender = SelectField('Gender', choices=GENDER_CHOICES, validators=[Optional()])
     material = StringField('Material', validators=[Optional(), Length(max=200)])
     care_instructions = TextAreaField('Care Instructions', validators=[Optional()])
     is_active = BooleanField('Active', default=True)

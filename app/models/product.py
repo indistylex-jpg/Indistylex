@@ -48,7 +48,7 @@ class Product(db.Model):
     brand = db.Column(db.String(100))
     gender = db.Column(db.String(20))  # men, women, girls, kids, unisex
     age_group = db.Column(db.String(20))  # legacy single age (first selected)
-    age_groups = db.Column(db.String(200))  # comma-separated: 2-4,4-6,6-8
+    age_groups = db.Column(db.String(500))  # comma-separated granular bands e.g. 6-9m,1-2y
     material = db.Column(db.String(200))
     care_instructions = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
@@ -109,6 +109,11 @@ class Product(db.Model):
         normalized = normalize_age_groups(selected)
         self.age_groups = ','.join(normalized) if normalized else None
         self.age_group = normalized[0] if len(normalized) == 1 else None
+
+    @property
+    def gender_label(self):
+        from app.utils.product_genders import gender_label
+        return gender_label(self.gender)
 
     @property
     def discount_percent(self):

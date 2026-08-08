@@ -1083,6 +1083,29 @@ img {
     margin-bottom: 12px;
     font-family: var(--font-body);
 }
+.filter-group-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted, #6c757d);
+    margin: -6px 0 12px;
+}
+.filter-age-section {
+    margin-bottom: 14px;
+}
+.filter-age-section:last-child {
+    margin-bottom: 0;
+}
+.filter-age-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.filter-age-list .filter-list-item {
+    margin-bottom: 6px;
+}
+.filter-age-list .filter-list-item label {
+    font-size: 0.8rem;
+}
 .filter-list {
     list-style: none;
     padding: 0;

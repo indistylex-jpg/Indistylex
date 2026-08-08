@@ -40,6 +40,32 @@
     border-color: #0d6efd;
     box-shadow: 0 0 0 2px rgba(13,110,253,.15);
   }
+  .age-picker-section {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 1rem 1.15rem;
+    margin-bottom: 0.75rem;
+    background: #fafbfc;
+  }
+  .age-picker-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+    color: #212529;
+  }
+  .age-picker-section-hint {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+  }
+  .age-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.35rem 0.75rem;
+  }
+  .age-picker-grid .form-check-label {
+    font-size: 0.875rem;
+  }
 </style>
 {% endblock %}
 
@@ -116,18 +142,24 @@
           <label class="form-label">Gender</label>
           {{ form.gender(class="form-select") }}
         </div>
-        <div class="col-md-9">
+        <div class="col-12">
           <label class="form-label d-block">Suitable Ages <span class="text-muted fw-normal">(check all that apply)</span></label>
-          <div class="d-flex flex-wrap gap-3 pt-1">
-            {% for value, label in age_group_choices %}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="age_groups" value="{{ value }}"
-                     id="age-{{ value }}" {{ 'checked' if value in selected_age_groups }}>
-              <label class="form-check-label" for="age-{{ value }}">{{ label }}</label>
+          {% for section in age_group_sections %}
+          <div class="age-picker-section">
+            <div class="age-picker-section-title">{{ section.title }}</div>
+            <div class="age-picker-section-hint">{{ section.hint }}</div>
+            <div class="age-picker-grid">
+              {% for value, label in section.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="age_groups" value="{{ value }}"
+                       id="age-{{ value }}" {{ 'checked' if value in selected_age_groups }}>
+                <label class="form-check-label" for="age-{{ value }}">{{ label }}</label>
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
           </div>
-          <div class="form-text">Example: for ages 3–8 years, check <strong>2–4</strong>, <strong>4–6</strong>, and <strong>6–8</strong>.</div>
+          {% endfor %}
+          <div class="form-text">Example: for a frock fitting ages 2–5 years, check <strong>2–3 Years</strong>, <strong>3–4 Years</strong>, and <strong>4–5 Years</strong>.</div>
         </div>
         <div class="col-md-4">
           <label class="form-label">Brand</label>
