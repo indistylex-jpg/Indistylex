@@ -192,7 +192,7 @@ class TestProductModel:
         )
         db.session.add(p)
         db.session.commit()
-        assert 'categories/kids' in p.primary_image_url or 'placeholder' in p.primary_image_url
+        assert 'lifestyle/product-placeholder' in p.primary_image_url
         assert p.primary_image is None
 
     def test_average_rating_no_reviews(self, db, sample_product):

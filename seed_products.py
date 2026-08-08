@@ -5,23 +5,23 @@ from app.models.product import Category, Product, ProductVariant, ProductImage
 
 app = create_app()
 
-# Placeholder images (free, no-auth required)
+# Original Indistylex lifestyle images (AI-generated, royalty-free)
 IMG = {
     'newborn': [
-        'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=600',
-        'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=600',
+        'images/lifestyle/hero-baby-indian.jpg',
+        'images/lifestyle/product-placeholder-kids.jpg',
     ],
     'toddler': [
-        'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=600',
-        'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=600',
+        'images/lifestyle/lifestyle-everyday-girl.jpg',
+        'images/lifestyle/lifestyle-everyday-boy.jpg',
     ],
     'boys': [
-        'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=600',
-        'https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=600',
+        'images/lifestyle/lifestyle-everyday-boy.jpg',
+        'images/lifestyle/lifestyle-teen-boy.jpg',
     ],
     'girls': [
-        'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=600',
-        'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=600',
+        'images/lifestyle/lifestyle-everyday-girl.jpg',
+        'images/lifestyle/lifestyle-ethnic-girl.jpg',
     ],
 }
 

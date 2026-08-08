@@ -4,11 +4,10 @@
 {% block meta_description %}Shop beautiful kids clothing at Indistylex. Soft fabrics, trendy designs for newborn to teens. Free shipping above ₹999.{% endblock %}
 
 {% block extra_css %}
-<link href="{{ url_for('static', filename='css/home.css') }}?v=4" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/home.css') }}?v=5" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<!-- Hero — Miarcus-style layout, Indistylex sky-blue identity -->
 <section class="home-hero">
     <div id="homeHero" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6000">
         <div class="carousel-indicators home-hero-dots">
@@ -17,12 +16,11 @@
             <button type="button" data-bs-target="#homeHero" data-bs-slide-to="2" aria-label="Slide 3"></button>
         </div>
         <div class="carousel-inner">
-            <!-- Sale slide -->
             <div class="carousel-item active">
                 <div class="home-hero-panel home-hero-panel--sale">
                     <div class="home-hero-pattern" aria-hidden="true"></div>
                     <div class="container home-hero-inner">
-                        <div class="home-hero-copy">
+                        <div class="home-hero-copy home-animate-in">
                             <span class="home-hero-eyebrow">Limited Time Only</span>
                             <p class="home-hero-pre">End of Season</p>
                             <h1 class="home-hero-display">SALE</h1>
@@ -33,17 +31,16 @@
                         </div>
                         <div class="home-hero-visual">
                             <div class="home-hero-badge">Bestsellers<br>Included</div>
-                            <img src="https://images.unsplash.com/photo-1621452773781-0f992fd1f5cb?w=640&q=80" alt="Kids fashion sale" class="home-hero-kid">
+                            <img src="{{ lifestyle_img('hero_sale') }}" alt="Indian girl in sale collection" class="home-hero-kid">
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- New collection -->
             <div class="carousel-item">
                 <div class="home-hero-panel home-hero-panel--new">
                     <div class="home-hero-pattern home-hero-pattern--light" aria-hidden="true"></div>
                     <div class="container home-hero-inner">
-                        <div class="home-hero-copy">
+                        <div class="home-hero-copy home-animate-in">
                             <span class="home-hero-eyebrow">Spring Summer 2026</span>
                             <h1 class="home-hero-display home-hero-display--sm">Soft Styles<br>For Little Stars</h1>
                             <p class="home-hero-subline">Premium cotton · Skin-safe · 0–18 years</p>
@@ -52,17 +49,16 @@
                             </a>
                         </div>
                         <div class="home-hero-visual">
-                            <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=640&q=80" alt="New collection" class="home-hero-kid">
+                            <img src="{{ lifestyle_img('hero_collection') }}" alt="Indian kids new collection" class="home-hero-kid">
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Baby slide -->
             <div class="carousel-item">
                 <div class="home-hero-panel home-hero-panel--baby">
                     <div class="home-hero-pattern" aria-hidden="true"></div>
                     <div class="container home-hero-inner">
-                        <div class="home-hero-copy">
+                        <div class="home-hero-copy home-animate-in">
                             <span class="home-hero-eyebrow">Newborn & Infant</span>
                             <h1 class="home-hero-display home-hero-display--sm">Gentle<br>From Day One</h1>
                             <p class="home-hero-subline">Rompers, bodysuits & gift sets</p>
@@ -71,7 +67,7 @@
                             </a>
                         </div>
                         <div class="home-hero-visual">
-                            <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?w=640&q=80" alt="Baby clothing" class="home-hero-kid">
+                            <img src="{{ lifestyle_img('hero_baby') }}" alt="Indian newborn baby clothing" class="home-hero-kid">
                         </div>
                     </div>
                 </div>
@@ -86,33 +82,23 @@
     </div>
 </section>
 
-<!-- USP ticker -->
 <section class="home-usp">
     <div class="home-usp-track">
         {% for icon, label in [
-            ('bi-moon-stars', 'Sleep Tested'),
-            ('bi-droplet', 'Easy Care'),
-            ('bi-flower1', 'Premium Cotton'),
-            ('bi-truck', 'Fast Shipping'),
-            ('bi-arrow-repeat', 'Easy Returns'),
-            ('bi-shield-check', 'Skin Safe'),
+            ('bi-moon-stars', 'Sleep Tested'), ('bi-droplet', 'Easy Care'), ('bi-flower1', 'Premium Cotton'),
+            ('bi-truck', 'Fast Shipping'), ('bi-arrow-repeat', 'Easy Returns'), ('bi-shield-check', 'Skin Safe'),
         ] %}
         <div class="home-usp-item"><i class="bi {{ icon }}"></i><span>{{ label }}</span></div>
         {% endfor %}
         {% for icon, label in [
-            ('bi-moon-stars', 'Sleep Tested'),
-            ('bi-droplet', 'Easy Care'),
-            ('bi-flower1', 'Premium Cotton'),
-            ('bi-truck', 'Fast Shipping'),
-            ('bi-arrow-repeat', 'Easy Returns'),
-            ('bi-shield-check', 'Skin Safe'),
+            ('bi-moon-stars', 'Sleep Tested'), ('bi-droplet', 'Easy Care'), ('bi-flower1', 'Premium Cotton'),
+            ('bi-truck', 'Fast Shipping'), ('bi-arrow-repeat', 'Easy Returns'), ('bi-shield-check', 'Skin Safe'),
         ] %}
         <div class="home-usp-item"><i class="bi {{ icon }}"></i><span>{{ label }}</span></div>
         {% endfor %}
     </div>
 </section>
 
-<!-- Find Their Perfect Fit -->
 <section class="home-section home-fit">
     <div class="container text-center">
         <h2 class="home-h2">Find Their Perfect Fit</h2>
@@ -143,19 +129,18 @@
     </div>
 </section>
 
-<!-- Quick shop tiles -->
 <section class="home-section home-quick-shop">
     <div class="container">
         <div class="row g-4">
             {% set quick = [
-                ('https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80', 'Newborn Essentials', 'Soft rompers & bodysuits', 'newborn-infant'),
-                ('https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=600&q=80', 'Everyday Wear', 'Comfort for active kids', 'toddler'),
-                ('https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=600&q=80', 'Ethnic & Festive', 'Celebration-ready outfits', 'ethnic-festive'),
+                ('hero_baby', 'Newborn Essentials', 'Soft rompers & bodysuits', 'newborn-infant'),
+                ('everyday_boy', 'Everyday Wear', 'Comfort for active kids', 'toddler'),
+                ('ethnic_girl', 'Ethnic & Festive', 'Celebration-ready outfits', 'ethnic-festive'),
             ] %}
-            {% for img, title, desc, slug in quick %}
+            {% for img_key, title, desc, slug in quick %}
             <div class="col-md-4">
-                <a href="{{ url_for('shop.category', slug=slug) }}" class="home-quick-card">
-                    <img src="{{ img }}" alt="{{ title }}">
+                <a href="{{ url_for('shop.category', slug=slug) }}" class="home-quick-card home-img-reveal">
+                    <img src="{{ lifestyle_img(img_key) }}" alt="{{ title }}">
                     <div class="home-quick-card-body">
                         <h3>{{ title }}</h3>
                         <p>{{ desc }}</p>
@@ -168,7 +153,6 @@
     </div>
 </section>
 
-<!-- Parent Favorites -->
 {% set favorites = featured if featured else new_arrivals %}
 {% if favorites %}
 <section class="home-section home-favorites">
@@ -190,52 +174,42 @@
 </section>
 {% endif %}
 
-<!-- Editorial category blocks -->
 <section class="home-section home-editorial">
     <div class="container">
-        <div class="home-editorial-block">
+        <div class="home-editorial-block home-img-reveal">
             <div class="home-editorial-text">
                 <h2 class="home-editorial-title">Everyday<br>Clothing</h2>
                 <p>Comfortable daily wear for baby & toddler up to 6 years</p>
                 <a href="{{ url_for('shop.listing') }}">Shop Now →</a>
             </div>
             <div class="home-editorial-grid">
-                <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80" alt="">
-                <img src="https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400&q=80" alt="">
-                <img src="https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&q=80" alt="">
+                <img src="{{ lifestyle_img('everyday_girl') }}" alt="Indian girl everyday wear">
+                <img src="{{ lifestyle_img('everyday_boy') }}" alt="Indian boy everyday wear">
+                <img src="{{ lifestyle_img('school_girl') }}" alt="Indian girl school wear">
             </div>
         </div>
-        <div class="home-editorial-block home-editorial-block--reverse">
+        <div class="home-editorial-block home-editorial-block--reverse home-img-reveal">
             <div class="home-editorial-text">
                 <h2 class="home-editorial-title">Ethnic &<br>Festive</h2>
                 <p>Kurtas, lehengas & celebration wear for every age</p>
                 <a href="{{ url_for('shop.category', slug='ethnic-festive') }}">Shop Now →</a>
             </div>
             <div class="home-editorial-grid">
-                <img src="https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80" alt="">
-                <img src="https://images.unsplash.com/photo-1604917621956-10dfa7cce2e7?w=400&q=80" alt="">
-                <img src="https://images.unsplash.com/photo-1542652694-40abf526446e?w=400&q=80" alt="">
+                <img src="{{ lifestyle_img('ethnic_girl') }}" alt="Indian girl ethnic wear">
+                <img src="{{ lifestyle_img('ethnic_boy') }}" alt="Indian boy kurta">
+                <img src="{{ lifestyle_img('winter_kids') }}" alt="Indian kids winter wear">
             </div>
         </div>
     </div>
 </section>
 
-<!-- Shop By Category grid -->
 <section class="home-section home-categories">
     <div class="container">
         <h2 class="home-h2 text-center mb-4">Shop By Category</h2>
         <div class="home-cat-grid">
-            {% set cat_imgs = [
-                'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80',
-                'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&q=80',
-                'https://images.unsplash.com/photo-1542652694-40abf526446e?w=600&q=80',
-                'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=600&q=80',
-                'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=600&q=80',
-                'https://images.unsplash.com/photo-1604917621956-10dfa7cce2e7?w=600&q=80',
-            ] %}
             {% for cat in categories[:6] %}
-            <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="home-cat-tile">
-                <img src="{{ cat_imgs[loop.index0 % cat_imgs|length] }}" alt="{{ cat.name }}">
+            <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="home-cat-tile home-img-reveal">
+                <img src="{{ url_for('static', filename=category_lifestyle_images[loop.index0 % category_lifestyle_images|length]) }}" alt="{{ cat.name }}">
                 <div class="home-cat-tile-cap">
                     <strong>{{ cat.name.split('(')[0].strip() }}</strong>
                     <span>Shop Now →</span>
@@ -246,7 +220,6 @@
     </div>
 </section>
 
-<!-- New Arrivals -->
 {% if new_arrivals %}
 <section class="home-section home-new">
     <div class="container">
@@ -266,22 +239,21 @@
 </section>
 {% endif %}
 
-<!-- What are you shopping for? -->
 <section class="home-section home-needs">
     <div class="container text-center">
         <h2 class="home-h2">What Are You Shopping For?</h2>
         <p class="home-lead">Browse essentials curated by parenting needs</p>
         <div class="row g-3 g-md-4 mt-2">
             {% set needs = [
-                ('bi-sun', 'Daily Wear', 'shop.listing', {}),
-                ('bi-balloon', 'Birthday & Party', 'shop.category', {'slug': 'ethnic-festive'}),
-                ('bi-snow', 'Winter Layers', 'shop.category', {'slug': 'winter-wear'}),
-                ('bi-moon', 'Sleep & Nightwear', 'shop.category', {'slug': 'nightwear'}),
+                ('everyday_girl', 'Daily Wear', 'shop.listing', {}),
+                ('ethnic_girl', 'Birthday & Party', 'shop.category', {'slug': 'ethnic-festive'}),
+                ('winter_kids', 'Winter Layers', 'shop.category', {'slug': 'winter-wear'}),
+                ('hero_baby', 'Sleep & Nightwear', 'shop.category', {'slug': 'nightwear'}),
             ] %}
-            {% for icon, label, route, kwargs in needs %}
+            {% for img_key, label, route, kwargs in needs %}
             <div class="col-6 col-md-3">
-                <a href="{{ url_for(route, **kwargs) }}" class="home-need-card">
-                    <span class="home-need-icon"><i class="bi {{ icon }}"></i></span>
+                <a href="{{ url_for(route, **kwargs) }}" class="home-need-card home-need-card--photo home-img-reveal">
+                    <img src="{{ lifestyle_img(img_key) }}" alt="{{ label }}">
                     <span>{{ label }}</span>
                 </a>
             </div>
@@ -290,7 +262,6 @@
     </div>
 </section>
 
-<!-- Real moments -->
 <section class="home-section home-moments">
     <div class="container">
         <div class="text-center mb-4">
@@ -298,17 +269,9 @@
             <p class="home-lead mb-0">Join thousands of happy families across India</p>
         </div>
         <div class="home-moments-track" id="momentsTrack">
-            {% set moments = [
-                'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80',
-                'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=400&q=80',
-                'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400&q=80',
-                'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&q=80',
-                'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&q=80',
-                'https://images.unsplash.com/photo-1542652694-40abf526446e?w=400&q=80',
-            ] %}
-            {% for img in moments %}
-            <div class="home-moment-card">
-                <img src="{{ img }}" alt="Parent moment" loading="lazy">
+            {% for img_path in moment_lifestyle_images %}
+            <div class="home-moment-card home-img-reveal">
+                <img src="{{ url_for('static', filename=img_path) }}" alt="Indian family fashion moment" loading="lazy">
                 <a href="{{ url_for('shop.listing', sort='newest') }}" class="home-moment-btn">New Arrivals</a>
             </div>
             {% endfor %}
@@ -316,7 +279,6 @@
     </div>
 </section>
 
-<!-- Shop By Age -->
 <section class="home-section home-age">
     <div class="container text-center">
         <h2 class="home-h2">Shop By Age</h2>
@@ -332,7 +294,6 @@
     </div>
 </section>
 
-<!-- Trust -->
 <section class="home-trust">
     <div class="container">
         <div class="row g-4">
@@ -346,7 +307,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/home.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='js/home.js') }}?v=4"></script>
 <script>
 (function () {
   var hero = document.getElementById('homeHero');

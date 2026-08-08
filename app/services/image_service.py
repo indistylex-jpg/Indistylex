@@ -78,7 +78,7 @@ def normalize_stored_image_path(path):
     return f'/uploads/{rel}'
 
 
-def resolve_image_url(path, fallback='images/categories/kids.svg'):
+def resolve_image_url(path, fallback='images/lifestyle/product-placeholder-kids.jpg'):
     """Return a browser-ready image URL for templates and APIs."""
     normalized = normalize_stored_image_path(path)
     if not normalized:
