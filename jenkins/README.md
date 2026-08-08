@@ -43,34 +43,48 @@ cat .jenkins_home/secrets/initialAdminPassword
 2. Create admin user (remember username/password)
 3. Save Jenkins URL as `http://localhost:8080`
 
-### 3. Install Pipeline + Git plugins (if UI fails)
+### 3. Install Git plugin (required for "Pipeline from SCM → Git")
 
-If plugin install hangs in the browser, use the CLI script:
+**Why Git option is missing:** the `git` plugin is not installed. Pipeline type works, but **SCM: Git** only appears after `git.jpi` is installed and Jenkins is restarted.
+
+Run on your ThinkPad:
 
 ```bash
 cd ~/work/indistyle/Indistylex/jenkins
+git pull shivam74826 develop
+
+# Fix if scripts fail with "bash\r not found"
+sed -i 's/\r$//' *.sh
+
+# Fix permissions if .jenkins_home owned by root
+sudo chown -R $USER:$USER .
+
+chmod +x *.sh
 ./install-plugins.sh
 ./restart-local.sh
 ```
 
-This installs:
-- `workflow-aggregator` — Pipeline jobs
-- `git` — clone from GitHub
-- `ssh-agent` — deploy to production server
-
-**Verify plugins installed:**
+Verify:
 ```bash
-ls .jenkins_home/plugins/ | grep -E 'git\.|workflow-job'
+ls .jenkins_home/plugins/git.jpi    # must exist
 ```
-You should see `git.jpi` and `workflow-job.jpi`.
 
-### 4. Create the deploy job
+Hard refresh browser (**Ctrl+Shift+R**), then create job again.
 
-1. Jenkins home → **New Item**
-2. Name: `indistylex-deploy`
-3. Type: **Pipeline** ← if you don't see this, run `./install-plugins.sh` + restart
-4. Click OK
-5. Scroll to **Pipeline** section:
+### 3b. WORKAROUND — use inline script (no Git plugin needed)
+
+If Git SCM still doesn't show, use this instead — works immediately:
+
+1. **New Item** → `indistylex-deploy` → **Pipeline** → OK
+2. **Pipeline** section → Definition: **Pipeline script** (NOT "from SCM")
+3. Open `jenkins/pipeline-no-git-plugin.groovy` in this repo, copy ALL text
+4. Paste into the Script box → **Save**
+5. Add SSH credential `indistylex-server-ssh` (see step 5 below)
+6. Click **Build** to deploy
+
+---
+
+### 4. Create the deploy job (with Git SCM — after step 3)
    - Definition: **Pipeline script from SCM**
    - SCM: **Git**
    - Repository URL: `https://github.com/shivam74826/Indistylex.git`
