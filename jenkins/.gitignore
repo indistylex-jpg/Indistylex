@@ -1,0 +1,5 @@
+# Local Jenkins runtime (do not commit)
+.jenkins_home/
+jenkins.war
+jenkins.log
+jenkins.pid

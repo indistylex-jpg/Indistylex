@@ -1,0 +1,6 @@
+workflow-aggregator:latest
+git:latest
+ssh-agent:latest
+credentials-binding:latest
+pipeline-stage-view:latest
+timestamper:latest
