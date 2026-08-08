@@ -228,7 +228,7 @@
                 <h2 class="home-h2 mb-1">New Arrivals</h2>
                 <p class="home-lead mb-0">Fresh styles just dropped</p>
             </div>
-            <a href="{{ url_for('shop.listing', sort='newest') }}" class="home-link-all">View all <i class="bi bi-arrow-right"></i></a>
+            <a href="{{ url_for('shop.listing', sort='new_arrivals') }}" class="home-link-all">View all <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="home-product-grid">
             {% for product in new_arrivals[:6] %}

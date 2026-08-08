@@ -20,6 +20,14 @@
   </div>
 </div>
 
+<div class="admin-filter-pills">
+  <a href="{{ url_for('admin.products') }}" class="admin-filter-pill {{ 'is-active' if not visibility }}">All</a>
+  <a href="{{ url_for('admin.products', visibility='new') }}" class="admin-filter-pill {{ 'is-active' if visibility == 'new' }}">New Arrivals</a>
+  <a href="{{ url_for('admin.products', visibility='featured') }}" class="admin-filter-pill {{ 'is-active' if visibility == 'featured' }}">Featured</a>
+  <a href="{{ url_for('admin.products', visibility='trending') }}" class="admin-filter-pill {{ 'is-active' if visibility == 'trending' }}">Trending</a>
+  <a href="{{ url_for('admin.products', visibility='draft') }}" class="admin-filter-pill {{ 'is-active' if visibility == 'draft' }}">Drafts</a>
+</div>
+
 <form method="POST" action="{{ url_for('admin.bulk_delete_products') }}" id="bulk-delete-form">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
@@ -57,6 +65,12 @@
                       {{ product.gender_label }}
                       {% if product.age_groups_label %} · {{ product.age_groups_label }}{% endif %}
                     </small>
+                    <div class="visibility-badges">
+                      {% if not product.is_active %}<span class="visibility-badge visibility-badge--draft">Draft</span>{% endif %}
+                      {% if product.is_new_arrival and product.is_active %}<span class="visibility-badge visibility-badge--new">New</span>{% endif %}
+                      {% if product.is_featured and product.is_active %}<span class="visibility-badge visibility-badge--featured">Featured</span>{% endif %}
+                      {% if product.is_trending and product.is_active %}<span class="visibility-badge visibility-badge--trending">Trending</span>{% endif %}
+                    </div>
                     </div>
                   </div>
                 </td>

@@ -39,6 +39,7 @@ class ProductForm(FlaskForm):
     material = StringField('Material', validators=[Optional(), Length(max=200)])
     care_instructions = TextAreaField('Care Instructions', validators=[Optional()])
     is_active = BooleanField('Active', default=True)
+    is_new_arrival = BooleanField('New Arrival')
     is_featured = BooleanField('Featured')
     is_trending = BooleanField('Trending')
     submit = SubmitField('Save Product')

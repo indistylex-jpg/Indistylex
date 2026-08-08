@@ -240,6 +240,7 @@ def seed():
                 is_active=True,
                 is_featured=p['featured'],
                 is_trending=p['trending'],
+                is_new_arrival=p.get('trending', False),
             )
             db.session.add(product)
             db.session.flush()

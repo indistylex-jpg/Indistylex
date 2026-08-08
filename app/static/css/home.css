@@ -450,6 +450,9 @@
     border-radius: 6px;
     z-index: 2;
 }
+.home-product-sale--new {
+    background: var(--accent);
+}
 .home-product-card .collection-card-wishlist {
     position: absolute;
     top: 12px;

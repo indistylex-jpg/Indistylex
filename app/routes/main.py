@@ -16,7 +16,9 @@ def index():
     ).order_by(Category.sort_order).all()
 
     # New arrivals (latest active products)
-    new_arrivals = Product.query.filter_by(is_active=True).join(Category).filter(
+    new_arrivals = Product.query.filter_by(
+        is_active=True, is_new_arrival=True
+    ).join(Category).filter(
         Category.is_active == True
     ).order_by(Product.created_at.desc()).limit(8).all()
 

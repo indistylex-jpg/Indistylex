@@ -20,6 +20,7 @@ SORT_OPTIONS = [
     ('price_low', 'Price, low to high'),
     ('price_high', 'Price, high to low'),
     ('newest', 'Date, new to old'),
+    ('new_arrivals', 'New Arrivals'),
     ('oldest', 'Date, old to new'),
 ]
 
@@ -150,5 +151,9 @@ def build_listing_query(args):
     sort = args.get('sort', 'newest')
     if sort not in {value for value, _ in SORT_OPTIONS}:
         sort = 'newest'
+    if sort == 'new_arrivals':
+        query = query.filter(Product.is_new_arrival.is_(True))
+        query = apply_shop_sort(query, 'newest')
+        return query, 'new_arrivals'
     query = apply_shop_sort(query, sort)
     return query, sort

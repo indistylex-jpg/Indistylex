@@ -40,7 +40,7 @@
                         {% for cat in nav_categories %}
                         <li><a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name }}</a></li>
                         {% endfor %}
-                        <li><a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a></li>
+                        <li><a href="{{ url_for('shop.listing', sort='new_arrivals') }}">New Arrivals</a></li>
                         <li><a href="{{ url_for('shop.listing', sort='popular') }}">Best Sellers</a></li>
                     </ul>
                 </div>

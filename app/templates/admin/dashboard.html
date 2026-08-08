@@ -77,6 +77,24 @@
 </div>
 
 <!-- Tracking strip -->
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="store-visibility-strip">
+      <a href="{{ url_for('admin.products', visibility='new') }}" class="store-vis-card">
+        <strong>{{ store_visibility.new_arrival }}</strong><span>New Arrivals</span>
+      </a>
+      <a href="{{ url_for('admin.products', visibility='featured') }}" class="store-vis-card">
+        <strong>{{ store_visibility.featured }}</strong><span>Parent Favorites</span>
+      </a>
+      <a href="{{ url_for('admin.products', visibility='trending') }}" class="store-vis-card">
+        <strong>{{ store_visibility.trending }}</strong><span>Trending</span>
+      </a>
+      <a href="{{ url_for('admin.products', visibility='draft') }}" class="store-vis-card">
+        <strong>{{ store_visibility.draft }}</strong><span>Drafts (hidden)</span>
+      </a>
+    </div>
+  </div>
+</div>
 <div class="row g-3 mb-4">
   <div class="col-12">
     <div class="dash-track-strip">

@@ -54,6 +54,7 @@ class Product(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_featured = db.Column(db.Boolean, default=False)
     is_trending = db.Column(db.Boolean, default=False)
+    is_new_arrival = db.Column(db.Boolean, default=False)
     views_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

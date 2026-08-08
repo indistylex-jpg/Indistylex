@@ -5,6 +5,8 @@
     <div class="home-product-card-media">
         {% if product.discount_percent > 0 %}
         <span class="home-product-sale">On Sale</span>
+        {% elif product.is_new_arrival %}
+        <span class="home-product-sale home-product-sale--new">New</span>
         {% endif %}
         <button type="button" class="collection-card-wishlist" data-wishlist-id="{{ product.id }}" aria-label="Add to wishlist">
             <i class="bi bi-heart"></i>

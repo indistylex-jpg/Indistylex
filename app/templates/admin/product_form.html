@@ -2,79 +2,32 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block extra_css %}
-<style>
-  .product-image-preview-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  .product-image-preview-item,
-  .product-image-saved-item {
-    width: 200px;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    background: #f8f9fa;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  }
-  .product-image-preview-item img,
-  .product-image-saved-item img {
-    width: 200px;
-    height: 200px;
-    object-fit: contain;
-    display: block;
-    background: #fff;
-  }
-  .product-image-preview-caption {
-    padding: 0.5rem 0.65rem;
-    font-size: 0.75rem;
-    color: #6c757d;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border-top: 1px solid #eee;
-    background: #fff;
-  }
-  .product-image-preview-item.is-primary {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13,110,253,.15);
-  }
-  .age-picker-section {
-    border: 1px solid #e9ecef;
-    border-radius: 0.5rem;
-    padding: 1rem 1.15rem;
-    margin-bottom: 0.75rem;
-    background: #fafbfc;
-  }
-  .age-picker-section-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.15rem;
-    color: #212529;
-  }
-  .age-picker-section-hint {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-bottom: 0.75rem;
-  }
-  .age-picker-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-    gap: 0.35rem 0.75rem;
-  }
-  .age-picker-grid .form-check-label {
-    font-size: 0.875rem;
-  }
-</style>
+<link href="{{ url_for('static', filename='css/admin.css') }}?v=7" rel="stylesheet">
 {% endblock %}
 
-{% block content %}<div class="mb-4">
+{% block content %}
+<div class="mb-4">
   <a href="{{ url_for('admin.products') }}" class="text-decoration-none">
     <i class="bi bi-arrow-left me-1"></i>Back to Products
   </a>
 </div>
-<h4 class="fw-bold mb-4">{{ title }}</h4>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">{{ title }}</h4>
+    <p class="text-muted mb-0 small">Fill each section — ages & visibility control how customers find this product.</p>
+  </div>
+  {% if listing_preview is defined %}
+  <div class="product-listing-preview-box">
+    <strong class="small d-block mb-1">Currently visible on</strong>
+    <ul class="small mb-0 ps-3">
+      {% for place in listing_preview %}
+      <li>{{ place }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
 
 {% if product and product.variants.count() %}
 <div class="card border-0 shadow-sm mb-4">
@@ -86,10 +39,8 @@
         <tbody>
           {% for v in product.variants %}
           <tr>
-            <td>{{ v.size }}</td>
-            <td>{{ v.color }}</td>
-            <td class="text-muted small">{{ v.sku }}</td>
-            <td>{{ v.stock_quantity }}</td>
+            <td>{{ v.size }}</td><td>{{ v.color }}</td>
+            <td class="text-muted small">{{ v.sku }}</td><td>{{ v.stock_quantity }}</td>
             <td>
               <form method="POST" action="{{ url_for('admin.delete_variant', variant_id=v.id) }}" class="d-inline"
                     onsubmit="return confirm('Delete this variant?')">
@@ -106,228 +57,222 @@
 </div>
 {% endif %}
 
-<div class="card border-0 shadow-sm">
-  <div class="card-body p-4">
-    <form method="POST" enctype="multipart/form-data" novalidate>
-      {{ form.hidden_tag() }}
+<form method="POST" enctype="multipart/form-data" novalidate id="product-form">
+  {{ form.hidden_tag() }}
 
-      <div class="row g-3">
-        <div class="col-md-8">
-          <label class="form-label">Product Name</label>
-          {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
-          {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Category</label>
-          {{ form.category_id(class="form-select") }}
-        </div>
-        <div class="col-12">
-          <label class="form-label">Short Description</label>
-          {{ form.short_description(class="form-control", placeholder="Brief line for product cards") }}
-        </div>
-        <div class="col-12">
-          <label class="form-label">Description</label>
-          {{ form.description(class="form-control", rows=4) }}
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Price (₹)</label>
-          {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else ""), step="0.01") }}
-          {% for error in form.price.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Compare at Price (₹)</label>
-          {{ form.compare_at_price(class="form-control", step="0.01", placeholder="Original price") }}
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Gender</label>
-          {{ form.gender(class="form-select") }}
-        </div>
-        <div class="col-12">
-          <label class="form-label d-block">Suitable Ages <span class="text-muted fw-normal">(check all that apply)</span></label>
-          {% for section in age_group_sections %}
-          <div class="age-picker-section">
-            <div class="age-picker-section-title">{{ section.title }}</div>
-            <div class="age-picker-section-hint">{{ section.hint }}</div>
-            <div class="age-picker-grid">
-              {% for value, label in section.choices %}
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="age_groups" value="{{ value }}"
-                       id="age-{{ value }}" {{ 'checked' if value in selected_age_groups }}>
-                <label class="form-check-label" for="age-{{ value }}">{{ label }}</label>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          {% endfor %}
-          <div class="form-text">Example: for a frock fitting ages 2–5 years, check <strong>2–3 Years</strong>, <strong>3–4 Years</strong>, and <strong>4–5 Years</strong>.</div>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Brand</label>
-          {{ form.brand(class="form-control", placeholder="Optional") }}
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Material</label>
-          {{ form.material(class="form-control", placeholder="e.g. 100% Cotton") }}
-        </div>
-        <div class="col-md-4">
-          <div class="form-check mt-4">
-            {{ form.is_active(class="form-check-input") }}
-            <label class="form-check-label">Active (visible on store)</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-check mt-4">
-            {{ form.is_featured(class="form-check-input") }}
-            <label class="form-check-label">Featured (show on homepage)</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-check mt-4">
-            {{ form.is_trending(class="form-check-input") }}
-            <label class="form-check-label">Trending</label>
-          </div>
-        </div>
+  <!-- 1. Basics -->
+  <div class="product-form-section">
+    <div class="product-form-section-head">
+      <span class="product-form-step">1</span>
+      <div>
+        <h5 class="mb-0">Product details</h5>
+        <p class="text-muted small mb-0">Name, category, pricing, and descriptions</p>
       </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label">Product Name <span class="text-danger">*</span></label>
+        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Cotton Frock — Floral Pink") }}
+        {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Category <span class="text-danger">*</span></label>
+        <select name="category_id" id="category_id" class="form-select" required>
+          <option value="">Select category…</option>
+          {% for group in category_groups %}
+          <optgroup label="{{ group.label }}">
+            {% for opt in group.options %}
+            <option value="{{ opt.id }}" {{ 'selected' if form.category_id.data == opt.id }}>{{ opt.name }}</option>
+            {% endfor %}
+          </optgroup>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Short Description</label>
+        {{ form.short_description(class="form-control", placeholder="One line for product cards (max 500 chars)") }}
+      </div>
+      <div class="col-12">
+        <label class="form-label">Full Description</label>
+        {{ form.description(class="form-control", rows=4, placeholder="Fabric, fit, occasion, care…") }}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Selling Price (₹) <span class="text-danger">*</span></label>
+        {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else ""), step="0.01") }}
+        {% for error in form.price.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Compare at Price (₹)</label>
+        {{ form.compare_at_price(class="form-control", step="0.01", placeholder="MRP for sale badge") }}
+        <div class="form-text">Must be higher than selling price</div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Brand</label>
+        {{ form.brand(class="form-control", placeholder="Indistylex") }}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Material</label>
+        {{ form.material(class="form-control", placeholder="100% Cotton") }}
+      </div>
+    </div>
+  </div>
 
-      <hr class="my-4">
-      <h5 class="fw-semibold">Product Images</h5>
-      <p class="text-muted small mb-3">Upload photos (JPG, PNG, WebP). Preview appears below — use it to pick the right <strong>color</strong> for each variant. First image = main photo.</p>
-
-      {% if product and images %}
-      <div class="product-image-preview-grid mb-3">
-        {% for img in images %}
-        <div class="product-image-saved-item position-relative">
-          <img src="{{ image_url(img.image_url) }}" alt="Product photo">
-          <div class="product-image-preview-caption">
-            {% if img.is_primary %}<span class="badge bg-primary me-1">Main</span>{% endif %}
-            Saved image {{ loop.index }}
+  <!-- 2. Audience -->
+  <div class="product-form-section">
+    <div class="product-form-section-head">
+      <span class="product-form-step">2</span>
+      <div>
+        <h5 class="mb-0">Who is it for?</h5>
+        <p class="text-muted small mb-0">Gender and age bands power shop filters & “Shop by Age”</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Gender <span class="text-danger">*</span> <span class="text-muted fw-normal">(if live)</span></label>
+        {{ form.gender(class="form-select", id="gender") }}
+        <div id="gender-hint" class="form-text">Pick Boys, Girls, or Kids so shop filters work correctly.</div>
+      </div>
+      <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <label class="form-label mb-0 me-2">Quick age presets</label>
+          {% for preset in age_presets %}
+          <button type="button" class="btn btn-sm btn-outline-primary" data-age-preset="{{ preset.ages | join(',') }}">{{ preset.label }}</button>
+          {% endfor %}
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-age-clear>Clear all</button>
+        </div>
+        <label class="form-label">Suitable ages <span class="text-danger">*</span> <span class="text-muted fw-normal">(check all that apply)</span></label>
+        {% for section in age_group_sections %}
+        <div class="age-picker-section">
+          <div class="age-picker-section-title">{{ section.title }}</div>
+          <div class="age-picker-section-hint">{{ section.hint }}</div>
+          <div class="age-picker-grid">
+            {% for value, label in section.choices %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="age_groups" value="{{ value }}"
+                     id="age-{{ value }}" {{ 'checked' if value in selected_age_groups }}>
+              <label class="form-check-label" for="age-{{ value }}">{{ label }}</label>
+            </div>
+            {% endfor %}
           </div>
         </div>
         {% endfor %}
+        <div class="form-text">Example: frock for 2–5 years → check 2–3Y, 3–4Y, and 4–5Y.</div>
       </div>
-      {% endif %}
-
-      <div class="mb-2">
-        <input type="file" name="images" id="product-images-input" class="form-control"
-               accept="image/jpeg,image/jpg,image/png,image/webp" multiple>
-      </div>
-      <div id="image-preview" class="product-image-preview-grid"></div>
-      <hr class="my-4">
-      <h5 class="fw-semibold">{{ 'Add More Variants' if product else 'Variants' }}</h5>
-      <p class="text-muted small mb-3">Add size, color, SKU and stock for each variant. Use “Add another variant” for more rows.</p>
-
-      <div class="table-responsive">
-        <table class="table table-sm align-middle mb-2">
-          <thead>
-            <tr>
-              <th style="width:18%">Size</th>
-              <th style="width:18%">Color</th>
-              <th style="width:34%">SKU</th>
-              <th style="width:15%">Stock</th>
-              <th style="width:15%"></th>
-            </tr>
-          </thead>
-          <tbody id="variant-rows">
-            <tr class="variant-row">
-              <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="e.g. 3-6M"></td>
-              <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="e.g. Blue"></td>
-              <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="Unique SKU"></td>
-              <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="0" min="0"></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="add-variant-row">
-        <i class="bi bi-plus-lg me-1"></i>Add another variant
-      </button>
-
-      <hr class="my-4">
-      <button type="submit" class="btn btn-primary">Save Product</button>
-      <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
-    </form>
+    </div>
   </div>
-</div>
+
+  <!-- 3. Store visibility -->
+  <div class="product-form-section">
+    <div class="product-form-section-head">
+      <span class="product-form-step">3</span>
+      <div>
+        <h5 class="mb-0">Store & homepage visibility</h5>
+        <p class="text-muted small mb-0">Choose where this product appears — you control the dashboard sections</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      {% for opt in visibility_options %}
+      <div class="col-sm-6 col-lg-3">
+        <label class="visibility-card">
+          {% if opt.field == 'is_active' %}
+          {{ form.is_active(class="form-check-input visibility-card-input", **{'data-visibility-field': opt.field}) }}
+          {% elif opt.field == 'is_new_arrival' %}
+          {{ form.is_new_arrival(class="form-check-input visibility-card-input", **{'data-visibility-field': opt.field}) }}
+          {% elif opt.field == 'is_featured' %}
+          {{ form.is_featured(class="form-check-input visibility-card-input", **{'data-visibility-field': opt.field}) }}
+          {% elif opt.field == 'is_trending' %}
+          {{ form.is_trending(class="form-check-input visibility-card-input", **{'data-visibility-field': opt.field}) }}
+          {% endif %}
+          <span class="visibility-card-icon" style="color: {{ opt.color }}"><i class="bi {{ opt.icon }}"></i></span>
+          <strong class="visibility-card-title">{{ opt.label }}</strong>
+          <span class="visibility-card-desc">{{ opt.description }}</span>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="listing-preview-panel mt-3">
+      <strong class="small">Preview — will show on:</strong>
+      <ul id="listing-preview-list" class="small mb-0 mt-1"></ul>
+    </div>
+  </div>
+
+  <!-- 4. Images -->
+  <div class="product-form-section">
+    <div class="product-form-section-head">
+      <span class="product-form-step">4</span>
+      <div>
+        <h5 class="mb-0">Photos</h5>
+        <p class="text-muted small mb-0">{% if is_new %}At least one image required{% else %}Add more photos anytime{% endif %}</p>
+      </div>
+    </div>
+    {% if product and images %}
+    <div class="product-image-preview-grid mb-3">
+      {% for img in images %}
+      <div class="product-image-saved-item">
+        <img src="{{ image_url(img.image_url) }}" alt="Product photo">
+        <div class="product-image-preview-caption">
+          {% if img.is_primary %}<span class="badge bg-primary me-1">Main</span>{% endif %}
+          Saved {{ loop.index }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <input type="file" name="images" id="product-images-input" class="form-control"
+           accept="image/jpeg,image/jpg,image/png,image/webp" multiple {% if is_new and not (product and images) %}required{% endif %}>
+    <div id="image-preview" class="product-image-preview-grid mt-2"></div>
+  </div>
+
+  <!-- 5. Variants -->
+  <div class="product-form-section">
+    <div class="product-form-section-head">
+      <span class="product-form-step">5</span>
+      <div>
+        <h5 class="mb-0">Sizes, colors & stock</h5>
+        <p class="text-muted small mb-0">{% if is_new %}At least one complete variant required{% else %}Add new size/color rows below{% endif %}</p>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-2">
+        <thead>
+          <tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th></th></tr>
+        </thead>
+        <tbody id="variant-rows">
+          <tr class="variant-row">
+            <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="3-4Y" {% if is_new %}required{% endif %}></td>
+            <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="Pink" {% if is_new %}required{% endif %}></td>
+            <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="IX-FRK-PINK-34" {% if is_new %}required{% endif %}></td>
+            <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="10" min="0"></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="add-variant-row">
+      <i class="bi bi-plus-lg me-1"></i>Add another variant
+    </button>
+  </div>
+
+  <div class="product-form-actions">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="bi bi-check2-circle me-1"></i>Save Product
+    </button>
+    <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+  </div>
+</form>
 
 <template id="variant-row-template">
   <tr class="variant-row">
-    <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="e.g. 3-6M"></td>
-    <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="e.g. Blue"></td>
-    <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="Unique SKU"></td>
+    <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="3-4Y"></td>
+    <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="Pink"></td>
+    <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="SKU"></td>
     <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="0" min="0"></td>
-    <td>
-      <button type="button" class="btn btn-sm btn-outline-danger remove-variant-row" title="Remove row">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </td>
+    <td><button type="button" class="btn btn-sm btn-outline-danger remove-variant-row"><i class="bi bi-x-lg"></i></button></td>
   </tr>
 </template>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-(function () {
-  const rows = document.getElementById('variant-rows');
-  const addBtn = document.getElementById('add-variant-row');
-  const tpl = document.getElementById('variant-row-template');
-  const imageInput = document.getElementById('product-images-input');
-  const preview = document.getElementById('image-preview');
-  let previewUrls = [];
-
-  addBtn?.addEventListener('click', function () {
-    rows.appendChild(tpl.content.cloneNode(true));
-  });
-
-  rows?.addEventListener('click', function (e) {
-    const btn = e.target.closest('.remove-variant-row');
-    if (!btn) return;
-    const row = btn.closest('.variant-row');
-    if (rows.querySelectorAll('.variant-row').length > 1) {
-      row.remove();
-    }
-  });
-
-  function clearPreviewUrls() {
-    previewUrls.forEach(function (url) { URL.revokeObjectURL(url); });
-    previewUrls = [];
-  }
-
-  function renderImagePreviews(files) {
-    clearPreviewUrls();
-    preview.innerHTML = '';
-    if (!files || !files.length) return;
-
-    Array.from(files).forEach(function (file, index) {
-      if (!file.type.startsWith('image/')) return;
-
-      const card = document.createElement('div');
-      card.className = 'product-image-preview-item' + (index === 0 ? ' is-primary' : '');
-
-      const img = document.createElement('img');
-      const url = URL.createObjectURL(file);
-      previewUrls.push(url);
-      img.src = url;
-      img.alt = file.name;
-
-      const caption = document.createElement('div');
-      caption.className = 'product-image-preview-caption';
-      if (index === 0) {
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-primary me-1';
-        badge.textContent = 'Main';
-        caption.appendChild(badge);
-      }
-      caption.appendChild(document.createTextNode(file.name));
-
-      card.appendChild(img);
-      card.appendChild(caption);
-      preview.appendChild(card);
-    });
-  }
-
-  imageInput?.addEventListener('change', function () {
-    renderImagePreviews(this.files);
-  });
-})();
-</script>
+<script>window.PRODUCT_CATEGORY_META = {{ category_meta_json | safe }};</script>
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=1"></script>
 {% endblock %}

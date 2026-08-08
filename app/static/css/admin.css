@@ -982,3 +982,166 @@ body.admin-body {
   background: #1E4D8C;
   border-color: #1E4D8C;
 }
+
+/* ─── Product form (admin) ─── */
+.product-form-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.product-form-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+.product-form-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.product-form-actions {
+  position: sticky;
+  bottom: 0;
+  background: rgba(239, 246, 255, 0.95);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 0;
+  margin-top: 0.5rem;
+}
+.visibility-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  cursor: pointer;
+  height: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.visibility-card:has(.visibility-card-input:checked) {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  background: #F8FAFF;
+}
+.visibility-card-input {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.visibility-card-icon { font-size: 1.4rem; }
+.visibility-card-title { font-size: 0.88rem; color: var(--text-primary); }
+.visibility-card-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; }
+.listing-preview-panel {
+  background: #EFF6FF;
+  border-radius: 10px;
+  padding: 12px 16px;
+  border: 1px solid #BFDBFE;
+}
+.listing-preview-panel ul { list-style: none; padding-left: 0; }
+.product-listing-preview-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  max-width: 280px;
+}
+.age-picker-section {
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1rem 1.15rem;
+  margin-bottom: 0.75rem;
+  background: #fafbfc;
+}
+.age-picker-section-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.15rem; }
+.age-picker-section-hint { font-size: 0.75rem; color: #6c757d; margin-bottom: 0.75rem; }
+.age-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+.product-image-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.product-image-preview-item,
+.product-image-saved-item {
+  width: 140px;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #fff;
+}
+.product-image-preview-item img,
+.product-image-saved-item img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  display: block;
+}
+.product-image-preview-caption {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.7rem;
+  color: #6c757d;
+  border-top: 1px solid #eee;
+}
+.product-image-preview-item.is-primary { border-color: #2563EB; }
+.visibility-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.visibility-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.visibility-badge--new { background: #DBEAFE; color: #1E40AF; }
+.visibility-badge--featured { background: #FCE7F3; color: #9D174D; }
+.visibility-badge--trending { background: #FEF3C7; color: #92400E; }
+.visibility-badge--draft { background: #F3F4F6; color: #6B7280; }
+.admin-filter-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.admin-filter-pill {
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0;
+  text-decoration: none;
+  color: var(--text-secondary);
+  background: #fff;
+}
+.admin-filter-pill:hover { border-color: #2563EB; color: #2563EB; }
+.admin-filter-pill.is-active { background: #2563EB; color: #fff; border-color: #2563EB; }
+.store-visibility-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+.store-vis-card {
+  flex: 1 1 140px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s;
+}
+.store-vis-card:hover { box-shadow: 0 4px 14px rgba(37,99,235,0.1); color: inherit; }
+.store-vis-card strong { display: block; font-size: 1.25rem; color: #2563EB; }
+.store-vis-card span { font-size: 0.75rem; color: var(--text-muted); }

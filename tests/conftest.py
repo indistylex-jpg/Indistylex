@@ -107,6 +107,7 @@ def sample_product(db, sample_category):
         material='100% Cotton',
         is_active=True,
         is_featured=True,
+        is_new_arrival=True,
     )
     db.session.add(product)
     db.session.flush()

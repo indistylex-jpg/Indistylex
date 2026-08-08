@@ -26,6 +26,18 @@ from app.services.expense_service import (
     auto_record_order_shipping, auto_record_order_refund,
 )
 from app.services.dashboard_analytics_service import get_dashboard_analytics
+from app.services.product_catalog_service import (
+    AGE_PRESETS,
+    STORE_VISIBILITY_OPTIONS,
+    apply_age_groups_from_request,
+    apply_product_fields_from_form,
+    category_metadata_for_js,
+    get_category_choices_flat,
+    get_category_groups,
+    get_store_visibility_counts,
+    listing_preview,
+    validate_product_submission,
+)
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -97,7 +109,7 @@ def _save_variants_from_request(product):
 
 
 def _apply_product_age_groups(product):
-    product.set_age_groups_list(request.form.getlist('age_groups'))
+    apply_age_groups_from_request(product, request.form)
 
 
 def _delete_product_record(product):
@@ -140,6 +152,7 @@ def dashboard():
     total_expenses, expense_count = get_expense_totals(start_date=month_start)
     expense_by_category = get_expense_by_category(start_date=month_start)
     net_profit = analytics['total_revenue'] - float(total_expenses)
+    store_visibility = get_store_visibility_counts()
 
     top_products = []
     for i, name in enumerate(analytics['top_product_names'][:5]):
@@ -184,6 +197,7 @@ def dashboard():
         expense_count=expense_count,
         expense_by_category=expense_by_category,
         net_profit=net_profit,
+        store_visibility=store_visibility,
         **template_data,
         **chart_json,
     )
@@ -295,13 +309,29 @@ def products():
 
     query = Product.query
     search = request.args.get('q', '').strip()
+    visibility = request.args.get('visibility', '').strip()
+
     if search:
         query = query.filter(Product.name.ilike(f'%{search}%'))
+
+    if visibility == 'featured':
+        query = query.filter_by(is_featured=True, is_active=True)
+    elif visibility == 'new':
+        query = query.filter_by(is_new_arrival=True, is_active=True)
+    elif visibility == 'trending':
+        query = query.filter_by(is_trending=True, is_active=True)
+    elif visibility == 'draft':
+        query = query.filter_by(is_active=False)
 
     products = query.order_by(Product.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
-    return render_template('admin/products.html', products=products, search=search)
+    return render_template(
+        'admin/products.html',
+        products=products,
+        search=search,
+        visibility=visibility,
+    )
 
 
 @admin_bp.route('/products/bulk-delete', methods=['GET', 'POST'])
@@ -361,55 +391,49 @@ def bulk_delete_products():
 @admin_required
 def add_product():
     form = ProductForm()
-    form.category_id.choices = [
-        (c.id, f'{c.parent.name} > {c.name}' if c.parent else c.name)
-        for c in Category.query.order_by(Category.name).all()
-    ]
+    form.category_id.choices = get_category_choices_flat()
+    category_groups = get_category_groups()
 
     if form.validate_on_submit():
-        from slugify import slugify
-        product = Product(
-            name=form.name.data.strip(),
-            slug=slugify(form.name.data.strip()),
-            short_description=form.short_description.data,
-            description=form.description.data,
-            price=form.price.data,
-            compare_at_price=form.compare_at_price.data,
-            category_id=form.category_id.data,
-            brand=form.brand.data,
-            gender=form.gender.data or None,
-            material=form.material.data,
-            care_instructions=form.care_instructions.data,
-            is_active=form.is_active.data,
-            is_featured=form.is_featured.data,
-            is_trending=form.is_trending.data,
+        errors = validate_product_submission(
+            form, request.form, request.files, is_new=True,
         )
-        db.session.add(product)
-        db.session.flush()
-        _apply_product_age_groups(product)
+        if errors:
+            for msg in errors:
+                flash(msg, 'danger')
+        else:
+            product = Product()
+            apply_product_fields_from_form(product, form, is_new=True)
+            db.session.add(product)
+            db.session.flush()
+            apply_age_groups_from_request(product, request.form)
 
-        image_count, image_failed = _save_product_images(product)
-        variant_count, skipped_skus = _save_variants_from_request(product)
-        db.session.commit()
+            image_count, image_failed = _save_product_images(product)
+            variant_count, skipped_skus = _save_variants_from_request(product)
+            db.session.commit()
 
-        parts = [f'Product "{product.name}" created']
-        if image_count:
-            parts.append(f'{image_count} image(s)')
-        if variant_count:
-            parts.append(f'{variant_count} variant(s)')
-        flash('. '.join(parts) + '.', 'success')
-        if image_failed:
-            flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
-        for sku in skipped_skus:
-            flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
-        return redirect(url_for('admin.products'))
+            places = listing_preview(product)
+            flash(
+                f'Product "{product.name}" created. Visible on: {"; ".join(places)}.',
+                'success',
+            )
+            if image_failed:
+                flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+            for sku in skipped_skus:
+                flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+            return redirect(url_for('admin.products'))
 
     return render_template(
         'admin/product_form.html',
         form=form,
         title='Add Product',
+        is_new=True,
         age_group_sections=AGE_GROUP_SECTIONS,
+        age_presets=AGE_PRESETS,
         selected_age_groups=[],
+        category_groups=category_groups,
+        visibility_options=STORE_VISIBILITY_OPTIONS,
+        category_meta_json=json.dumps(category_metadata_for_js()),
     )
 
 
@@ -419,31 +443,34 @@ def add_product():
 def edit_product(product_id):
     product = Product.query.get_or_404(product_id)
     form = ProductForm(obj=product)
-    form.category_id.choices = [
-        (c.id, f'{c.parent.name} > {c.name}' if c.parent else c.name)
-        for c in Category.query.order_by(Category.name).all()
-    ]
+    form.category_id.choices = get_category_choices_flat()
+    category_groups = get_category_groups()
 
     if form.validate_on_submit():
-        form.populate_obj(product)
-        product.gender = form.gender.data or None
-        _apply_product_age_groups(product)
+        errors = validate_product_submission(
+            form, request.form, request.files, is_new=False, product=product,
+        )
+        if errors:
+            for msg in errors:
+                flash(msg, 'danger')
+        else:
+            apply_product_fields_from_form(product, form, is_new=False)
+            apply_age_groups_from_request(product, request.form)
 
-        image_count, image_failed = _save_product_images(product)
-        variant_count, skipped_skus = _save_variants_from_request(product)
-        db.session.commit()
+            image_count, image_failed = _save_product_images(product)
+            variant_count, skipped_skus = _save_variants_from_request(product)
+            db.session.commit()
 
-        parts = [f'Product "{product.name}" updated']
-        if image_count:
-            parts.append(f'{image_count} new image(s)')
-        if variant_count:
-            parts.append(f'{variant_count} new variant(s)')
-        flash('. '.join(parts) + '.', 'success')
-        if image_failed:
-            flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
-        for sku in skipped_skus:
-            flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
-        return redirect(url_for('admin.products'))
+            places = listing_preview(product)
+            flash(
+                f'Product "{product.name}" updated. Visible on: {"; ".join(places)}.',
+                'success',
+            )
+            if image_failed:
+                flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+            for sku in skipped_skus:
+                flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+            return redirect(url_for('admin.products'))
 
     variants = product.variants.all()
     images = product.images.order_by(ProductImage.sort_order).all()
@@ -452,11 +479,17 @@ def edit_product(product_id):
         'admin/product_form.html',
         form=form,
         title='Edit Product',
+        is_new=False,
         product=product,
         variants=variants,
         images=images,
         age_group_sections=AGE_GROUP_SECTIONS,
+        age_presets=AGE_PRESETS,
         selected_age_groups=product.age_groups_list,
+        category_groups=category_groups,
+        visibility_options=STORE_VISIBILITY_OPTIONS,
+        listing_preview=listing_preview(product),
+        category_meta_json=json.dumps(category_metadata_for_js()),
     )
 
 

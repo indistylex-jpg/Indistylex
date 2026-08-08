@@ -302,10 +302,20 @@ class TestAdminRoutes:
         assert resp.status_code == 200
         assert b'name="images"' in resp.data
         assert b'variant_size[]' in resp.data
-        assert b'Suitable Ages' in resp.data
+        assert b'Suitable ages' in resp.data
         assert b'name="age_groups"' in resp.data
+        assert b'Store & homepage visibility' in resp.data
 
     def test_admin_create_product_with_variant(self, client, admin_user, sample_category):
+        from io import BytesIO
+        try:
+            from PIL import Image
+            img_buf = BytesIO()
+            Image.new('RGB', (10, 10), color=(255, 0, 0)).save(img_buf, format='JPEG')
+            img_buf.seek(0)
+        except ImportError:
+            img_buf = BytesIO(b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9')
+
         login_admin(client)
         resp = client.post('/admin/products/add', data={
             'name': 'Full Set Romper',
@@ -314,15 +324,18 @@ class TestAdminRoutes:
             'gender': 'kids',
             'age_groups': ['1-2y', '2-3y', '3-4y'],
             'is_active': 'y',
+            'is_new_arrival': 'y',
             'variant_size[]': '6-9M',
             'variant_color[]': 'Pink',
             'variant_sku[]': 'FULL-ROM-PINK',
             'variant_stock[]': '10',
-        }, follow_redirects=True)
+            'images': (img_buf, 'test.jpg'),
+        }, content_type='multipart/form-data', follow_redirects=True)
         assert resp.status_code == 200
         product = Product.query.filter_by(name='Full Set Romper').first()
         assert product is not None
         assert product.age_groups == '1-2y,2-3y,3-4y'
+        assert product.is_new_arrival is True
         assert product.variants.count() == 1
         assert product.variants.first().sku == 'FULL-ROM-PINK'
 

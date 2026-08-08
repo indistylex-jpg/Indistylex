@@ -6,6 +6,8 @@
 
         {% if product.discount_percent > 0 %}
         <span class="collection-card-badge collection-card-badge--sale">On Sale</span>
+        {% elif product.is_new_arrival %}
+        <span class="collection-card-badge collection-card-badge--new">New</span>
         {% endif %}
 
         <button type="button" class="collection-card-wishlist" title="Add to wishlist"

@@ -322,6 +322,10 @@ def get_products():
     if trending:
         query = query.filter_by(is_trending=True)
 
+    new_arrival = request.args.get('new_arrival', type=int)
+    if new_arrival:
+        query = query.filter_by(is_new_arrival=True)
+
     # Sorting
     sort = request.args.get('sort', 'newest')
     if sort == 'price_low':
@@ -824,7 +828,9 @@ def get_home_data():
     """Get home page data (featured, trending, categories)."""
     featured = Product.query.filter_by(is_active=True, is_featured=True).limit(10).all()
     trending = Product.query.filter_by(is_active=True, is_trending=True).limit(10).all()
-    new_arrivals = Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).limit(10).all()
+    new_arrivals = Product.query.filter_by(
+        is_active=True, is_new_arrival=True
+    ).order_by(Product.created_at.desc()).limit(10).all()
     categories = Category.query.filter_by(is_active=True).order_by(Category.sort_order).all()
 
     return jsonify({
@@ -877,7 +883,8 @@ def _serialize_product_list(product):
         'review_count': product.review_count,
         'in_stock': product.in_stock,
         'is_featured': product.is_featured,
-        'is_trending': product.is_trending
+        'is_trending': product.is_trending,
+        'is_new_arrival': product.is_new_arrival,
     }
 
 
