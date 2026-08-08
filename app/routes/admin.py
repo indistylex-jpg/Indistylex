@@ -25,6 +25,7 @@ from app.services.expense_service import (
     record_expense, delete_expense, get_expense_totals, get_expense_by_category,
     auto_record_order_shipping, auto_record_order_refund,
 )
+from app.services.dashboard_analytics_service import get_dashboard_analytics
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -129,147 +130,63 @@ def _delete_product_record(product):
 @login_required
 @admin_required
 def dashboard():
-    """Admin dashboard with key metrics."""
-    total_orders = Order.query.count()
-    total_revenue = db.session.query(func.sum(Order.total)).filter(
-        Order.status.notin_(['cancelled', 'refunded'])
-    ).scalar() or 0
-    total_customers = User.query.filter_by(role='customer').count()
-    total_products = Product.query.filter_by(is_active=True).count()
-
+    """Admin dashboard with key metrics and charts."""
+    analytics = get_dashboard_analytics()
     recent_orders = Order.query.order_by(Order.created_at.desc()).limit(10).all()
     low_stock = get_low_stock_products(threshold=5)
 
-    pending_orders = Order.query.filter_by(status='pending').count()
+    today = datetime.utcnow()
+    month_start = today.replace(day=1).date()
+    total_expenses, expense_count = get_expense_totals(start_date=month_start)
+    expense_by_category = get_expense_by_category(start_date=month_start)
+    net_profit = analytics['total_revenue'] - float(total_expenses)
 
-    # --- Analytics data for charts ---
-
-    # Monthly revenue (last 6 months)
-    six_months_ago = datetime.utcnow() - timedelta(days=180)
-    db_engine = db.engine.dialect.name
-    if db_engine == 'sqlite':
-        month_expr = func.strftime('%Y-%m', Order.created_at)
-    else:
-        month_expr = func.date_format(Order.created_at, '%Y-%m')
-
-    monthly_revenue_rows = db.session.query(
-        month_expr.label('month'),
-        func.sum(Order.total).label('revenue'),
-        func.count(Order.id).label('orders')
-    ).filter(
-        Order.created_at >= six_months_ago,
-        Order.status.notin_(['cancelled', 'refunded'])
-    ).group_by(month_expr).order_by('month').all()
-
-    monthly_labels = [r.month for r in monthly_revenue_rows]
-    monthly_revenue = [float(r.revenue or 0) for r in monthly_revenue_rows]
-    monthly_order_counts = [int(r.orders) for r in monthly_revenue_rows]
-
-    # Payment method breakdown
-    payment_rows = db.session.query(
-        Order.payment_method, func.count(Order.id)
-    ).filter(
-        Order.status.notin_(['cancelled', 'refunded'])
-    ).group_by(Order.payment_method).all()
-    payment_labels = [r[0] or 'cod' for r in payment_rows]
-    payment_counts = [r[1] for r in payment_rows]
-
-    # Order status distribution
-    status_rows = db.session.query(
-        Order.status, func.count(Order.id)
-    ).group_by(Order.status).all()
-    status_labels = [r[0] or 'pending' for r in status_rows]
-    status_counts = [r[1] for r in status_rows]
-
-    # Top 10 selling products by quantity
-    top_products_rows = db.session.query(
-        OrderItem.product_name,
-        func.sum(OrderItem.quantity).label('total_qty')
-    ).group_by(OrderItem.product_name).order_by(
-        func.sum(OrderItem.quantity).desc()
-    ).limit(10).all()
-    top_product_names = [r.product_name for r in top_products_rows]
-    top_product_qty = [int(r.total_qty) for r in top_products_rows]
-
-    # Top selling products with images and prices for the sidebar list
     top_products = []
-    for row in top_products_rows[:5]:
-        product = Product.query.filter_by(name=row.product_name).first()
+    for i, name in enumerate(analytics['top_product_names'][:5]):
+        qty = analytics['top_product_qty'][i] if i < len(analytics['top_product_qty']) else 0
+        product = Product.query.filter_by(name=name).first()
         if product:
             img = product.images.first()
-            image = img.image_url if img else None
             top_products.append({
                 'name': product.name,
                 'price': float(product.price),
-                'image': image,
-                'qty_sold': int(row.total_qty)
+                'image': img.image_url if img else None,
+                'qty_sold': qty,
             })
         else:
-            top_products.append({
-                'name': row.product_name,
-                'price': 0,
-                'image': None,
-                'qty_sold': int(row.total_qty)
-            })
+            top_products.append({'name': name, 'price': 0, 'image': None, 'qty_sold': qty})
 
-    # If no order data, show top products from catalog
     if not top_products:
         for p in Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).limit(5).all():
             img = p.images.first()
-            image = img.image_url if img else None
             top_products.append({
                 'name': p.name,
                 'price': float(p.price),
-                'image': image,
-                'qty_sold': 0
+                'image': img.image_url if img else None,
+                'qty_sold': 0,
             })
 
-    # Category product counts for donut chart
-    category_rows = db.session.query(
-        Category.name,
-        func.count(Product.id).label('count')
-    ).join(Product, Product.category_id == Category.id).filter(
-        Product.is_active == True
-    ).group_by(Category.name).order_by(func.count(Product.id).desc()).limit(5).all()
-    category_names = [r.name for r in category_rows]
-    category_counts = [int(r.count) for r in category_rows]
+    chart_keys = (
+        'monthly_labels', 'monthly_revenue', 'monthly_order_counts',
+        'status_labels', 'status_counts', 'payment_labels', 'payment_counts',
+        'top_product_names', 'top_product_qty', 'category_names', 'category_counts',
+        'gender_labels', 'gender_counts', 'gender_colors',
+    )
+    chart_json = {k: json.dumps(analytics[k]) for k in chart_keys}
+    template_data = {k: v for k, v in analytics.items() if k not in chart_keys}
 
-    # Date range for header
-    today = datetime.utcnow()
-    week_ago = today - timedelta(days=6)
-    today_range = f"{week_ago.strftime('%b %d')} - {today.strftime('%b %d, %Y')}"
-
-    # Expenses — current month totals (auto + manual)
-    month_start = today.replace(day=1).date()
-    total_expenses, expense_count = get_expense_totals(start_date=month_start)
-    net_profit = float(total_revenue or 0) - float(total_expenses)
-    expense_by_category = get_expense_by_category(start_date=month_start)
-
-    return render_template('admin/dashboard.html',
-                           total_orders=total_orders,
-                           total_revenue=total_revenue,
-                           total_customers=total_customers,
-                           total_products=total_products,
-                           recent_orders=recent_orders,
-                           low_stock=low_stock,
-                           pending_orders=pending_orders,
-                           monthly_labels=json.dumps(monthly_labels),
-                           monthly_revenue=json.dumps(monthly_revenue),
-                           monthly_order_counts=json.dumps(monthly_order_counts),
-                           payment_labels=json.dumps(payment_labels),
-                           payment_counts=json.dumps(payment_counts),
-                           status_labels=json.dumps(status_labels),
-                           status_counts=json.dumps(status_counts),
-                           top_product_names=json.dumps(top_product_names),
-                           top_product_qty=json.dumps(top_product_qty),
-                           top_products=top_products,
-                           category_names=json.dumps(category_names),
-                           category_counts=json.dumps(category_counts),
-                           today_range=today_range,
-                           total_expenses=total_expenses,
-                           expense_count=expense_count,
-                           net_profit=net_profit,
-                           expense_by_category=expense_by_category)
+    return render_template(
+        'admin/dashboard.html',
+        recent_orders=recent_orders,
+        low_stock=low_stock,
+        top_products=top_products,
+        total_expenses=total_expenses,
+        expense_count=expense_count,
+        expense_by_category=expense_by_category,
+        net_profit=net_profit,
+        **template_data,
+        **chart_json,
+    )
 
 
 # ── Categories ────────────────────────────────────────────────────────
