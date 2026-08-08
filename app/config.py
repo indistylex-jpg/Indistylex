@@ -58,6 +58,13 @@ class Config:
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@indistylex.in')
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-this-password')
 
+    # Social profiles
+    SOCIAL_FACEBOOK = os.environ.get('SOCIAL_FACEBOOK', 'https://www.facebook.com/indistylex')
+    SOCIAL_INSTAGRAM = os.environ.get('SOCIAL_INSTAGRAM', 'https://www.instagram.com/indistylex')
+    SOCIAL_TWITTER = os.environ.get('SOCIAL_TWITTER', 'https://twitter.com/indistylex')
+    SOCIAL_PINTEREST = os.environ.get('SOCIAL_PINTEREST', 'https://www.pinterest.com/indistylex')
+    SOCIAL_WHATSAPP = os.environ.get('SOCIAL_WHATSAPP', 'https://wa.me/916394142176')
+
     # Session security
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'

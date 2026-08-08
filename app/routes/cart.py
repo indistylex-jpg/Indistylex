@@ -5,6 +5,7 @@ from app.models.cart import Cart, CartItem
 from app.models.product import ProductVariant
 from app.models.coupon import Coupon
 from app.services.inventory_service import check_stock
+from app.services.cart_service import resolve_variant_id, cart_add_error_message
 from app.utils.helpers import generate_session_id
 
 cart_bp = Blueprint('cart', __name__)
@@ -44,22 +45,21 @@ def view():
 def add_to_cart():
     """Add item to cart."""
     variant_id = request.form.get('variant_id', type=int)
+    product_id = request.form.get('product_id', type=int)
+    size = request.form.get('size', '').strip()
+    color = request.form.get('color', '').strip()
     quantity = request.form.get('quantity', 1, type=int)
+    buy_now = request.form.get('buy_now') == '1'
 
-    # If variant_id not provided, resolve from product_id + size + color
     if not variant_id:
-        product_id = request.form.get('product_id', type=int)
-        size = request.form.get('size', '').strip()
-        color = request.form.get('color', '').strip()
-        if product_id and size and color:
-            variant = ProductVariant.query.filter_by(
-                product_id=product_id, size=size, color=color, is_active=True
-            ).first()
-            if variant:
-                variant_id = variant.id
+        variant_id = resolve_variant_id(
+            product_id=product_id,
+            size=size,
+            color=color,
+        )
 
     if not variant_id or quantity < 1:
-        flash('Please select a size and color.', 'danger')
+        flash(cart_add_error_message(product_id, size, color), 'danger')
         return redirect(request.referrer or url_for('shop.listing'))
 
     variant = ProductVariant.query.get(variant_id)
@@ -90,6 +90,9 @@ def add_to_cart():
 
     db.session.commit()
     flash('Item added to cart!', 'success')
+
+    if buy_now:
+        return redirect(url_for('checkout.checkout_page'))
     return redirect(url_for('cart.view'))
 
 

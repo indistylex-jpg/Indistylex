@@ -86,13 +86,20 @@
                     <p class="pdp-description">{{ product.description }}</p>
 
                     <!-- Add to Cart Form -->
+                    {% set variants = product.variants.filter_by(is_active=True).all() %}
+                    {% set in_stock_variants = variants | selectattr('stock_quantity', 'gt', 0) | list %}
+                    {% set sizes = in_stock_variants | map(attribute='size') | unique | list %}
+                    {% set colors = in_stock_variants | map(attribute='color') | unique | list %}
+
                     <form method="POST" action="{{ url_for('cart.add_to_cart') }}" id="addToCartForm">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
+                        {% if in_stock_variants | length == 1 %}
+                        <input type="hidden" name="variant_id" value="{{ in_stock_variants[0].id }}">
+                        {% endif %}
 
                         <!-- Size Selection -->
-                        {% set sizes = product.variants | map(attribute='size') | unique | list %}
-                        {% if sizes %}
+                        {% if sizes | length > 1 %}
                         <div class="pdp-option-group">
                             <label class="pdp-option-label">SIZE</label>
                             <div class="pdp-size-options">
@@ -100,13 +107,18 @@
                                 <button type="button" class="pdp-size-btn" data-size="{{ size }}">{{ size }}</button>
                                 {% endfor %}
                             </div>
-                            <input type="hidden" name="size" id="selectedSize" required>
+                            <input type="hidden" name="size" id="selectedSize">
+                        </div>
+                        {% elif sizes | length == 1 %}
+                        <input type="hidden" name="size" id="selectedSize" value="{{ sizes[0] }}">
+                        <div class="pdp-option-group mb-3">
+                            <label class="pdp-option-label">SIZE</label>
+                            <span class="badge bg-light text-dark border">{{ sizes[0] }}</span>
                         </div>
                         {% endif %}
 
                         <!-- Color Selection -->
-                        {% set colors = product.variants | map(attribute='color') | unique | list %}
-                        {% if colors %}
+                        {% if colors | length > 1 %}
                         <div class="pdp-option-group">
                             <label class="pdp-option-label">COLOR</label>
                             <div class="pdp-color-options">
@@ -114,8 +126,18 @@
                                 <button type="button" class="pdp-color-btn" data-color="{{ color }}">{{ color }}</button>
                                 {% endfor %}
                             </div>
-                            <input type="hidden" name="color" id="selectedColor" required>
+                            <input type="hidden" name="color" id="selectedColor">
                         </div>
+                        {% elif colors | length == 1 %}
+                        <input type="hidden" name="color" id="selectedColor" value="{{ colors[0] }}">
+                        <div class="pdp-option-group mb-3">
+                            <label class="pdp-option-label">COLOR</label>
+                            <span class="badge bg-light text-dark border">{{ colors[0] }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if not in_stock_variants %}
+                        <div class="alert alert-warning">This product is currently out of stock.</div>
                         {% endif %}
 
                         <!-- Quantity -->
@@ -130,8 +152,8 @@
 
                         <!-- Action Buttons -->
                         <div class="pdp-actions">
-                            <button type="submit" class="pdp-btn-cart" id="addToCartBtn">ADD TO CART</button>
-                            <a href="{{ url_for('checkout.checkout_page') }}" class="pdp-btn-buy">BUY NOW</a>
+                            <button type="submit" class="pdp-btn-cart" id="addToCartBtn" {% if not in_stock_variants %}disabled{% endif %}>ADD TO CART</button>
+                            <button type="submit" name="buy_now" value="1" class="pdp-btn-buy" id="buyNowBtn" {% if not in_stock_variants %}disabled{% endif %}>BUY NOW</button>
                         </div>
                     </form>
 
@@ -172,13 +194,15 @@
                     </div>
 
                     <!-- Share -->
+                    {% set share_url = url_for('product.detail', slug=product.slug, _external=True) %}
+                    {% set share_text = product.name ~ ' — Indistylex' %}
                     <div class="pdp-share">
                         <span class="pdp-share-label">Share this product</span>
                         <div class="pdp-share-icons">
-                            <a href="#"><i class="bi bi-twitter-x"></i></a>
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-whatsapp"></i></a>
-                            <a href="#"><i class="bi bi-instagram"></i></a>
+                            <a href="https://twitter.com/intent/tweet?url={{ share_url | urlencode }}&text={{ share_text | urlencode }}" target="_blank" rel="noopener noreferrer" aria-label="Share on X"><i class="bi bi-twitter-x"></i></a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url | urlencode }}" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook"><i class="bi bi-facebook"></i></a>
+                            <a href="https://wa.me/?text={{ (share_text ~ ' ' ~ share_url) | urlencode }}" target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                            <a href="{{ social_links.instagram }}" target="_blank" rel="noopener noreferrer" aria-label="Follow on Instagram"><i class="bi bi-instagram"></i></a>
                         </div>
                     </div>
                 </div>
@@ -216,39 +240,84 @@
 
 {% block extra_js %}
 <script>
-// Size selection
-document.querySelectorAll('.pdp-size-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.pdp-size-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById('selectedSize').value = this.dataset.size;
+(function () {
+    const form = document.getElementById('addToCartForm');
+    if (!form) return;
+
+    const variants = {{ [
+        {'id': v.id, 'size': v.size, 'color': v.color}
+        for v in in_stock_variants
+    ] | tojson }};
+
+    function setActive(btnList, activeBtn) {
+        btnList.forEach(b => b.classList.remove('active'));
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function syncColorForSize(size) {
+        const colorEl = document.getElementById('selectedColor');
+        if (!colorEl) return;
+        const colorBtns = document.querySelectorAll('.pdp-color-btn');
+        if (!colorBtns.length) return;
+        const matches = variants.filter(v => v.size === size);
+        if (matches.length === 1) {
+            colorEl.value = matches[0].color;
+            colorBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.color === matches[0].color);
+            });
+        }
+    }
+
+    document.querySelectorAll('.pdp-size-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            setActive(document.querySelectorAll('.pdp-size-btn'), this);
+            const sizeEl = document.getElementById('selectedSize');
+            if (sizeEl) sizeEl.value = this.dataset.size;
+            syncColorForSize(this.dataset.size);
+        });
     });
-});
-// Color selection
-document.querySelectorAll('.pdp-color-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.pdp-color-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById('selectedColor').value = this.dataset.color;
+
+    document.querySelectorAll('.pdp-color-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            setActive(document.querySelectorAll('.pdp-color-btn'), this);
+            const colorEl = document.getElementById('selectedColor');
+            if (colorEl) colorEl.value = this.dataset.color;
+        });
     });
-});
-// Quantity
-document.querySelectorAll('.pdp-qty-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const input = document.getElementById('qtyInput');
-        let val = parseInt(input.value);
-        if (this.dataset.action === 'increase' && val < 10) input.value = val + 1;
-        if (this.dataset.action === 'decrease' && val > 1) input.value = val - 1;
+
+    document.querySelectorAll('.pdp-qty-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const input = document.getElementById('qtyInput');
+            let val = parseInt(input.value, 10) || 1;
+            if (this.dataset.action === 'increase' && val < 10) input.value = val + 1;
+            if (this.dataset.action === 'decrease' && val > 1) input.value = val - 1;
+        });
     });
-});
-// Validate
-document.getElementById('addToCartForm').addEventListener('submit', function(e) {
-    const sizeEl = document.getElementById('selectedSize');
-    const colorEl = document.getElementById('selectedColor');
-    if (sizeEl && !sizeEl.value) { e.preventDefault(); alert('Please select a size.'); return; }
-    if (colorEl && !colorEl.value) { e.preventDefault(); alert('Please select a color.'); return; }
-});
-// Gallery
+
+    form.addEventListener('submit', function (e) {
+        const sizeEl = document.getElementById('selectedSize');
+        const colorEl = document.getElementById('selectedColor');
+        const needsSize = document.querySelectorAll('.pdp-size-btn').length > 0;
+        const needsColor = document.querySelectorAll('.pdp-color-btn').length > 0;
+        if (needsSize && sizeEl && !sizeEl.value) {
+            e.preventDefault();
+            alert('Please select a size.');
+            return;
+        }
+        if (needsColor && colorEl && !colorEl.value) {
+            e.preventDefault();
+            alert('Please select a color.');
+            return;
+        }
+    });
+
+    // Auto-select when only one clickable option
+    const sizeBtns = document.querySelectorAll('.pdp-size-btn');
+    if (sizeBtns.length === 1) sizeBtns[0].click();
+    const colorBtns = document.querySelectorAll('.pdp-color-btn');
+    if (colorBtns.length === 1) colorBtns[0].click();
+})();
+
 function changeImage(el, src) {
     document.getElementById('mainImage').src = src;
     document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));

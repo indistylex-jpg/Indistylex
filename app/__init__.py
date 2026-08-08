@@ -174,7 +174,7 @@ def create_app(config_name=None):
 
         # Clothing dropdown: age-neutral + one Boys + one Girls column (not first 4 by sort).
         nav_mega_clothing = [
-            b for slug in ('newborn-infant', 'toddler', 'boys-3-8', 'girls-3-8')
+            b for slug in ('newborn-infant', 'girls-1-3', 'boys-1-3', 'girls-3-8')
             if (b := _mega_block(slug))
         ]
 
@@ -202,6 +202,13 @@ def create_app(config_name=None):
             'moment_lifestyle_images': MOMENT_IMAGES,
             'product_placeholder_image': PRODUCT_PLACEHOLDER,
             'currency_symbol': app.config.get('CURRENCY_SYMBOL', '₹'),
+            'social_links': {
+                'facebook': app.config.get('SOCIAL_FACEBOOK'),
+                'instagram': app.config.get('SOCIAL_INSTAGRAM'),
+                'twitter': app.config.get('SOCIAL_TWITTER'),
+                'pinterest': app.config.get('SOCIAL_PINTEREST'),
+                'whatsapp': app.config.get('SOCIAL_WHATSAPP'),
+            },
         }
 
     @app.template_global()

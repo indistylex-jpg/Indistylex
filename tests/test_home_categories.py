@@ -14,18 +14,20 @@ class _Cat:
 
 def test_home_tiles_have_single_boys_and_girls():
     slugs = {
-        'newborn-infant', 'toddler', 'boys-3-8', 'boys-teens',
+        'newborn-infant', 'boys-1-3', 'girls-1-3', 'boys-3-8', 'boys-teens',
         'girls-3-8', 'girls-teens', 'ethnic-festive', 'winter-wear',
     }
     tiles = visible_home_category_tiles(slugs)
     labels = [t['label'] for t in tiles]
     assert labels.count('Boys') == 1
     assert labels.count('Girls') == 1
+    assert 'Girls (1–3 Years)' in labels
+    assert 'Boys (1–3 Years)' in labels
 
 
 def test_marquee_has_no_trailing_duplicate_boys_girls():
     slugs = {
-        'newborn-infant', 'toddler', 'boys-3-8', 'boys-teens',
+        'newborn-infant', 'boys-1-3', 'girls-1-3', 'boys-3-8', 'boys-teens',
         'girls-3-8', 'girls-teens', 'ethnic-festive', 'winter-wear',
     }
     links = nav_marquee_links(slugs)

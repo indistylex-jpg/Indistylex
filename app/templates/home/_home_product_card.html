@@ -1,12 +1,17 @@
 {% set variants = product.variants.filter_by(is_active=True).all() %}
-{% set sizes = variants | map(attribute='size') | unique | list %}
-{% set colors = variants | map(attribute='color') | unique | list %}
+{% set in_stock_variants = variants | selectattr('stock_quantity', 'gt', 0) | list %}
+{% set sizes = in_stock_variants | map(attribute='size') | unique | list %}
+{% set colors = in_stock_variants | map(attribute='color') | unique | list %}
 <div class="home-product-card" data-gender="{{ product.gender or 'kids' }}">
     <div class="home-product-card-media">
         {% if product.discount_percent > 0 %}
         <span class="home-product-sale">On Sale</span>
         {% elif product.is_new_arrival %}
         <span class="home-product-sale home-product-sale--new">New</span>
+        {% elif product.is_featured %}
+        <span class="home-product-sale home-product-sale--featured">Featured</span>
+        {% elif product.is_trending %}
+        <span class="home-product-sale home-product-sale--trending">Trending</span>
         {% endif %}
         <button type="button" class="collection-card-wishlist" data-wishlist-id="{{ product.id }}" aria-label="Add to wishlist">
             <i class="bi bi-heart"></i>
@@ -36,22 +41,30 @@
             <span class="home-product-save">Save {{ product.discount_percent }}%</span>
             {% endif %}
         </div>
-        {% if variants %}
+        {% if in_stock_variants %}
         <form method="POST" action="{{ url_for('cart.add_to_cart') }}" class="home-product-cart-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="product_id" value="{{ product.id }}">
-            <input type="hidden" name="color" value="{{ variants[0].color }}">
+            <input type="hidden" name="color" value="{{ in_stock_variants[0].color }}">
             <input type="hidden" name="quantity" value="1">
+            {% if sizes | length == 1 %}
+            <input type="hidden" name="variant_id" value="{{ in_stock_variants[0].id }}">
+            <input type="hidden" name="size" value="{{ sizes[0] }}">
+            <button type="submit" class="home-product-add-btn">
+                <i class="bi bi-cart-plus"></i> ADD TO CART
+            </button>
+            {% else %}
             <select name="size" class="home-product-size" required aria-label="Select size">
                 <option value="">Select a size</option>
                 {% for size in sizes %}
-                {% set size_variant = variants | selectattr('size', 'equalto', size) | list | first %}
-                <option value="{{ size }}" data-color="{{ size_variant.color if size_variant else variants[0].color }}">{{ size }}</option>
+                {% set size_variant = in_stock_variants | selectattr('size', 'equalto', size) | list | first %}
+                <option value="{{ size }}" data-variant-id="{{ size_variant.id }}" data-color="{{ size_variant.color }}">{{ size }}</option>
                 {% endfor %}
             </select>
             <button type="submit" class="home-product-add-btn">
                 <i class="bi bi-cart-plus"></i> ADD TO CART
             </button>
+            {% endif %}
         </form>
         {% else %}
         <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-add-btn">

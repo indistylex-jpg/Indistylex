@@ -28,6 +28,9 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/brand/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/brand/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/brand/apple-touch-icon-180x180.png') }}">
 
     <!-- Canonical URL -->
     <link rel="canonical" href="{% block canonical %}{{ request.url }}{% endblock %}">
@@ -38,7 +41,7 @@
     <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ self.meta_description() }}{% endblock %}">
     <meta property="og:url" content="{{ request.url }}">
-    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/og-default.jpg', _external=True) }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/brand/og-share-1200x630.png', _external=True) }}{% endblock %}">
     <meta property="og:locale" content="en_IN">
 
     <!-- Twitter Card -->
@@ -73,7 +76,10 @@
         "taxID": "09GVUPP6447P1Z3",
         "telephone": "+916394142176",
         "email": "support@indistylex.in",
-        "sameAs": []
+        "sameAs": [
+            "{{ config.SOCIAL_INSTAGRAM }}",
+            "{{ config.SOCIAL_FACEBOOK }}"
+        ]
     }
     </script>
     {% endblock %}
@@ -93,7 +99,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
 
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css') }}?v=13" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}?v=15" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/chatbot.css') }}?v=7" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}

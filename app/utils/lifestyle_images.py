@@ -21,6 +21,8 @@ CATEGORY_IMAGE_BY_SLUG = {
     'newborn': 'hero_baby',
     'baby-essentials': 'hero_baby',
     'toddler': 'hero_collection',
+    'boys-1-3': 'everyday_boy',
+    'girls-1-3': 'everyday_girl',
     'boys-3-8': 'everyday_boy',
     'boys-9-12': 'everyday_boy',
     'boys-teens': 'teen_boy',

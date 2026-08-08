@@ -18,5 +18,7 @@ def test_girls_categories_use_girl_photos():
 
 def test_neutral_categories_use_appropriate_photos():
     assert category_lifestyle_image_key('newborn-infant') == 'hero_baby'
+    assert category_lifestyle_image_key('boys-1-3') == 'everyday_boy'
+    assert category_lifestyle_image_key('girls-1-3') == 'everyday_girl'
     assert category_lifestyle_image_key('toddler') == 'hero_collection'
     assert category_lifestyle_image_key('winter-wear') == 'winter_kids'

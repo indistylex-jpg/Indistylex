@@ -93,6 +93,18 @@ img {
     text-decoration: none;
     flex-shrink: 0;
 }
+.store-logo-img {
+    display: block;
+    height: 44px;
+    width: auto;
+    max-width: 220px;
+}
+@media (max-width: 575.98px) {
+    .store-logo-img {
+        height: 36px;
+        max-width: 180px;
+    }
+}
 .store-search-form {
     flex: 1;
     max-width: 560px;
@@ -935,6 +947,12 @@ img {
     letter-spacing: 2px;
     color: var(--white);
     margin-bottom: 10px;
+}
+.footer-logo-img {
+    display: block;
+    height: 40px;
+    width: auto;
+    max-width: 200px;
 }
 .footer-tagline {
     font-size: 0.8rem;
@@ -2338,6 +2356,15 @@ img {
     text-decoration: none;
     text-align: center;
     transition: all 0.3s;
+    cursor: pointer;
+}
+.pdp-btn-buy:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.pdp-btn-cart:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 .pdp-btn-buy:hover {
     background: #333;

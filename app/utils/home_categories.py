@@ -8,10 +8,16 @@ HOME_CATEGORY_TILES = [
         'kwargs': {'slug': 'newborn-infant'},
     },
     {
-        'label': 'Toddler',
-        'image_slug': 'toddler',
+        'label': 'Boys (1–3 Years)',
+        'image_slug': 'boys-1-3',
         'endpoint': 'shop.category',
-        'kwargs': {'slug': 'toddler'},
+        'kwargs': {'slug': 'boys-1-3'},
+    },
+    {
+        'label': 'Girls (1–3 Years)',
+        'image_slug': 'girls-1-3',
+        'endpoint': 'shop.category',
+        'kwargs': {'slug': 'girls-1-3'},
     },
     {
         'label': 'Boys',
@@ -51,14 +57,14 @@ HOME_CATEGORY_TILES = [
     },
 ]
 
-# Junior age bands covered by the main Boys / Girls shop links.
+# Pre-teen bands covered by broader Boys / Girls shop links.
 REDUNDANT_CATEGORY_SLUGS = frozenset({'boys-9-12', 'girls-9-12'})
 
 MARQUEE_EXTRA_LINKS = [
     {
         'label': 'New Arrivals',
         'endpoint': 'shop.listing',
-        'kwargs': {'sort': 'newest'},
+        'kwargs': {'sort': 'new_arrivals'},
     },
 ]
 

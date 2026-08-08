@@ -48,6 +48,16 @@
         if (colorInput && opt && opt.dataset.color) {
           colorInput.value = opt.dataset.color;
         }
+        if (form && opt && opt.dataset.variantId) {
+          var variantInput = form.querySelector('input[name="variant_id"]');
+          if (!variantInput) {
+            variantInput = document.createElement('input');
+            variantInput.type = 'hidden';
+            variantInput.name = 'variant_id';
+            form.appendChild(variantInput);
+          }
+          variantInput.value = opt.dataset.variantId;
+        }
       });
     });
   });

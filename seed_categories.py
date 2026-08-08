@@ -2,8 +2,11 @@
 """
 Replace Indistylex categories with full 0–18 catalog.
 
-Deletes old categories (newborn, toddler, boys, girls, etc.) after
-re-assigning existing products to the best matching new sub-category.
+Includes gender-specific toddler bands:
+  boys-1-3  → Boys (1–3 Years)
+  girls-1-3 → Girls (1–3 Years)  e.g. frocks for 1-year girls
+
+Deletes legacy gender-neutral `toddler` parent after migrating products.
 
 Run on server:
   cd /var/www/html/indistylex
@@ -16,36 +19,41 @@ from app.models.product import Category, Product
 
 app = create_app()
 
+TODDLER_AGE_CODES = frozenset({'1y', '1-2y', '2-3y'})
+NEWBORN_AGE_CODES = frozenset({'0-3m', '3-6m', '6-9m', '9-12m'})
+
 # ── Level 1: parent categories ──────────────────────────────────────
 PARENTS = [
     ('newborn-infant', 'Newborn & Infant (0–12M)',
      'Soft essentials for 0–12 months — rompers, bodysuits, swaddles', 1),
-    ('toddler', 'Toddler (1–3 Years)',
-     'Comfy everyday wear for active toddlers', 2),
+    ('boys-1-3', 'Boys (1–3 Years)',
+     'Everyday & festive wear for toddler boys — dungarees, co-ords, kurta sets', 2),
+    ('girls-1-3', 'Girls (1–3 Years)',
+     'Frocks, dresses & sets for toddler girls — perfect from 1 year up', 3),
     ('boys-3-8', 'Boys (3–8 Years)',
-     'Daily & festive wear for young boys', 3),
+     'Daily & festive wear for young boys', 4),
     ('boys-9-12', 'Boys (9–12 Years)',
-     'Juniors — school, casual & ethnic for pre-teens', 4),
+     'Juniors — school, casual & ethnic for pre-teens', 5),
     ('boys-teens', 'Boys Teens (13–18 Years)',
-     'Teen boys — shirts, jeans, kurtas, co-ords', 5),
+     'Teen boys — shirts, jeans, kurtas, co-ords', 6),
     ('girls-3-8', 'Girls (3–8 Years)',
-     'Frocks, sets & ethnic for young girls', 6),
+     'Frocks, sets & ethnic for young girls', 7),
     ('girls-9-12', 'Girls (9–12 Years)',
-     'Juniors — dresses, kurtis, lehengas for pre-teens', 7),
+     'Juniors — dresses, kurtis, lehengas for pre-teens', 8),
     ('girls-teens', 'Girls Teens (13–18 Years)',
-     'Teen girls — kurtis, co-ords, western & ethnic', 8),
+     'Teen girls — kurtis, co-ords, western & ethnic', 9),
     ('ethnic-festive', 'Ethnic & Festive Wear',
-     'Diwali, wedding, puja — all ages', 9),
+     'Diwali, wedding, puja — all ages', 10),
     ('nightwear', 'Nightwear & Loungewear',
-     'Pyjamas, night suits, robes — all ages', 10),
+     'Pyjamas, night suits, robes — all ages', 11),
     ('winter-wear', 'Winter Wear',
-     'Sweaters, jackets, thermals, hoodies', 11),
+     'Sweaters, jackets, thermals, hoodies', 12),
     ('school-wear', 'School Wear',
-     'Shirts, pants, skirts, uniforms', 12),
+     'Shirts, pants, skirts, uniforms', 13),
     ('activewear', 'Activewear & Sportswear',
-     'Track suits, joggers, sports tees', 13),
+     'Track suits, joggers, sports tees', 14),
     ('baby-essentials', 'Baby Essentials & Accessories',
-     'Caps, bibs, booties, mittens, blankets', 14),
+     'Caps, bibs, booties, mittens, blankets', 15),
 ]
 
 # ── Level 2: (parent_slug, child_slug, name, sort_order) ───────────
@@ -57,12 +65,19 @@ CHILDREN = [
     ('newborn-infant', 'baby-gift-sets', 'Baby Sets & Gift Sets', 4),
     ('newborn-infant', 'baby-caps-booties', 'Caps, Booties & Mittens', 5),
     ('newborn-infant', 'bibs-burp-cloths', 'Bibs & Burp Cloths', 6),
-    # Toddler
-    ('toddler', 'dungarees-jumpsuits', 'Dungarees & Jumpsuits', 1),
-    ('toddler', 'coord-sets', 'Co-ord Sets', 2),
-    ('toddler', 'frocks-dresses', 'Frocks & Dresses', 3),
-    ('toddler', 'jogger-sets', 'Jogger Sets', 4),
-    ('toddler', 'kurta-sets', 'Kurta Sets (Toddler)', 5),
+    # Boys 1–3
+    ('boys-1-3', 'dungarees-jumpsuits', 'Dungarees & Jumpsuits', 1),
+    ('boys-1-3', 'coord-sets', 'Co-ord Sets', 2),
+    ('boys-1-3', 'jogger-sets', 'Jogger Sets', 3),
+    ('boys-1-3', 'kurta-sets', 'Kurta Sets', 4),
+    ('boys-1-3', 't-shirts-tops', 'T-Shirts & Tops', 5),
+    # Girls 1–3
+    ('girls-1-3', 'frocks-dresses', 'Frocks & Dresses', 1),
+    ('girls-1-3', 'dungarees-jumpsuits', 'Dungarees & Jumpsuits', 2),
+    ('girls-1-3', 'coord-sets', 'Co-ord Sets', 3),
+    ('girls-1-3', 'jogger-sets', 'Jogger Sets', 4),
+    ('girls-1-3', 'lehenga-choli', 'Lehenga & Party Wear', 5),
+    ('girls-1-3', 'kurta-kurti-sets', 'Kurta & Kurti Sets', 6),
     # Boys 3-8 & 9-12 (same subs, different parents)
     *[(p, s, n, o) for p in ('boys-3-8', 'boys-9-12') for s, n, o in [
         ('t-shirts-polos', 'T-Shirts & Polos', 1),
@@ -133,6 +148,11 @@ CHILDREN = [
     ('activewear', 'sports-t-shirts', 'Sports T-Shirts', 2),
     ('activewear', 'sports-shorts', 'Sports Shorts', 3),
     ('activewear', 'leggings-sports-pants', 'Leggings & Sports Pants', 4),
+    # Baby essentials
+    ('baby-essentials', 'caps-booties-mittens', 'Caps, Booties & Mittens', 1),
+    ('baby-essentials', 'bibs-burp-cloths', 'Bibs & Burp Cloths', 2),
+    ('baby-essentials', 'blankets-swaddles', 'Blankets & Swaddles', 3),
+    ('baby-essentials', 'baby-care-accessories', 'Baby Care Accessories', 4),
 ]
 
 # Product name keywords → child slug suffix (within parent context)
@@ -171,70 +191,177 @@ KEYWORD_MAP = [
 
 LEGACY_PARENT = {
     'newborn': 'newborn-infant',
-    'toddler': 'toddler',
+    'toddler': 'girls-1-3',
     'boys': 'boys-3-8',
     'girls': 'girls-3-8',
     'men': 'boys-teens',
     'women': 'girls-teens',
-    'kids': 'toddler',
+    'kids': 'girls-1-3',
 }
+
+BOYS_ONLY_SUFFIXES = frozenset({
+    't-shirts-tops', 't-shirts-polos', 'shirts-formal', 'kurta-pajama',
+    'sherwani-indo-western', 'nehru-jacket-sets', 'shorts-bermudas',
+})
+GIRLS_ONLY_SUFFIXES = frozenset({
+    'frocks-dresses', 'lehenga-choli', 'anarkali-gown', 'salwar-sharara',
+    'palazzo-kurti', 'pattu-half-saree', 'skirts-tops', 'kurta-kurti-sets',
+    'nightgowns-pyjamas',
+})
+
+
+def product_age_codes(product):
+    raw = (product.age_groups or product.age_group or '').strip()
+    if not raw:
+        return set()
+    return {code.strip() for code in raw.split(',') if code.strip()}
+
+
+def is_toddler_product(product):
+    codes = product_age_codes(product)
+    if codes & TODDLER_AGE_CODES:
+        return True
+    legacy = product.age_group or ''
+    return legacy in ('2-4', '1-2', '2-3')
+
+
+def is_newborn_product(product):
+    codes = product_age_codes(product)
+    if codes & NEWBORN_AGE_CODES:
+        return True
+    return (product.age_group or '') == '0-2'
+
+
+def toddler_parent_for_gender(gender, product_name=''):
+    gender = (gender or '').lower()
+    name = (product_name or '').lower()
+    if gender == 'boys':
+        return 'boys-1-3'
+    if gender == 'girls':
+        return 'girls-1-3'
+    if any(k in name for k in ('frock', 'dress', 'lehenga', 'gown', 'kurti')):
+        return 'girls-1-3'
+    return 'boys-1-3'
 
 
 def pick_parent_slug(product, old_slug):
     age = product.age_group or ''
     gender = (product.gender or '').lower()
+    old_base = old_slug.split('-')[0] if old_slug else ''
+
+    if old_slug.startswith('toddler') or old_base == 'toddler' or is_toddler_product(product):
+        return toddler_parent_for_gender(gender, product.name)
+
     if old_slug in LEGACY_PARENT:
         base = LEGACY_PARENT[old_slug]
     else:
-        base = old_slug if old_slug in {p[0] for p in PARENTS} else 'toddler'
+        base = old_slug if old_slug in {p[0] for p in PARENTS} else toddler_parent_for_gender(gender, product.name)
 
-    if base.startswith('boys') or gender == 'boys' or (old_slug == 'boys'):
-        if age in ('12-14', '14-18'):
+    if is_newborn_product(product) or old_slug == 'newborn' or age == '0-2':
+        return 'newborn-infant'
+
+    if base.startswith('boys') or gender == 'boys' or old_slug == 'boys':
+        if age in ('12-14', '14-18') or any(a.startswith(('12-', '13-', '14-', '15-', '16-', '17-')) for a in product_age_codes(product)):
             return 'boys-teens'
-        if age in ('8-12', '6-8') and any(x in (product.name or '').lower() for x in ('9-10', '11-12')):
+        if age == '8-12' or any(a in ('8-9y', '9-10y', '10-11y', '11-12y') for a in product_age_codes(product)):
             return 'boys-9-12'
-        if age == '8-12':
-            return 'boys-9-12'
+        if is_toddler_product(product):
+            return 'boys-1-3'
         return 'boys-3-8' if base.startswith('boys') else base
 
     if base.startswith('girls') or gender == 'girls' or old_slug == 'girls':
-        if age in ('12-14', '14-18'):
+        if age in ('12-14', '14-18') or any(a.startswith(('12-', '13-', '14-', '15-', '16-', '17-')) for a in product_age_codes(product)):
             return 'girls-teens'
-        if age == '8-12':
+        if age == '8-12' or any(a in ('8-9y', '9-10y', '10-11y', '11-12y') for a in product_age_codes(product)):
             return 'girls-9-12'
+        if is_toddler_product(product):
+            return 'girls-1-3'
         return 'girls-3-8' if base.startswith('girls') else base
 
-    if old_slug == 'newborn' or age == '0-2':
-        return 'newborn-infant'
-    if old_slug == 'toddler' or age == '2-4':
-        return 'toddler'
+    if is_toddler_product(product):
+        return toddler_parent_for_gender(gender, product.name)
     return base
 
 
-def pick_child_suffix(product):
+def normalize_child_suffix(parent_slug, suffix, gender):
+    gender = (gender or '').lower()
+    if parent_slug == 'boys-1-3':
+        if suffix in GIRLS_ONLY_SUFFIXES:
+            if suffix == 'frocks-dresses':
+                return 'coord-sets'
+            if suffix in ('kurta-pajama', 'kurta-sets'):
+                return 'kurta-sets'
+            return 'coord-sets'
+        if suffix == 'kurta-pajama':
+            return 'kurta-sets'
+        if suffix == 'kurta-sets':
+            return 'kurta-sets'
+    if parent_slug == 'girls-1-3':
+        if suffix in BOYS_ONLY_SUFFIXES:
+            return 'coord-sets'
+        if suffix in ('kurta-pajama', 'palazzo-kurti'):
+            return 'kurta-kurti-sets'
+        if suffix == 'kurta-sets':
+            return 'kurta-kurti-sets'
+    if parent_slug.startswith('girls') and suffix == 'kurta-pajama':
+        return 'palazzo-kurti'
+    return suffix
+
+
+def pick_child_suffix(product, parent_slug=None):
     name = (product.name or '').lower()
     gender = (product.gender or '').lower()
     for keywords, suffix in KEYWORD_MAP:
         if any(k in name for k in keywords):
             if suffix == 'kurta-pajama' and gender == 'girls':
+                if parent_slug == 'girls-1-3':
+                    return 'kurta-kurti-sets'
                 return 'palazzo-kurti'
+            if parent_slug:
+                return normalize_child_suffix(parent_slug, suffix, gender)
             return suffix
     if 'kurta' in name or 'kurti' in name:
+        if parent_slug == 'girls-1-3':
+            return 'kurta-kurti-sets'
         return 'palazzo-kurti' if gender == 'girls' else 'kurta-pajama'
-    if 'frock' in name:
+    if 'frock' in name or 'dress' in name:
         return 'frocks-dresses'
     if 'footed' in name or 'pajama' in name:
-        return 'rompers-onesies' if product.age_group == '0-2' else 'pyjamas-night-suits'
+        return 'rompers-onesies' if is_newborn_product(product) else 'pyjamas-night-suits'
+    if parent_slug == 'boys-1-3':
+        return 'coord-sets'
+    if parent_slug == 'girls-1-3':
+        return 'frocks-dresses' if gender == 'girls' else 'coord-sets'
     return 'coord-sets'
+
+
+def child_suffix_from_old_slug(old_slug):
+    """Extract child suffix from legacy or current parent-child slug."""
+    known_parents = sorted([p[0] for p in PARENTS], key=len, reverse=True)
+    for legacy in ('toddler',):
+        if legacy not in known_parents:
+            known_parents.insert(0, legacy)
+    for parent in known_parents:
+        prefix = f'{parent}-'
+        if old_slug.startswith(prefix):
+            return old_slug[len(prefix):]
+    return None
 
 
 def migrate_products(cat_by_slug):
     migrated = 0
     for product in Product.query.all():
         old_cat = Category.query.get(product.category_id)
-        old_slug = old_cat.slug if old_cat else 'toddler'
-        parent_slug = pick_parent_slug(product, old_slug)
-        child_suffix = pick_child_suffix(product)
+        if old_cat and old_cat.parent_id:
+            parent_cat = Category.query.get(old_cat.parent_id)
+            old_parent_slug = parent_cat.slug if parent_cat else old_cat.slug
+        else:
+            old_parent_slug = old_cat.slug if old_cat else 'girls-1-3'
+
+        parent_slug = pick_parent_slug(product, old_parent_slug)
+        child_suffix = child_suffix_from_old_slug(old_cat.slug if old_cat else '') or pick_child_suffix(product, parent_slug)
+        child_suffix = normalize_child_suffix(parent_slug, child_suffix, product.gender)
+
         full_slug = f'{parent_slug}-{child_suffix}'
         if full_slug not in cat_by_slug:
             full_slug = parent_slug

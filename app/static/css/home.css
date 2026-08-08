@@ -453,6 +453,12 @@
 .home-product-sale--new {
     background: var(--accent);
 }
+.home-product-sale--featured {
+    background: var(--primary);
+}
+.home-product-sale--trending {
+    background: #0EA5E9;
+}
 .home-product-card .collection-card-wishlist {
     position: absolute;
     top: 12px;

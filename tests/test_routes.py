@@ -206,6 +206,26 @@ class TestCartRoutes:
         }, follow_redirects=True)
         assert resp.status_code == 200
 
+    def test_add_to_cart_with_size_color(self, client, sample_product):
+        resp = client.post('/cart/add', data={
+            'product_id': sample_product.id,
+            'size': '0-3M',
+            'color': 'White',
+            'quantity': 1,
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b'added to cart' in resp.data.lower()
+
+    def test_buy_now_adds_and_redirects_checkout(self, client, sample_product):
+        variant = sample_product.variants.first()
+        resp = client.post('/cart/add', data={
+            'variant_id': variant.id,
+            'quantity': 1,
+            'buy_now': '1',
+        }, follow_redirects=False)
+        assert resp.status_code == 302
+        assert '/checkout' in resp.headers['Location']
+
     def test_cart_count_ajax(self, client):
         resp = client.get('/cart/count')
         assert resp.status_code == 200

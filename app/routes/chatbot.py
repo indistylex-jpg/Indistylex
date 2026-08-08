@@ -194,15 +194,15 @@ def _handle_categories(msg):
 
 
 def _handle_new_arrivals(msg):
-    products = Product.query.filter_by(is_active=True).order_by(
-        Product.created_at.desc()
-    ).limit(5).all()
+    products = Product.query.filter_by(
+        is_active=True, is_new_arrival=True
+    ).order_by(Product.created_at.desc()).limit(5).all()
     if products:
         product_list = '\n'.join(
             f"• [{p.name}](/product/{p.slug}) — ₹{p.price}" for p in products
         )
-        return f"✨ **New Arrivals:**\n\n{product_list}\n\n[View all →](/shop)"
-    return "Check out our [shop](/shop) for the latest arrivals!"
+        return f"✨ **New Arrivals:**\n\n{product_list}\n\n[View all →](/shop?sort=new_arrivals)"
+    return "Check out our [New Arrivals](/shop?sort=new_arrivals) for the latest styles!"
 
 
 def _handle_pricing(msg):
