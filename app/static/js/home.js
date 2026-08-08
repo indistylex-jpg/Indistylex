@@ -30,14 +30,13 @@
       applyGender('girls');
     }
 
-    document.querySelectorAll('.home-carousel-nav').forEach(function (nav) {
-      var track = document.querySelector(nav.getAttribute('data-target'));
+    document.querySelectorAll('.home-carousel-arrow').forEach(function (btn) {
+      var track = document.querySelector(btn.getAttribute('data-target'));
       if (!track) return;
-      nav.querySelector('[data-dir="prev"]')?.addEventListener('click', function () {
-        track.scrollBy({ left: -track.clientWidth * 0.85, behavior: 'smooth' });
-      });
-      nav.querySelector('[data-dir="next"]')?.addEventListener('click', function () {
-        track.scrollBy({ left: track.clientWidth * 0.85, behavior: 'smooth' });
+      btn.addEventListener('click', function () {
+        var dir = btn.getAttribute('data-dir');
+        var amount = track.clientWidth * 0.85;
+        track.scrollBy({ left: dir === 'prev' ? -amount : amount, behavior: 'smooth' });
       });
     });
 

@@ -2,14 +2,18 @@
 /* Design: Ultra-clean, black/white/gold, minimal */
 
 :root {
-    --primary: #1E4D8C;
-    --accent: #2563EB;
-    --accent-hover: #1D4ED8;
-    --accent-soft: #EFF6FF;
+    --primary: #1B3A5F;
+    --accent: #4F8EF7;
+    --accent-hover: #3A7AE8;
+    --accent-soft: #EBF3FF;
+    --accent-warm: #FF8C5A;
     --white: #FFFFFF;
-    --light-bg: #F8FAFC;
-    --border: #E2E8F0;
-    --text-muted: #64748B;
+    --light-bg: #F7FAFF;
+    --cream: #FFFCF9;
+    --border: #E2EAF5;
+    --text-muted: #6B7C93;
+    --card-bg: #EEF3FF;
+    --cart-btn: #6B93E8;
     --font-heading: 'Inter', sans-serif;
     --font-body: 'Inter', sans-serif;
 }
@@ -48,7 +52,7 @@ img {
 
 /* ===== STORE HEADER (Miarcus-style, Indistylex colors) ===== */
 .promo-ticker-bar {
-    background: #DBEAFE;
+    background: #FDE8F0;
     color: var(--primary);
     font-size: 0.72rem;
     font-weight: 600;
@@ -1873,9 +1877,9 @@ img {
     gap: 4px;
     font-size: 0.68rem;
     font-weight: 600;
-    color: var(--primary);
-    background: rgba(200, 169, 98, 0.15);
-    border: 1px solid rgba(200, 169, 98, 0.35);
+    color: var(--accent-hover);
+    background: var(--accent-soft);
+    border: 1px solid #D4E4FF;
     border-radius: 999px;
     padding: 3px 10px;
     margin-bottom: 8px;
@@ -1928,7 +1932,7 @@ img {
 }
 .collection-card-media {
     position: relative;
-    background: #EEF4FC;
+    background: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 1 / 1;
@@ -1961,7 +1965,7 @@ img {
     z-index: 2;
 }
 .collection-card-badge--sale {
-    background: #E85D04;
+    background: var(--accent-warm);
     color: var(--white);
 }
 .collection-card-badge--new,
