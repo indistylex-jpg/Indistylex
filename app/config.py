@@ -85,6 +85,9 @@ class Config:
     # Security headers
     SEND_FILE_MAX_AGE_DEFAULT = 31536000  # 1 year cache for static files
 
+    # Bump when logo/favicon/brand assets change (cache-busts browser tabs).
+    ASSET_VERSION = os.environ.get('ASSET_VERSION', '20260808')
+
 
 class DevelopmentConfig(Config):
     """Development configuration."""

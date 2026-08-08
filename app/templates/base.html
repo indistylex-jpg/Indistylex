@@ -26,11 +26,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#1E4D8C">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/brand/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/brand/favicon-16x16.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/brand/apple-touch-icon-180x180.png') }}">
+    <!-- Favicon (versioned — browsers cache these aggressively) -->
+    <link rel="icon" type="image/svg+xml" href="{{ static_v('images/favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ static_v('images/brand/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ static_v('images/brand/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ static_v('images/brand/apple-touch-icon-180x180.png') }}">
+    <link rel="manifest" href="{{ static_v('images/brand/site.webmanifest') }}">
 
     <!-- Canonical URL -->
     <link rel="canonical" href="{% block canonical %}{{ request.url }}{% endblock %}">
@@ -64,7 +65,7 @@
         "currenciesAccepted": "INR",
         "paymentAccepted": "UPI, Credit Card, Debit Card, Net Banking",
         "priceRange": "₹₹",
-        "logo": "{{ url_for('static', filename='images/logo.svg', _external=True) }}",
+        "logo": "{{ url_for('static', filename='images/logo.svg', _external=True) }}?v={{ config.ASSET_VERSION }}",
         "address": {
             "@type": "PostalAddress",
             "streetAddress": "MIG 79, Dhoomanganj, Preetam Nagar",

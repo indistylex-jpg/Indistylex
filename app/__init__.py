@@ -212,6 +212,12 @@ def create_app(config_name=None):
         }
 
     @app.template_global()
+    def static_v(filename):
+        """Versioned static URL so logo/favicon updates bypass long browser cache."""
+        version = app.config.get('ASSET_VERSION', '1')
+        return f"{url_for('static', filename=filename)}?v={version}"
+
+    @app.template_global()
     def lifestyle_img(name):
         """URL for original Indistylex lifestyle photo by key."""
         from app.utils.lifestyle_images import LIFESTYLE_IMAGES, PRODUCT_PLACEHOLDER

@@ -6,6 +6,6 @@
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#favGrad)"/>
-  <text x="16" y="21" text-anchor="middle" font-family="'Inter',system-ui,Arial,sans-serif" font-size="12.5" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">iX</text>
-  <rect x="10" y="24" width="12" height="2" rx="1" fill="#DBEAFE"/>
+  <path d="M16 9 L13.5 11.5 L11 10 L12 14 L12 21 L20 21 L20 14 L21 10 L18.5 11.5 L16 9 L15 11 Z" fill="#FFFFFF"/>
+  <path d="M14.2 11.5 L16 13.2 L17.8 11.5" fill="none" stroke="#DBEAFE" stroke-width="0.9" stroke-linecap="round"/>
 </svg>

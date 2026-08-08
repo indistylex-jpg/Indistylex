@@ -20,7 +20,7 @@
     <div class="store-header-top">
         <div class="container store-header-top-inner">
             <a class="store-logo" href="{{ url_for('main.index') }}">
-                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Indistylex" class="store-logo-img" width="200" height="44">
+                <img src="{{ static_v('images/logo.svg') }}" alt="Indistylex" class="store-logo-img" width="200" height="44">
             </a>
 
             <form class="store-search-form d-none d-md-flex" action="{{ url_for('shop.listing') }}" method="GET">
