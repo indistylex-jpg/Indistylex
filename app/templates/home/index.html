@@ -134,8 +134,8 @@
         <div class="row g-4">
             {% set quick = [
                 ('hero_baby', 'Newborn Essentials', 'Soft rompers & bodysuits', 'newborn-infant'),
-                ('everyday_boy', 'Everyday Wear', 'Comfort for active kids', 'toddler'),
-                ('ethnic_girl', 'Ethnic & Festive', 'Celebration-ready outfits', 'ethnic-festive'),
+                ('hero_collection', 'Everyday Wear', 'Comfort for active kids', 'toddler'),
+                ('ethnic_boy', 'Ethnic & Festive', 'Celebration-ready outfits', 'ethnic-festive'),
             ] %}
             {% for img_key, title, desc, slug in quick %}
             <div class="col-md-4">
@@ -209,7 +209,7 @@
         <div class="home-cat-grid">
             {% for cat in categories[:6] %}
             <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="home-cat-tile home-img-reveal">
-                <img src="{{ url_for('static', filename=category_lifestyle_images[loop.index0 % category_lifestyle_images|length]) }}" alt="{{ cat.name }}">
+                <img src="{{ category_lifestyle_img(cat.slug) }}" alt="{{ cat.name }}">
                 <div class="home-cat-tile-cap">
                     <strong>{{ cat.name.split('(')[0].strip() }}</strong>
                     <span>Shop Now →</span>
@@ -245,7 +245,7 @@
         <p class="home-lead">Browse essentials curated by parenting needs</p>
         <div class="row g-3 g-md-4 mt-2">
             {% set needs = [
-                ('everyday_girl', 'Daily Wear', 'shop.listing', {}),
+                ('hero_collection', 'Daily Wear', 'shop.listing', {}),
                 ('ethnic_girl', 'Birthday & Party', 'shop.category', {'slug': 'ethnic-festive'}),
                 ('winter_kids', 'Winter Layers', 'shop.category', {'slug': 'winter-wear'}),
                 ('hero_baby', 'Sleep & Nightwear', 'shop.category', {'slug': 'nightwear'}),

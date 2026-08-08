@@ -154,7 +154,7 @@ def create_app(config_name=None):
             children_by_parent.setdefault(child.parent_id, []).append(child)
 
         from app.utils.product_ages import SHOP_BY_AGE_NAV
-        from app.utils.lifestyle_images import CATEGORY_IMAGES, MOMENT_IMAGES, PRODUCT_PLACEHOLDER
+        from app.utils.lifestyle_images import MOMENT_IMAGES, PRODUCT_PLACEHOLDER
 
         categories_by_slug = {c.slug: c for c in active_categories}
 
@@ -192,7 +192,6 @@ def create_app(config_name=None):
             'nav_mega_clothing': nav_mega_clothing,
             'nav_quick_links': nav_quick_links,
             'shop_by_age_nav': SHOP_BY_AGE_NAV,
-            'category_lifestyle_images': CATEGORY_IMAGES,
             'moment_lifestyle_images': MOMENT_IMAGES,
             'product_placeholder_image': PRODUCT_PLACEHOLDER,
             'currency_symbol': app.config.get('CURRENCY_SYMBOL', '₹'),
@@ -204,6 +203,12 @@ def create_app(config_name=None):
         from app.utils.lifestyle_images import LIFESTYLE_IMAGES, PRODUCT_PLACEHOLDER
         rel = LIFESTYLE_IMAGES.get(name, PRODUCT_PLACEHOLDER)
         return url_for('static', filename=rel)
+
+    @app.template_global()
+    def category_lifestyle_img(slug):
+        """URL for category tile photo matched to boys/girls/age slug."""
+        from app.utils.lifestyle_images import category_lifestyle_image_path
+        return url_for('static', filename=category_lifestyle_image_path(slug))
 
     @app.template_global()
     def image_url(path, fallback=None):

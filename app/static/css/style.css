@@ -144,6 +144,10 @@ img {
 }
 .store-utility i { font-size: 1.15rem; }
 .store-utility:hover { color: var(--accent); }
+.store-utility--admin {
+    color: var(--accent);
+    font-weight: 600;
+}
 
 .store-nav {
     background: var(--white);

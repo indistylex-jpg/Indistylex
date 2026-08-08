@@ -44,6 +44,12 @@
                     <span>Wishlist</span>
                 </a>
                 {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}" class="store-utility store-utility--admin">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Admin</span>
+                </a>
+                {% endif %}
                 <a href="{{ url_for('user.profile') }}" class="store-utility">
                     <i class="bi bi-person"></i>
                     <span>Account</span>
@@ -180,6 +186,20 @@
                     <li class="store-nav-item">
                         <a href="{{ url_for('main.contact') }}">Help</a>
                     </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="store-nav-item d-lg-none">
+                        <a href="{{ url_for('user.profile') }}">My Account</a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="store-nav-item d-lg-none">
+                        <a href="{{ url_for('admin.dashboard') }}">Admin Panel</a>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    <li class="store-nav-item d-lg-none">
+                        <a href="{{ url_for('auth.login') }}">Sign In</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
