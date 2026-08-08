@@ -3,7 +3,7 @@
     <div class="product-card-minimal">
         <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-img-link">
             <div class="product-card-img-wrap">
-                <img src="{{ product.primary_image }}" alt="{{ product.name }}" loading="lazy">
+                <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
                 {% if product.discount_percent > 0 %}
                 <span class="product-badge-sale">-{{ product.discount_percent }}%</span>
                 {% endif %}

@@ -27,8 +27,15 @@ def create_app(config_name=None):
     cache.init_app(app)
     compress.init_app(app)
 
-    # Ensure upload folder exists
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    # Resolve upload folder to an absolute path under app/static/uploads
+    upload_folder = app.config.get('UPLOAD_FOLDER', 'static/uploads')
+    if not os.path.isabs(upload_folder):
+        upload_folder = upload_folder.replace('\\', '/')
+        if upload_folder.startswith('app/'):
+            upload_folder = upload_folder[4:]
+        upload_folder = os.path.normpath(os.path.join(app.root_path, upload_folder))
+    app.config['UPLOAD_FOLDER'] = upload_folder
+    os.makedirs(upload_folder, exist_ok=True)
 
     # ── Security Headers ───────────────────────────────────────────
     @app.after_request
@@ -139,11 +146,8 @@ def create_app(config_name=None):
     @app.template_global()
     def image_url(path, fallback='images/placeholders/product.png'):
         """Return the correct image URL for both external URLs and local uploads."""
-        if not path:
-            return url_for('static', filename=fallback)
-        if path.startswith(('http://', 'https://')):
-            return path
-        return url_for('static', filename='uploads/' + path)
+        from app.services.image_service import resolve_image_url
+        return resolve_image_url(path, fallback=fallback)
 
     # Register error handlers
     @app.errorhandler(404)

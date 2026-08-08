@@ -74,7 +74,10 @@ class Product(db.Model):
         img = self.images.filter_by(is_primary=True).first()
         if not img:
             img = self.images.first()
-        return img.image_url if img else '/static/images/placeholders/product.png'
+        if not img:
+            return '/static/images/logo.svg'
+        from app.services.image_service import normalize_stored_image_path
+        return normalize_stored_image_path(img.image_url) or '/static/images/logo.svg'
 
     @property
     def all_images(self):

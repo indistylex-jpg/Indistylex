@@ -1,4 +1,5 @@
 """Tests for service layer."""
+import os
 import pytest
 from decimal import Decimal
 
@@ -148,7 +149,35 @@ class TestInventoryService:
         assert float(sale.total) == 180
 
 
-# ────────────────────────── Expense Service ──────────────────────────
+# ────────────────────────── Image Service ──────────────────────────
+
+class TestImageService:
+
+    def test_normalize_legacy_static_path(self):
+        from app.services.image_service import normalize_stored_image_path
+        assert normalize_stored_image_path('/static/uploads/products/abc.jpg') == '/static/uploads/products/abc.jpg'
+
+    def test_normalize_relative_path(self):
+        from app.services.image_service import normalize_stored_image_path
+        assert normalize_stored_image_path('products/abc.jpg') == '/static/uploads/products/abc.jpg'
+
+    def test_resolve_image_url_relative(self, app):
+        from app.services.image_service import resolve_image_url
+        with app.app_context():
+            url = resolve_image_url('products/abc.jpg')
+            assert '/static/uploads/products/abc.jpg' in url
+
+    def test_resolve_image_url_legacy(self, app):
+        from app.services.image_service import resolve_image_url
+        with app.app_context():
+            url = resolve_image_url('/static/uploads/products/abc.jpg')
+            assert url == '/static/uploads/products/abc.jpg'
+
+    def test_image_disk_path(self, app):
+        from app.services.image_service import image_disk_path
+        with app.app_context():
+            path = image_disk_path('/static/uploads/products/abc.jpg')
+            assert path.endswith(os.path.join('uploads', 'products', 'abc.jpg').replace('\\', '/')) or 'products/abc.jpg' in path.replace('\\', '/')
 
 class TestExpenseService:
 

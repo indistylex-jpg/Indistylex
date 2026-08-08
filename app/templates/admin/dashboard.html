@@ -248,7 +248,7 @@
           <li class="low-stock-item">
             <div class="product-thumb-wrapper small">
               {% if variant.product.images and variant.product.images[0] %}
-              <img src="{{ variant.product.images[0].image_url }}" alt="" class="product-thumb-img">
+              <img src="{{ image_url(variant.product.images[0].image_url if variant.product.images and variant.product.images[0] else variant.product.primary_image) }}" alt="" class="product-thumb-img">
               {% else %}
               <div class="product-thumb-placeholder small"><i class="bi bi-image"></i></div>
               {% endif %}

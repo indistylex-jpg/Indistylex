@@ -23,13 +23,13 @@
                     {% set all_images = product.images.all() %}
                     {% set primary_image = all_images | selectattr('is_primary') | first %}
                     <div class="pdp-main-image">
-                        <img src="{{ primary_image.image_url if primary_image else product.primary_image }}" alt="{{ product.name }}" id="mainImage">
+                        <img src="{{ image_url(primary_image.image_url if primary_image else product.primary_image) }}" alt="{{ product.name }}" id="mainImage">
                     </div>
                     {% if all_images | length > 1 %}
                     <div class="pdp-thumbnails">
                         {% for img in all_images | sort(attribute='sort_order') %}
-                        <div class="pdp-thumb {{ 'active' if img.is_primary }}" onclick="changeImage(this, '{{ img.image_url }}')">
-                            <img src="{{ img.image_url }}" alt="{{ product.name }}" loading="lazy">
+                        <div class="pdp-thumb {{ 'active' if img.is_primary }}" onclick="changeImage(this, '{{ image_url(img.image_url) }}')">
+                            <img src="{{ image_url(img.image_url) }}" alt="{{ product.name }}" loading="lazy">
                         </div>
                         {% endfor %}
                     </div>
@@ -184,7 +184,7 @@
                     <div class="product-card-minimal">
                         <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-img-link">
                             <div class="product-card-img-wrap">
-                                <img src="{{ product.primary_image }}" alt="{{ product.name }}" loading="lazy">
+                                <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
                             </div>
                         </a>
                         <div class="product-card-info">

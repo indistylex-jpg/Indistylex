@@ -31,7 +31,7 @@ class Config:
     FACEBOOK_CLIENT_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '')
 
     # File Uploads
-    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'app/static/uploads')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'static/uploads')
     MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 5 * 1024 * 1024))
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
 

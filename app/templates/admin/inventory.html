@@ -147,7 +147,7 @@
               <div class="d-flex align-items-center gap-2">
                 <div class="product-thumb-wrapper small">
                   {% if variant.product.images.first() %}
-                  <img src="{{ variant.product.images.first().image_url }}" alt="" class="product-thumb-img">
+                  <img src="{{ image_url(variant.product.images.first().image_url if variant.product.images.first() else variant.product.primary_image) }}" alt="" class="product-thumb-img">
                   {% else %}
                   <div class="product-thumb-placeholder small"><i class="bi bi-image"></i></div>
                   {% endif %}

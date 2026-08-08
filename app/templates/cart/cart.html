@@ -18,7 +18,7 @@
                     <div class="cart-item">
                         <div class="cart-item-image">
                             {% set img = item.variant.product.images | selectattr('is_primary') | first %}
-                            <img src="{{ img.image_url if img else item.variant.product.primary_image }}" alt="{{ item.variant.product.name }}">
+                            <img src="{{ image_url(img.image_url if img else item.variant.product.primary_image) }}" alt="{{ item.variant.product.name }}">
                         </div>
                         <div class="cart-item-details">
                             <div class="cart-item-info">

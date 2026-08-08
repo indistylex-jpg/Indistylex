@@ -1,7 +1,7 @@
 import os
 import uuid
 from PIL import Image
-from flask import current_app
+from flask import current_app, url_for
 from werkzeug.utils import secure_filename
 
 
@@ -35,8 +35,60 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def _prepare_image_for_save(img):
+    """Convert image to RGB, preserving transparency on a white background."""
+    if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+        rgba = img.convert('RGBA')
+        background = Image.new('RGB', rgba.size, (255, 255, 255))
+        background.paste(rgba, mask=rgba.split()[-1])
+        return background
+    return img.convert('RGB')
+
+
+def normalize_stored_image_path(path):
+    """Normalize DB-stored image path to a static URL path."""
+    if not path:
+        return None
+    path = path.strip()
+    if path.startswith(('http://', 'https://')):
+        return path
+    if path.startswith('/static/'):
+        return path
+    if path.startswith('static/'):
+        return f'/{path}'
+    return f'/static/uploads/{path.lstrip("/")}'
+
+
+def resolve_image_url(path, fallback='images/placeholders/product.png'):
+    """Return a browser-ready image URL for templates and APIs."""
+    normalized = normalize_stored_image_path(path)
+    if not normalized:
+        return url_for('static', filename=fallback)
+    if normalized.startswith(('http://', 'https://')):
+        return normalized
+    if normalized.startswith('/static/'):
+        return normalized
+    return url_for('static', filename=normalized.lstrip('/'))
+
+
+def image_disk_path(stored_path):
+    """Map a stored image path to the on-disk upload path."""
+    if not stored_path or stored_path.startswith(('http://', 'https://')):
+        return None
+
+    rel = stored_path.strip()
+    for prefix in ('/static/uploads/', 'static/uploads/', '/uploads/', 'uploads/'):
+        if rel.startswith(prefix):
+            rel = rel[len(prefix):]
+            break
+    rel = rel.lstrip('/')
+    if not rel:
+        return None
+    return os.path.join(current_app.config['UPLOAD_FOLDER'], rel)
+
+
 def save_image(file, subfolder='products'):
-    """Save and process uploaded image. Returns relative URL path."""
+    """Save and process uploaded image. Returns stored relative path."""
     if not file or not allowed_file(file.filename):
         return None
 
@@ -46,6 +98,8 @@ def save_image(file, subfolder='products'):
 
     # Generate unique filename
     ext = file.filename.rsplit('.', 1)[1].lower()
+    if ext == 'jpeg':
+        ext = 'jpg'
     filename = f'{uuid.uuid4().hex}.{ext}'
     safe_filename = secure_filename(filename)
 
@@ -57,14 +111,21 @@ def save_image(file, subfolder='products'):
 
     # Process image with Pillow (re-encode to strip metadata)
     img = Image.open(file.stream)
-    img = img.convert('RGB')
-
-    # Resize if too large
+    img = _prepare_image_for_save(img)
     img.thumbnail(MAX_IMAGE_SIZE, Image.LANCZOS)
-    img.save(filepath, quality=85, optimize=True)
 
-    # Return URL path relative to static
-    return f'/static/uploads/{subfolder}/{safe_filename}'
+    save_kwargs = {'quality': 85, 'optimize': True}
+    if ext in ('jpg', 'jpeg'):
+        img.save(filepath, format='JPEG', **save_kwargs)
+    elif ext == 'png':
+        img.save(filepath, format='PNG', optimize=True)
+    elif ext == 'webp':
+        img.save(filepath, format='WEBP', quality=85)
+    else:
+        img.save(filepath, **save_kwargs)
+
+    # Store relative path — works with resolve_image_url()
+    return f'{subfolder}/{safe_filename}'
 
 
 def save_thumbnail(file, subfolder='thumbnails'):
@@ -73,6 +134,8 @@ def save_thumbnail(file, subfolder='thumbnails'):
         return None
 
     ext = file.filename.rsplit('.', 1)[1].lower()
+    if ext == 'jpeg':
+        ext = 'jpg'
     filename = f'{uuid.uuid4().hex}_thumb.{ext}'
     safe_filename = secure_filename(filename)
 
@@ -82,20 +145,17 @@ def save_thumbnail(file, subfolder='thumbnails'):
     filepath = os.path.join(upload_dir, safe_filename)
 
     img = Image.open(file.stream)
-    img = img.convert('RGB')
+    img = _prepare_image_for_save(img)
     img.thumbnail(THUMBNAIL_SIZE, Image.LANCZOS)
     img.save(filepath, quality=80, optimize=True)
 
-    return f'/static/uploads/{subfolder}/{safe_filename}'
+    return f'{subfolder}/{safe_filename}'
 
 
 def delete_image(image_url):
     """Delete an image file from disk."""
-    if not image_url or not image_url.startswith('/static/uploads/'):
-        return False
-
-    filepath = os.path.join(current_app.root_path, image_url.lstrip('/'))
-    if os.path.exists(filepath):
+    filepath = image_disk_path(image_url)
+    if filepath and os.path.exists(filepath):
         os.remove(filepath)
         return True
     return False
