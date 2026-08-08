@@ -1,6 +1,11 @@
+# Required for Pipeline jobs + Git SCM deploy
 workflow-aggregator:latest
+workflow-job:latest
+pipeline-model-definition:latest
 git:latest
-ssh-agent:latest
 credentials-binding:latest
-pipeline-stage-view:latest
+ssh-agent:latest
 timestamper:latest
+pipeline-stage-view:latest
+script-security:latest
+structs:latest

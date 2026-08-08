@@ -1,97 +1,172 @@
 # Jenkins CI/CD — Indistylex
 
-Deploy **Indistylex** by triggering a Jenkins pipeline instead of manual `git pull`.
-
-| Environment | Jenkins URL | Deploy target |
-|-------------|-------------|---------------|
-| **Local (Docker)** | http://localhost:8080 | `production` (SSH to server) |
-| **Server** | http://138.201.50.228:8081 | `local` (same machine) |
+Deploy **Indistylex** by triggering a Jenkins pipeline.
 
 ---
 
-## 1. Local Jenkins (Docker)
+## How Jenkins works (simple)
 
-```bash
-cd /path/to/Indistylex/jenkins
-chmod +x deploy.sh install-server.sh
-docker compose up -d
+```
+You click "Build" in Jenkins
+        ↓
+Jenkins reads Jenkinsfile from GitHub
+        ↓
+Runs jenkins/deploy.sh on server
+        ↓
+git pull → pip install → restart indistylex
 ```
 
-Get initial admin password:
-
-```bash
-docker exec indistylex-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
-```
-
-Open **http://localhost:8080**, complete setup, install suggested plugins.
-
-### Create pipeline job (local Jenkins)
-
-1. **New Item** → name: `indistylex-deploy` → **Pipeline**
-2. **Pipeline** → Definition: *Pipeline script from SCM*
-3. **Git** → `https://github.com/shivam74826/Indistylex.git`, branch `develop`
-4. Script Path: `Jenkinsfile`
-5. Save
-
-### SSH credential (local → production deploy)
-
-1. **Manage Jenkins** → **Credentials** → **System** → **Global**
-2. **Add Credentials** → Kind: **SSH Username with private key**
-3. ID: `indistylex-server-ssh` (must match Jenkinsfile)
-4. Username: `root`
-5. Private key: your server SSH key
-
-### Trigger deploy from local Jenkins
-
-1. Open job → **Build with Parameters**
-2. **BRANCH**: `develop`
-3. **DEPLOY_TARGET**: `production`
-4. **RUN_MIGRATIONS**: off (unless you need SQL migrations)
-5. **Build**
+**You do NOT need Docker** for local Jenkins. Use the WAR method below.
 
 ---
 
-## 2. Server Jenkins (production)
+## Local Jenkins (your ThinkPad) — step by step
 
-SSH to server and run (after pulling latest code):
+### 1. Start Jenkins
+
+```bash
+cd ~/work/indistyle/Indistylex/jenkins
+chmod +x *.sh
+./restart-local.sh
+```
+
+Open: **http://localhost:8080**
+
+First-time password:
+```bash
+cat .jenkins_home/secrets/initialAdminPassword
+```
+
+### 2. Complete setup wizard (first time only)
+
+1. Choose **Install suggested plugins** (or skip — we install via script below)
+2. Create admin user (remember username/password)
+3. Save Jenkins URL as `http://localhost:8080`
+
+### 3. Install Pipeline + Git plugins (if UI fails)
+
+If plugin install hangs in the browser, use the CLI script:
+
+```bash
+cd ~/work/indistyle/Indistylex/jenkins
+./install-plugins.sh
+./restart-local.sh
+```
+
+This installs:
+- `workflow-aggregator` — Pipeline jobs
+- `git` — clone from GitHub
+- `ssh-agent` — deploy to production server
+
+**Verify plugins installed:**
+```bash
+ls .jenkins_home/plugins/ | grep -E 'git\.|workflow-job'
+```
+You should see `git.jpi` and `workflow-job.jpi`.
+
+### 4. Create the deploy job
+
+1. Jenkins home → **New Item**
+2. Name: `indistylex-deploy`
+3. Type: **Pipeline** ← if you don't see this, run `./install-plugins.sh` + restart
+4. Click OK
+5. Scroll to **Pipeline** section:
+   - Definition: **Pipeline script from SCM**
+   - SCM: **Git**
+   - Repository URL: `https://github.com/shivam74826/Indistylex.git`
+   - Branch: `*/develop`
+   - Script Path: `Jenkinsfile`
+6. **Save**
+
+### 5. Add SSH credential (for deploy to server)
+
+1. **Manage Jenkins** → **Credentials** → **System** → **Global credentials**
+2. **Add Credentials**
+3. Kind: **SSH Username with private key**
+4. ID: `indistylex-server-ssh` (must match Jenkinsfile)
+5. Username: `root`
+6. Private Key: paste your server SSH private key (`~/.ssh/id_rsa` or similar)
+7. Save
+
+### 6. Trigger a deploy
+
+1. Open job `indistylex-deploy`
+2. **Build with Parameters**
+3. Set:
+   - **BRANCH**: `develop`
+   - **GIT_REMOTE**: `origin` (or `shivam74826` if that's your remote name on server)
+   - **DEPLOY_TARGET**: `production` (from local Jenkins → SSH to server)
+   - **RUN_MIGRATIONS**: off
+4. **Build**
+
+Watch console output for success.
+
+---
+
+## Server Jenkins (production)
+
+On server `138.201.50.228`:
 
 ```bash
 cd /var/www/html/indistylex
-git pull origin develop   # or shivam74826 develop
-chmod +x jenkins/deploy.sh jenkins/install-server.sh
-bash jenkins/install-server.sh
+git pull shivam74826 develop
+chmod +x jenkins/*.sh
+sudo bash jenkins/install-server.sh
 ```
-
-Jenkins runs on port **8081** (so it does not conflict with the app on 8000).
 
 Open: **http://138.201.50.228:8081**
 
-Use the printed initial admin password to finish setup.
-
-### Create pipeline job (server Jenkins)
-
-Same as local, but when triggering:
-
+Create same Pipeline job, but when building use:
 - **DEPLOY_TARGET**: `local`
-- **GIT_REMOTE**: set to your git remote name if not `origin` (e.g. `shivam74826`)
-
-To set default remote, add to job **Environment**:
-
-```
-GIT_REMOTE=shivam74826
-```
-
-Or configure in Jenkinsfile `environment` block.
-
-### Firewall (if Jenkins UI not reachable)
-
-```bash
-ufw allow 8081/tcp
-```
+- **GIT_REMOTE**: `shivam74826`
 
 ---
 
-## 3. Manual deploy (without Jenkins)
+## Troubleshooting
+
+### "Pipeline" not in New Item list
+
+Plugins not loaded. Run:
+```bash
+./install-plugins.sh
+./restart-local.sh
+```
+Hard refresh browser (Ctrl+Shift+R).
+
+### Plugin install fails in UI (timeout / stuck)
+
+Don't use UI. Use CLI:
+```bash
+./install-plugins.sh
+./restart-local.sh
+```
+
+### Jenkins won't start / port in use
+
+```bash
+pkill -f 'jenkins.war'
+./restart-local.sh
+```
+
+### "git" plugin missing
+
+```bash
+ls .jenkins_home/plugins/git.jpi   # should exist
+./install-plugins.sh && ./restart-local.sh
+```
+
+### Deploy fails: SSH credential not found
+
+Create credential with exact ID: `indistylex-server-ssh`
+
+### Deploy fails: permission denied on server
+
+On server, ensure deploy script is executable:
+```bash
+chmod +x /var/www/html/indistylex/jenkins/deploy.sh
+```
+
+### Manual deploy (no Jenkins)
 
 ```bash
 cd /var/www/html/indistylex
@@ -100,21 +175,27 @@ GIT_REMOTE=shivam74826 BRANCH=develop bash jenkins/deploy.sh
 
 ---
 
-## Pipeline parameters
+## Files
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `BRANCH` | develop | Branch to deploy |
-| `RUN_MIGRATIONS` | false | Run optional MySQL migration scripts |
-| `DEPLOY_TARGET` | local | `local` = this server; `production` = SSH deploy |
+| File | Purpose |
+|------|---------|
+| `start-local.sh` | Start Jenkins WAR |
+| `restart-local.sh` | Stop + start Jenkins |
+| `install-plugins.sh` | Install plugins without UI |
+| `plugins.txt` | Plugin list |
+| `deploy.sh` | Actual deploy script |
+| `install-server.sh` | Install Jenkins on Ubuntu server |
+| `../Jenkinsfile` | Pipeline definition |
 
 ---
 
-## Troubleshooting
+## Docker (optional)
 
-| Issue | Fix |
-|-------|-----|
-| Permission denied on git pull | `usermod -aG www-data jenkins` and fix repo permissions |
-| Service restart fails | `journalctl -u indistylex -n 50` |
-| SSH deploy fails from local | Check credential ID `indistylex-server-ssh` |
-| Wrong git remote | Set `GIT_REMOTE=shivam74826` in job env or when running deploy.sh |
+Docker is **not required**. If you prefer Docker later:
+
+```bash
+sudo apt install docker.io docker-compose-v2
+docker compose up -d
+```
+
+But WAR mode (`./restart-local.sh`) is simpler for local use.
