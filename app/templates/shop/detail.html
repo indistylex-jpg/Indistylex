@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% set pdp_variants = product.variants.filter_by(is_active=True).all() %}
+{% set in_stock_variants = pdp_variants | selectattr('stock_quantity', 'gt', 0) | list %}
+{% set pdp_sizes = in_stock_variants | map(attribute='size') | unique | list %}
+{% set pdp_colors = in_stock_variants | map(attribute='color') | unique | list %}
+
 {% block title %}{{ product.name }} — Indistylex{% endblock %}
-{% block meta_description %}{{ product.description[:160] | striptags }}{% endblock %}
+{% block meta_description %}{{ (product.description or product.short_description or product.name)[:160] | striptags }}{% endblock %}
 
 {% block content %}
 <section class="product-detail-section py-4">
@@ -86,11 +91,6 @@
                     <p class="pdp-description">{{ product.description }}</p>
 
                     <!-- Add to Cart Form -->
-                    {% set variants = product.variants.filter_by(is_active=True).all() %}
-                    {% set in_stock_variants = variants | selectattr('stock_quantity', 'gt', 0) | list %}
-                    {% set sizes = in_stock_variants | map(attribute='size') | unique | list %}
-                    {% set colors = in_stock_variants | map(attribute='color') | unique | list %}
-
                     <form method="POST" action="{{ url_for('cart.add_to_cart') }}" id="addToCartForm">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
@@ -99,40 +99,40 @@
                         {% endif %}
 
                         <!-- Size Selection -->
-                        {% if sizes | length > 1 %}
+                        {% if pdp_sizes | length > 1 %}
                         <div class="pdp-option-group">
                             <label class="pdp-option-label">SIZE</label>
                             <div class="pdp-size-options">
-                                {% for size in sizes %}
+                                {% for size in pdp_sizes %}
                                 <button type="button" class="pdp-size-btn" data-size="{{ size }}">{{ size }}</button>
                                 {% endfor %}
                             </div>
                             <input type="hidden" name="size" id="selectedSize">
                         </div>
-                        {% elif sizes | length == 1 %}
-                        <input type="hidden" name="size" id="selectedSize" value="{{ sizes[0] }}">
+                        {% elif pdp_sizes | length == 1 %}
+                        <input type="hidden" name="size" id="selectedSize" value="{{ pdp_sizes[0] }}">
                         <div class="pdp-option-group mb-3">
                             <label class="pdp-option-label">SIZE</label>
-                            <span class="badge bg-light text-dark border">{{ sizes[0] }}</span>
+                            <span class="badge bg-light text-dark border">{{ pdp_sizes[0] }}</span>
                         </div>
                         {% endif %}
 
                         <!-- Color Selection -->
-                        {% if colors | length > 1 %}
+                        {% if pdp_colors | length > 1 %}
                         <div class="pdp-option-group">
                             <label class="pdp-option-label">COLOR</label>
                             <div class="pdp-color-options">
-                                {% for color in colors %}
+                                {% for color in pdp_colors %}
                                 <button type="button" class="pdp-color-btn" data-color="{{ color }}">{{ color }}</button>
                                 {% endfor %}
                             </div>
                             <input type="hidden" name="color" id="selectedColor">
                         </div>
-                        {% elif colors | length == 1 %}
-                        <input type="hidden" name="color" id="selectedColor" value="{{ colors[0] }}">
+                        {% elif pdp_colors | length == 1 %}
+                        <input type="hidden" name="color" id="selectedColor" value="{{ pdp_colors[0] }}">
                         <div class="pdp-option-group mb-3">
                             <label class="pdp-option-label">COLOR</label>
-                            <span class="badge bg-light text-dark border">{{ colors[0] }}</span>
+                            <span class="badge bg-light text-dark border">{{ pdp_colors[0] }}</span>
                         </div>
                         {% endif %}
 
@@ -244,10 +244,11 @@
     const form = document.getElementById('addToCartForm');
     if (!form) return;
 
-    const variants = {{ [
-        {'id': v.id, 'size': v.size, 'color': v.color}
-        for v in in_stock_variants
-    ] | tojson }};
+    const variants = [
+        {% for v in in_stock_variants %}
+        {"id": {{ v.id }}, "size": {{ v.size|tojson }}, "color": {{ v.color|tojson }}}{{ "," if not loop.last else "" }}
+        {% endfor %}
+    ];
 
     function setActive(btnList, activeBtn) {
         btnList.forEach(b => b.classList.remove('active'));
