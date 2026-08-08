@@ -1,18 +1,4 @@
-/* ===== INDISTYLEX HOME — Miarcus layout, soft sky-blue identity ===== */
-
-:root {
-    --home-navy: #1B3A5F;
-    --home-blue: #4F8EF7;
-    --home-blue-dark: #3A7AE8;
-    --home-sky: #D6E8FF;
-    --home-sky-deep: #A8CFFF;
-    --home-soft: #EBF3FF;
-    --home-cream: #FFFCF9;
-    --home-coral: #FF8C5A;
-    --home-card: #EEF3FF;
-    --home-cart: #6B93E8;
-    --home-usp-bg: #FDE8F0;
-}
+/* ===== INDISTYLEX HOME — uses site CSS variables from style.css ===== */
 
 /* ── Hero ── */
 .home-hero { margin-top: 0; }
@@ -24,13 +10,13 @@
     align-items: center;
 }
 .home-hero-panel--sale {
-    background: linear-gradient(135deg, #C5DBFF 0%, #9EC4FF 45%, #7AADFF 100%);
+    background: linear-gradient(135deg, #DBEAFE 0%, #93C5FD 45%, #2563EB 100%);
 }
 .home-hero-panel--new {
-    background: linear-gradient(135deg, #E8F2FF 0%, #C8DFFB 50%, #A8CFFF 100%);
+    background: linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 50%, #93C5FD 100%);
 }
 .home-hero-panel--baby {
-    background: linear-gradient(135deg, #D4E8FF 0%, #B8D9FF 55%, #9EC8FF 100%);
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 55%, #60A5FA 100%);
 }
 .home-hero-pattern {
     position: absolute;
@@ -53,7 +39,7 @@
     gap: 24px;
     padding: 48px 16px 56px;
 }
-.home-hero-copy { flex: 1; max-width: 480px; color: var(--home-navy); }
+.home-hero-copy { flex: 1; max-width: 480px; color: var(--primary); }
 .home-hero-eyebrow {
     display: block;
     font-size: 0.72rem;
@@ -81,13 +67,13 @@
 .home-hero-display--sm {
     font-size: clamp(2rem, 5vw, 3.2rem);
     letter-spacing: -1px;
-    color: var(--home-navy);
+    color: var(--primary);
     text-shadow: none;
 }
 .home-hero-off {
     font-size: clamp(1rem, 2vw, 1.25rem);
     margin-bottom: 24px;
-    color: var(--home-navy);
+    color: var(--primary);
 }
 .home-hero-off strong { font-weight: 800; }
 .home-hero-subline {
@@ -99,7 +85,7 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: var(--home-navy);
+    background: var(--primary);
     color: #fff;
     font-size: 0.78rem;
     font-weight: 800;
@@ -115,7 +101,7 @@
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(27, 58, 95, 0.3);
 }
-.home-hero-cta--dark { background: var(--home-blue-dark); }
+.home-hero-cta--dark { background: var(--accent-hover); }
 .home-hero-cta .bi-bag-heart-fill { color: #FFD166; font-size: 1rem; }
 .home-hero-visual {
     position: relative;
@@ -138,7 +124,7 @@
     right: -10px;
     width: 100px;
     height: 100px;
-    background: var(--home-blue);
+    background: var(--accent);
     color: #fff;
     border-radius: 50%;
     display: flex;
@@ -161,7 +147,7 @@
     border: none;
     border-radius: 50%;
     background: rgba(255,255,255,0.92);
-    color: var(--home-navy);
+    color: var(--primary);
     font-size: 1.1rem;
     z-index: 5;
     cursor: pointer;
@@ -187,7 +173,7 @@
 
 /* ── USP bar ── */
 .home-usp {
-    background: var(--home-usp-bg);
+    background: #DBEAFE;
     border-bottom: 1px solid rgba(255,255,255,0.6);
     overflow: hidden;
     padding: 14px 0;
@@ -205,11 +191,11 @@
     white-space: nowrap;
     font-size: 0.78rem;
     font-weight: 600;
-    color: var(--home-navy);
+    color: var(--primary);
 }
 .home-usp-item i {
     font-size: 1.1rem;
-    color: var(--home-blue);
+    color: var(--accent);
 }
 @keyframes home-usp-scroll {
     0% { transform: translateX(0); }
@@ -221,12 +207,12 @@
 .home-h2 {
     font-size: clamp(1.6rem, 3.5vw, 2.1rem);
     font-weight: 800;
-    color: var(--home-navy);
+    color: var(--primary);
     letter-spacing: -0.4px;
     margin-bottom: 8px;
 }
 .home-lead {
-    color: #6B7C93;
+    color: var(--text-muted);
     font-size: 0.95rem;
     margin-bottom: 24px;
 }
@@ -241,16 +227,16 @@
 .home-link-all {
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--home-blue);
+    color: var(--accent);
     text-decoration: none;
 }
-.home-link-all:hover { color: var(--home-navy); }
+.home-link-all:hover { color: var(--primary); }
 
 /* ── Gender toggle + fit chips ── */
 .home-fit { background: #fff; }
 .home-gender-toggle {
     display: inline-flex;
-    background: var(--home-soft);
+    background: var(--accent-soft);
     border-radius: 999px;
     padding: 4px;
     margin-bottom: 32px;
@@ -263,12 +249,12 @@
     border-radius: 999px;
     font-size: 0.88rem;
     font-weight: 700;
-    color: #6B7C93;
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
 }
 .home-gender-btn.is-active {
-    background: var(--home-blue);
+    background: var(--accent);
     color: #fff;
     box-shadow: 0 4px 14px rgba(79, 142, 247, 0.35);
 }
@@ -284,29 +270,29 @@
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    color: var(--home-navy);
+    color: var(--primary);
     min-width: 76px;
     transition: transform 0.15s;
 }
 .home-fit-chip:hover {
     transform: translateY(-4px);
-    color: var(--home-blue);
+    color: var(--accent);
 }
 .home-fit-chip-icon {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: var(--home-soft);
+    background: var(--accent-soft);
     border: 2px solid #E2EAF5;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    color: var(--home-blue);
+    color: var(--accent);
     transition: border-color 0.2s, background 0.2s;
 }
 .home-fit-chip:hover .home-fit-chip-icon {
-    border-color: var(--home-blue);
+    border-color: var(--accent);
     background: #fff;
 }
 .home-fit-chip-label {
@@ -316,7 +302,7 @@
 }
 
 /* ── Quick shop cards ── */
-.home-quick-shop { background: var(--home-cream); padding-top: 0; }
+.home-quick-shop { background: var(--light-bg); padding-top: 0; }
 .home-quick-card {
     display: block;
     border-radius: 16px;
@@ -344,22 +330,22 @@
 .home-quick-card-body h3 {
     font-size: 1.05rem;
     font-weight: 800;
-    color: var(--home-navy);
+    color: var(--primary);
     margin-bottom: 6px;
 }
 .home-quick-card-body p {
     font-size: 0.82rem;
-    color: #6B7C93;
+    color: var(--text-muted);
     margin-bottom: 10px;
 }
 .home-quick-card-body span {
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--home-blue);
+    color: var(--accent);
 }
 
 /* ── Product carousel ── */
-.home-favorites { background: var(--home-soft); }
+.home-favorites { background: var(--accent-soft); }
 .home-carousel-wrap {
     position: relative;
 }
@@ -372,7 +358,7 @@
     border: 1px solid #E2EAF5;
     border-radius: 50%;
     background: #fff;
-    color: var(--home-navy);
+    color: var(--primary);
     z-index: 3;
     cursor: pointer;
     display: none;
@@ -383,9 +369,9 @@
 .home-carousel-arrow--prev { left: -20px; }
 .home-carousel-arrow--next { right: -20px; }
 .home-carousel-arrow:hover {
-    background: var(--home-blue);
+    background: var(--accent);
     color: #fff;
-    border-color: var(--home-blue);
+    border-color: var(--accent);
 }
 .home-product-track {
     display: flex;
@@ -417,7 +403,7 @@
 }
 .home-product-card-media {
     position: relative;
-    background: var(--home-card);
+    background: var(--card-bg);
     aspect-ratio: 1;
 }
 .home-product-card-media img {
@@ -430,7 +416,7 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    background: var(--home-coral);
+    background: var(--accent-warm);
     color: #fff;
     font-size: 0.62rem;
     font-weight: 700;
@@ -452,13 +438,13 @@
     overflow: hidden;
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--home-navy);
+    color: var(--primary);
     text-decoration: none;
     line-height: 1.35;
     margin-bottom: 8px;
     min-height: 2.4em;
 }
-.home-product-title:hover { color: var(--home-blue); }
+.home-product-title:hover { color: var(--accent); }
 .home-product-pill {
     display: inline-flex;
     align-items: center;
@@ -466,7 +452,7 @@
     font-size: 0.68rem;
     font-weight: 600;
     background: #E8EEFF;
-    color: var(--home-blue-dark);
+    color: var(--accent-hover);
     border-radius: 999px;
     padding: 4px 10px;
     margin-bottom: 8px;
@@ -481,7 +467,7 @@
 .home-product-price {
     font-size: 0.95rem;
     font-weight: 800;
-    color: var(--home-navy);
+    color: var(--primary);
 }
 .home-product-compare {
     font-size: 0.75rem;
@@ -501,12 +487,12 @@
     font-size: 0.78rem;
     margin-bottom: 10px;
     background: #fff;
-    color: var(--home-navy);
+    color: var(--primary);
 }
 .home-product-add-btn {
     width: 100%;
     border: none;
-    background: var(--home-cart);
+    background: var(--accent);
     color: #fff;
     font-size: 0.72rem;
     font-weight: 800;
@@ -522,7 +508,7 @@
     transition: background 0.2s;
 }
 .home-product-add-btn:hover {
-    background: var(--home-blue-dark);
+    background: var(--accent-hover);
     color: #fff;
 }
 
@@ -540,24 +526,24 @@
 .home-editorial-title {
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 800;
-    color: var(--home-blue);
+    color: var(--accent);
     line-height: 1.05;
     letter-spacing: -1px;
     margin-bottom: 12px;
     opacity: 0.9;
 }
 .home-editorial-text p {
-    color: #6B7C93;
+    color: var(--text-muted);
     font-size: 0.95rem;
     margin-bottom: 16px;
 }
 .home-editorial-text a {
     font-size: 0.88rem;
     font-weight: 700;
-    color: var(--home-navy);
+    color: var(--primary);
     text-decoration: none;
 }
-.home-editorial-text a:hover { color: var(--home-blue); }
+.home-editorial-text a:hover { color: var(--accent); }
 .home-editorial-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -574,7 +560,7 @@
 }
 
 /* ── Category grid ── */
-.home-categories { background: var(--home-cream); }
+.home-categories { background: var(--light-bg); }
 .home-cat-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -622,20 +608,20 @@
     align-items: center;
     gap: 12px;
     padding: 28px 16px;
-    background: var(--home-soft);
+    background: var(--accent-soft);
     border: 1px solid #E2EAF5;
     border-radius: 14px;
     text-decoration: none;
-    color: var(--home-navy);
+    color: var(--primary);
     font-size: 0.85rem;
     font-weight: 700;
     transition: all 0.2s;
 }
 .home-need-card:hover {
     background: #fff;
-    border-color: var(--home-blue);
+    border-color: var(--accent);
     transform: translateY(-3px);
-    color: var(--home-blue);
+    color: var(--accent);
 }
 .home-need-icon {
     width: 56px;
@@ -646,11 +632,11 @@
     align-items: center;
     justify-content: center;
     font-size: 1.4rem;
-    color: var(--home-blue);
+    color: var(--accent);
 }
 
 /* ── Real moments ── */
-.home-moments { background: var(--home-soft); }
+.home-moments { background: var(--accent-soft); }
 .home-moments-track {
     display: flex;
     gap: 16px;
@@ -676,7 +662,7 @@
     bottom: 12px;
     left: 12px;
     right: 12px;
-    background: var(--home-cart);
+    background: var(--accent);
     color: #fff;
     text-align: center;
     font-size: 0.72rem;
@@ -685,10 +671,10 @@
     border-radius: 8px;
     text-decoration: none;
 }
-.home-moment-btn:hover { background: var(--home-blue-dark); color: #fff; }
+.home-moment-btn:hover { background: var(--accent-hover); color: #fff; }
 
 /* ── Shop by age ── */
-.home-age { background: linear-gradient(180deg, #fff 0%, var(--home-soft) 100%); }
+.home-age { background: linear-gradient(180deg, #fff 0%, var(--accent-soft) 100%); }
 .home-age-grid {
     display: flex;
     flex-wrap: wrap;
@@ -707,7 +693,7 @@
     border: 1px solid #E2EAF5;
     border-radius: 12px;
     text-decoration: none;
-    color: var(--home-navy);
+    color: var(--primary);
     transition: all 0.15s;
 }
 .home-age-emoji { font-size: 1.3rem; }
@@ -718,7 +704,7 @@
     line-height: 1.2;
 }
 .home-age-item:hover {
-    border-color: var(--home-blue);
+    border-color: var(--accent);
     box-shadow: 0 4px 14px rgba(79, 142, 247, 0.15);
     transform: translateY(-2px);
 }
@@ -736,16 +722,16 @@
 }
 .home-trust-box i {
     font-size: 1.6rem;
-    color: var(--home-blue);
+    color: var(--accent);
 }
 .home-trust-box strong {
     display: block;
     font-size: 0.82rem;
-    color: var(--home-navy);
+    color: var(--primary);
 }
 .home-trust-box span {
     font-size: 0.72rem;
-    color: #6B7C93;
+    color: var(--text-muted);
 }
 
 @media (max-width: 767.98px) {

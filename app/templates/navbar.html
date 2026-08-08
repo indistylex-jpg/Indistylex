@@ -87,7 +87,7 @@
     <!-- Nav row with mega menus -->
     <nav class="store-nav">
         <div class="container">
-            <div class="collapse navbar-collapse show" id="storeNavCollapse">
+            <div class="collapse navbar-collapse" id="storeNavCollapse">
                 <ul class="store-nav-list">
                     <li class="store-nav-item">
                         <a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a>
@@ -106,14 +106,6 @@
                                     </ul>
                                 </div>
                                 {% endfor %}
-                                <div class="store-mega-col">
-                                    <h6>Gender</h6>
-                                    <ul>
-                                        <li><a href="{{ url_for('shop.listing', gender='boys') }}">Boys</a></li>
-                                        <li><a href="{{ url_for('shop.listing', gender='girls') }}">Girls</a></li>
-                                        <li><a href="{{ url_for('shop.listing', gender='kids') }}">Kids (Unisex)</a></li>
-                                    </ul>
-                                </div>
                                 <div class="store-mega-promo">
                                     <div class="store-mega-promo-inner">
                                         <p>Comfortable styles for every age</p>
@@ -201,14 +193,10 @@
         <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
         <span class="marquee-sep">◆</span>
         {% endfor %}
+        <a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a>
+        <span class="marquee-sep">◆</span>
         <a href="{{ url_for('shop.listing', gender='boys') }}">Boys</a>
         <span class="marquee-sep">◆</span>
         <a href="{{ url_for('shop.listing', gender='girls') }}">Girls</a>
-        <span class="marquee-sep">◆</span>
-        <a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a>
-        {% for cat in nav_categories %}
-        <span class="marquee-sep">◆</span>
-        <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
-        {% endfor %}
     </div>
 </div>

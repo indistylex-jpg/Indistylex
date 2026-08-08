@@ -2,18 +2,16 @@
 /* Design: Ultra-clean, black/white/gold, minimal */
 
 :root {
-    --primary: #1B3A5F;
-    --accent: #4F8EF7;
-    --accent-hover: #3A7AE8;
-    --accent-soft: #EBF3FF;
-    --accent-warm: #FF8C5A;
+    --primary: #1E4D8C;
+    --accent: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-soft: #EFF6FF;
+    --accent-warm: #E85D04;
     --white: #FFFFFF;
-    --light-bg: #F7FAFF;
-    --cream: #FFFCF9;
-    --border: #E2EAF5;
-    --text-muted: #6B7C93;
-    --card-bg: #EEF3FF;
-    --cart-btn: #6B93E8;
+    --light-bg: #F8FAFC;
+    --border: #E2E8F0;
+    --text-muted: #64748B;
+    --card-bg: #EEF4FC;
     --font-heading: 'Inter', sans-serif;
     --font-body: 'Inter', sans-serif;
 }
@@ -52,7 +50,7 @@ img {
 
 /* ===== STORE HEADER (Miarcus-style, Indistylex colors) ===== */
 .promo-ticker-bar {
-    background: #FDE8F0;
+    background: #DBEAFE;
     color: var(--primary);
     font-size: 0.72rem;
     font-weight: 600;
@@ -346,7 +344,14 @@ img {
 .marquee-sep { opacity: 0.4; font-size: 0.5rem; }
 
 @media (min-width: 992px) {
-    #storeNavCollapse { display: block !important; height: auto !important; }
+    #storeNavCollapse {
+        display: block !important;
+        height: auto !important;
+        visibility: visible !important;
+    }
+    #storeNavCollapse.collapse:not(.show) {
+        display: block !important;
+    }
 }
 @media (max-width: 991.98px) {
     .store-nav-list {

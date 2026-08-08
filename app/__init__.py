@@ -195,7 +195,7 @@ def create_app(config_name=None):
         }
 
     @app.template_global()
-    def image_url(path, fallback='images/placeholders/product.png'):
+    def image_url(path, fallback='images/categories/kids.svg'):
         """Return the correct image URL for both external URLs and local uploads."""
         from app.services.image_service import resolve_image_url
         return resolve_image_url(path, fallback=fallback)

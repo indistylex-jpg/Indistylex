@@ -203,22 +203,41 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* --- Close mobile nav on link click --- */
-  var navCollapse = document.getElementById('mainNav');
-  if (navCollapse) {
-    navCollapse.querySelectorAll('.nav-link:not(.dropdown-toggle)').forEach(function (link) {
-      link.addEventListener('click', function () {
-        var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
-        if (bsCollapse) bsCollapse.hide();
-      });
+  function closeStoreMobileNav() {
+    if (!window.matchMedia('(max-width: 991.98px)').matches) return;
+    var storeNavCollapse = document.getElementById('storeNavCollapse');
+    if (!storeNavCollapse) return;
+    document.querySelectorAll('.store-nav-item.has-mega').forEach(function (el) {
+      el.classList.remove('is-open');
     });
+    var bsCollapse = bootstrap.Collapse.getInstance(storeNavCollapse);
+    if (bsCollapse) {
+      bsCollapse.hide();
+    } else if (storeNavCollapse.classList.contains('show')) {
+      storeNavCollapse.classList.remove('show');
+    }
   }
 
   var storeNavCollapse = document.getElementById('storeNavCollapse');
   if (storeNavCollapse) {
-    storeNavCollapse.querySelectorAll('.store-nav-item:not(.has-mega) > a').forEach(function (link) {
+    storeNavCollapse.querySelectorAll('a[href]').forEach(function (link) {
       link.addEventListener('click', function () {
-        var bsCollapse = bootstrap.Collapse.getInstance(storeNavCollapse);
-        if (bsCollapse && window.matchMedia('(max-width: 991.98px)').matches) bsCollapse.hide();
+        var megaItem = link.closest('.store-nav-item.has-mega');
+        if (megaItem && link === megaItem.firstElementChild) {
+          return;
+        }
+        closeStoreMobileNav();
+      });
+    });
+  }
+
+  var mobileSearch = document.getElementById('mobileSearch');
+  if (mobileSearch) {
+    mobileSearch.querySelectorAll('form').forEach(function (form) {
+      form.addEventListener('submit', function () {
+        var bs = bootstrap.Collapse.getInstance(mobileSearch);
+        if (bs) bs.hide();
+        closeStoreMobileNav();
       });
     });
   }

@@ -82,7 +82,7 @@ class Product(db.Model):
     @property
     def primary_image_url(self):
         from app.services.image_service import resolve_image_url
-        return resolve_image_url(self.primary_image)
+        return resolve_image_url(self.primary_image, fallback='images/categories/kids.svg')
 
     @property
     def all_images(self):
