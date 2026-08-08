@@ -492,7 +492,7 @@ def add_product():
         form=form,
         title='Add Product',
         age_group_choices=AGE_GROUP_CHOICES,
-        selected_age_groups=selected_age_groups or [],
+        selected_age_groups=[],
     )
 
 

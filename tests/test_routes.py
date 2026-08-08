@@ -302,6 +302,8 @@ class TestAdminRoutes:
         assert resp.status_code == 200
         assert b'name="images"' in resp.data
         assert b'variant_size[]' in resp.data
+        assert b'Suitable Ages' in resp.data
+        assert b'name="age_groups"' in resp.data
 
     def test_admin_create_product_with_variant(self, client, admin_user, sample_category):
         login_admin(client)
