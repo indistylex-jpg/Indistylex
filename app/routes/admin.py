@@ -15,8 +15,10 @@ from app.services.image_service import save_image, delete_image
 from app.services.inventory_service import (
     get_low_stock_products, record_b2b_sale, cancel_b2b_sale,
 )
-from app.models.b2b_sale import B2BSale
+from app.models.b2b_sale import B2BSale, B2BSaleItem
 from app.models.expense import Expense
+from app.models.wishlist import Wishlist
+from app.models.cart import CartItem
 from app.forms.expense_forms import ExpenseForm
 from app.services.expense_service import (
     record_expense, delete_expense, get_expense_totals, get_expense_by_category,
@@ -93,10 +95,26 @@ def _save_variants_from_request(product):
 
 
 def _delete_product_record(product):
-    """Delete a product, its variants, and image files from disk."""
+    """Delete a product and clean up related records."""
     name = product.name
+    variant_ids = [v.id for v in product.variants.all()]
+
+    if variant_ids:
+        b2b_refs = B2BSaleItem.query.filter(B2BSaleItem.variant_id.in_(variant_ids)).count()
+        if b2b_refs:
+            raise ValueError(f'"{name}" has B2B sale history and cannot be deleted.')
+
+        CartItem.query.filter(CartItem.variant_id.in_(variant_ids)).delete(synchronize_session=False)
+        OrderItem.query.filter(OrderItem.variant_id.in_(variant_ids)).update(
+            {OrderItem.variant_id: None}, synchronize_session=False
+        )
+
+    Review.query.filter_by(product_id=product.id).delete(synchronize_session=False)
+    Wishlist.query.filter_by(product_id=product.id).delete(synchronize_session=False)
+
     for img in product.images.all():
         delete_image(img.image_url)
+
     db.session.delete(product)
     return name
 
@@ -364,6 +382,58 @@ def products():
     return render_template('admin/products.html', products=products, search=search)
 
 
+@admin_bp.route('/products/bulk-delete', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def bulk_delete_products():
+    """Delete multiple products at once."""
+    if request.method == 'GET':
+        return redirect(url_for('admin.products'))
+
+    raw_ids = request.form.getlist('product_ids')
+    if not raw_ids:
+        flash('Select at least one product to delete.', 'warning')
+        return redirect(url_for('admin.products'))
+
+    product_ids = []
+    for raw_id in raw_ids:
+        try:
+            product_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not product_ids:
+        flash('No valid products selected.', 'warning')
+        return redirect(url_for('admin.products'))
+
+    products = Product.query.filter(Product.id.in_(product_ids)).all()
+    if not products:
+        flash('Selected products were not found.', 'warning')
+        return redirect(url_for('admin.products'))
+
+    deleted_names = []
+    failed_messages = []
+    for product in products:
+        try:
+            deleted_names.append(_delete_product_record(product))
+            db.session.commit()
+        except Exception as exc:
+            db.session.rollback()
+            failed_messages.append(str(exc))
+
+    if deleted_names:
+        if len(deleted_names) == 1:
+            flash(f'Product "{deleted_names[0]}" deleted.', 'success')
+        else:
+            flash(f'{len(deleted_names)} products deleted.', 'success')
+    for msg in failed_messages:
+        flash(msg, 'danger')
+    if not deleted_names and not failed_messages:
+        flash('No products were deleted.', 'warning')
+
+    return redirect(url_for('admin.products'))
+
+
 @admin_bp.route('/products/add', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -516,45 +586,13 @@ def delete_product_image(product_id, image_id):
 @admin_required
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
-    name = _delete_product_record(product)
-    db.session.commit()
-    flash(f'Product "{name}" deleted.', 'info')
-    return redirect(url_for('admin.products'))
-
-
-@admin_bp.route('/products/bulk-delete', methods=['POST'])
-@login_required
-@admin_required
-def bulk_delete_products():
-    """Delete multiple products at once."""
-    raw_ids = request.form.getlist('product_ids')
-    if not raw_ids:
-        flash('Select at least one product to delete.', 'warning')
-        return redirect(url_for('admin.products'))
-
-    product_ids = []
-    for raw_id in raw_ids:
-        try:
-            product_ids.append(int(raw_id))
-        except (TypeError, ValueError):
-            continue
-
-    if not product_ids:
-        flash('No valid products selected.', 'warning')
-        return redirect(url_for('admin.products'))
-
-    products = Product.query.filter(Product.id.in_(product_ids)).all()
-    if not products:
-        flash('Selected products were not found.', 'warning')
-        return redirect(url_for('admin.products'))
-
-    deleted_names = [_delete_product_record(product) for product in products]
-    db.session.commit()
-
-    if len(deleted_names) == 1:
-        flash(f'Product "{deleted_names[0]}" deleted.', 'info')
-    else:
-        flash(f'{len(deleted_names)} products deleted.', 'info')
+    try:
+        name = _delete_product_record(product)
+        db.session.commit()
+        flash(f'Product "{name}" deleted.', 'success')
+    except Exception as exc:
+        db.session.rollback()
+        flash(str(exc), 'danger')
     return redirect(url_for('admin.products'))
 
 
