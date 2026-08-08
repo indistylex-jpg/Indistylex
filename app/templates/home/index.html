@@ -207,11 +207,11 @@
     <div class="container">
         <h2 class="home-h2 text-center mb-4">Shop By Category</h2>
         <div class="home-cat-grid">
-            {% for cat in categories[:6] %}
-            <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="home-cat-tile home-img-reveal">
-                <img src="{{ category_lifestyle_img(cat.slug) }}" alt="{{ cat.name }}">
+            {% for tile in home_category_tiles[:6] %}
+            <a href="{{ url_for(tile.endpoint, **tile.kwargs) }}" class="home-cat-tile home-img-reveal">
+                <img src="{{ category_lifestyle_img(tile.image_slug) }}" alt="{{ tile.label }}">
                 <div class="home-cat-tile-cap">
-                    <strong>{{ cat.name.split('(')[0].strip() }}</strong>
+                    <strong>{{ tile.label }}</strong>
                     <span>Shop Now →</span>
                 </div>
             </a>

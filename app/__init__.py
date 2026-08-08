@@ -155,6 +155,11 @@ def create_app(config_name=None):
 
         from app.utils.product_ages import SHOP_BY_AGE_NAV
         from app.utils.lifestyle_images import MOMENT_IMAGES, PRODUCT_PLACEHOLDER
+        from app.utils.home_categories import (
+            nav_display_categories,
+            nav_marquee_links,
+            visible_home_category_tiles,
+        )
 
         categories_by_slug = {c.slug: c for c in active_categories}
 
@@ -188,7 +193,9 @@ def create_app(config_name=None):
 
         return {
             'cart_count': cart_count,
-            'nav_categories': active_categories,
+            'nav_categories': nav_display_categories(active_categories),
+            'home_category_tiles': visible_home_category_tiles(categories_by_slug),
+            'nav_marquee_links': nav_marquee_links(categories_by_slug),
             'nav_mega_clothing': nav_mega_clothing,
             'nav_quick_links': nav_quick_links,
             'shop_by_age_nav': SHOP_BY_AGE_NAV,

@@ -10,6 +10,7 @@ from app.services.shop_filter_service import (
     get_filter_sizes,
 )
 from app.utils.product_ages import AGE_GROUP_SECTIONS
+from app.utils.home_categories import nav_display_categories
 
 shop_bp = Blueprint('shop', __name__)
 

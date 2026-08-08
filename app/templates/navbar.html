@@ -209,14 +209,9 @@
 <!-- Collection ticker -->
 <div class="collection-marquee-bar">
     <div class="collection-marquee-track">
-        {% for cat in nav_categories %}
-        <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
+        {% for tile in nav_marquee_links %}
+        <a href="{{ url_for(tile.endpoint, **tile.kwargs) }}">{{ tile.label }}</a>
         <span class="marquee-sep">◆</span>
         {% endfor %}
-        <a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a>
-        <span class="marquee-sep">◆</span>
-        <a href="{{ url_for('shop.listing', gender='boys') }}">Boys</a>
-        <span class="marquee-sep">◆</span>
-        <a href="{{ url_for('shop.listing', gender='girls') }}">Girls</a>
     </div>
 </div>
