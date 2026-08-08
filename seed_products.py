@@ -25,12 +25,7 @@ IMG = {
     ],
 }
 
-CATEGORIES = [
-    {'name': 'Newborn (0–12M)', 'slug': 'newborn', 'description': 'Soft essentials for your newest family member', 'sort_order': 1},
-    {'name': 'Toddler (1–3Y)', 'slug': 'toddler', 'description': 'Comfy and colourful outfits for active toddlers', 'sort_order': 2},
-    {'name': 'Boys (3–12Y)', 'slug': 'boys', 'description': 'Cool styles for young boys', 'sort_order': 3},
-    {'name': 'Girls (3–12Y)', 'slug': 'girls', 'description': 'Trendy fashion for young girls', 'sort_order': 4},
-]
+CATEGORIES = []  # Use seed_categories.py for the full 0–18 category tree
 
 PRODUCTS = [
     # ── Newborn (0–12M) ──
@@ -194,23 +189,35 @@ def seed():
         # Create tables if not exist
         db.create_all()
 
+        # Ensure 0–18 category tree exists
+        if not Category.query.filter_by(slug='newborn-infant').first():
+            from seed_categories import seed_categories as rebuild_cats
+            rebuild_cats()
+            db.session.expire_all()
+
         # Skip if products already exist
         if Product.query.first():
             print('Products already seeded. Skipping.')
             return
 
-        # Create categories
-        cat_map = {}
-        for c in CATEGORIES:
-            cat = Category(
-                name=c['name'], slug=c['slug'],
-                description=c['description'], sort_order=c['sort_order'],
-                is_active=True
-            )
-            db.session.add(cat)
-            db.session.flush()
-            cat_map[c['slug']] = cat
-            print(f'  + Category: {cat.name}')
+        # Map each product to best sub-category
+        from seed_categories import pick_parent_slug, pick_child_suffix
+
+        class _P:
+            pass
+
+        def resolve_category(p):
+            stub = _P()
+            stub.name = p['name']
+            stub.age_group = p.get('age_group')
+            stub.gender = p.get('gender')
+            parent_slug = pick_parent_slug(stub, p['category'])
+            child_suffix = pick_child_suffix(stub)
+            full_slug = f'{parent_slug}-{child_suffix}'
+            cat = Category.query.filter_by(slug=full_slug).first()
+            if not cat:
+                cat = Category.query.filter_by(slug=parent_slug).first()
+            return cat
 
         # Create products with variants and images
         sku_counter = 1000
