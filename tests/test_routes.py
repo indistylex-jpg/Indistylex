@@ -310,7 +310,7 @@ class TestAdminRoutes:
             'category_id': sample_category.id,
             'price': '599.00',
             'gender': 'kids',
-            'age_group': '0-2',
+            'age_groups': ['2-4', '4-6', '6-8'],
             'is_active': 'y',
             'variant_size[]': '6-9M',
             'variant_color[]': 'Pink',
@@ -320,6 +320,7 @@ class TestAdminRoutes:
         assert resp.status_code == 200
         product = Product.query.filter_by(name='Full Set Romper').first()
         assert product is not None
+        assert product.age_groups == '2-4,4-6,6-8'
         assert product.variants.count() == 1
         assert product.variants.first().sku == 'FULL-ROM-PINK'
 

@@ -11,6 +11,7 @@ from app.models.order import Order, OrderItem, Payment
 from app.models.review import Review
 from app.models.coupon import Coupon
 from app.forms.product_forms import ProductForm, CategoryForm, ProductVariantForm
+from app.utils.product_ages import AGE_GROUP_CHOICES
 from app.services.image_service import save_image, delete_image
 from app.services.inventory_service import (
     get_low_stock_products, record_b2b_sale, cancel_b2b_sale,
@@ -92,6 +93,10 @@ def _save_variants_from_request(product):
         added += 1
 
     return added, skipped
+
+
+def _apply_product_age_groups(product):
+    product.set_age_groups_list(request.form.getlist('age_groups'))
 
 
 def _delete_product_record(product):
@@ -456,7 +461,6 @@ def add_product():
             category_id=form.category_id.data,
             brand=form.brand.data,
             gender=form.gender.data or None,
-            age_group=form.age_group.data or None,
             material=form.material.data,
             care_instructions=form.care_instructions.data,
             is_active=form.is_active.data,
@@ -465,6 +469,7 @@ def add_product():
         )
         db.session.add(product)
         db.session.flush()
+        _apply_product_age_groups(product)
 
         image_count, image_failed = _save_product_images(product)
         variant_count, skipped_skus = _save_variants_from_request(product)
@@ -482,7 +487,13 @@ def add_product():
             flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
         return redirect(url_for('admin.products'))
 
-    return render_template('admin/product_form.html', form=form, title='Add Product')
+    return render_template(
+        'admin/product_form.html',
+        form=form,
+        title='Add Product',
+        age_group_choices=AGE_GROUP_CHOICES,
+        selected_age_groups=selected_age_groups or [],
+    )
 
 
 @admin_bp.route('/products/edit/<int:product_id>', methods=['GET', 'POST'])
@@ -499,7 +510,7 @@ def edit_product(product_id):
     if form.validate_on_submit():
         form.populate_obj(product)
         product.gender = form.gender.data or None
-        product.age_group = form.age_group.data or None
+        _apply_product_age_groups(product)
 
         image_count, image_failed = _save_product_images(product)
         variant_count, skipped_skus = _save_variants_from_request(product)
@@ -520,8 +531,16 @@ def edit_product(product_id):
     variants = product.variants.all()
     images = product.images.order_by(ProductImage.sort_order).all()
 
-    return render_template('admin/product_form.html', form=form, title='Edit Product',
-                           product=product, variants=variants, images=images)
+    return render_template(
+        'admin/product_form.html',
+        form=form,
+        title='Edit Product',
+        product=product,
+        variants=variants,
+        images=images,
+        age_group_choices=AGE_GROUP_CHOICES,
+        selected_age_groups=product.age_groups_list,
+    )
 
 
 @admin_bp.route('/products/<int:product_id>/variants/add', methods=['POST'])

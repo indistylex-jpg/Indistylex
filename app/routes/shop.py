@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, current_app
 from app.models.product import Product, Category
 from app.extensions import cache
+from app.utils.product_ages import apply_age_group_filter
 
 shop_bp = Blueprint('shop', __name__)
 
@@ -30,10 +31,9 @@ def listing():
     if gender:
         query = query.filter(Product.gender == gender)
 
-    # Age group filter
+    # Age group filter — matches any checked age band on the product
     age_group = request.args.get('age_group')
-    if age_group:
-        query = query.filter(Product.age_group == age_group)
+    query = apply_age_group_filter(query, age_group, Product)
 
     # Price filter
     min_price = request.args.get('min_price', type=float)

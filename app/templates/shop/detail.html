@@ -71,6 +71,17 @@
                     </div>
                     {% endif %}
 
+                    {% if product.age_groups_list %}
+                    <div class="pdp-option-group mb-3">
+                        <label class="pdp-option-label">SUITABLE FOR</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for label in product.age_groups_badges %}
+                            <span class="badge bg-light text-dark border">{{ label }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Description -->
                     <p class="pdp-description">{{ product.description }}</p>
 

@@ -116,9 +116,18 @@
           <label class="form-label">Gender</label>
           {{ form.gender(class="form-select") }}
         </div>
-        <div class="col-md-3">
-          <label class="form-label">Age Group</label>
-          {{ form.age_group(class="form-select") }}
+        <div class="col-md-9">
+          <label class="form-label d-block">Suitable Ages <span class="text-muted fw-normal">(check all that apply)</span></label>
+          <div class="d-flex flex-wrap gap-3 pt-1">
+            {% for value, label in age_group_choices %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="age_groups" value="{{ value }}"
+                     id="age-{{ value }}" {{ 'checked' if value in selected_age_groups }}>
+              <label class="form-check-label" for="age-{{ value }}">{{ label }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="form-text">Example: for ages 3–8 years, check <strong>2–4</strong>, <strong>4–6</strong>, and <strong>6–8</strong>.</div>
         </div>
         <div class="col-md-4">
           <label class="form-label">Brand</label>

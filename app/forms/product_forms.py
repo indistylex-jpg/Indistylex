@@ -38,16 +38,6 @@ class ProductForm(FlaskForm):
         ('kids', 'Kids (Unisex)'),
         ('girls', 'Girls'),
     ], validators=[Optional()])
-    age_group = SelectField('Age Group', choices=[
-        ('', 'Select Age Group'),
-        ('0-2', '0–2 Years'),
-        ('2-4', '2–4 Years'),
-        ('4-6', '4–6 Years'),
-        ('6-8', '6–8 Years'),
-        ('8-12', '8–12 Years'),
-        ('12-14', '12–14 Years (Teen)'),
-        ('14-18', '14–18 Years (Teen)'),
-    ], validators=[Optional()])
     material = StringField('Material', validators=[Optional(), Length(max=200)])
     care_instructions = TextAreaField('Care Instructions', validators=[Optional()])
     is_active = BooleanField('Active', default=True)

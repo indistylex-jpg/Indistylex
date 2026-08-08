@@ -47,7 +47,8 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     brand = db.Column(db.String(100))
     gender = db.Column(db.String(20))  # men, women, girls, kids, unisex
-    age_group = db.Column(db.String(20))  # 0-2, 2-4, 4-6, 6-8, 8-12, 12-16, adult
+    age_group = db.Column(db.String(20))  # legacy single age (first selected)
+    age_groups = db.Column(db.String(200))  # comma-separated: 2-4,4-6,6-8
     material = db.Column(db.String(200))
     care_instructions = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
@@ -87,6 +88,27 @@ class Product(db.Model):
     def all_images(self):
         from app.services.image_service import resolve_image_url
         return [resolve_image_url(img.image_url) for img in self.images.order_by(ProductImage.sort_order).all()]
+
+    @property
+    def age_groups_list(self):
+        from app.utils.product_ages import parse_age_groups
+        return parse_age_groups(self.age_groups, self.age_group)
+
+    @property
+    def age_groups_label(self):
+        from app.utils.product_ages import age_groups_display
+        return age_groups_display(self.age_groups_list)
+
+    @property
+    def age_groups_badges(self):
+        from app.utils.product_ages import AGE_GROUP_LABELS
+        return [AGE_GROUP_LABELS.get(code, code) for code in self.age_groups_list]
+
+    def set_age_groups_list(self, selected):
+        from app.utils.product_ages import normalize_age_groups
+        normalized = normalize_age_groups(selected)
+        self.age_groups = ','.join(normalized) if normalized else None
+        self.age_group = normalized[0] if len(normalized) == 1 else None
 
     @property
     def discount_percent(self):
