@@ -1,125 +1,214 @@
-<!-- Announcement Bar -->
-<div class="announcement-bar">
-    <div class="container">
-        <span>FREE SHIPPING ON ORDERS ABOVE ₹999 &nbsp;|&nbsp; EASY RETURNS</span>
+<!-- Promo ticker (Miarcus-style) -->
+<div class="promo-ticker-bar">
+    <div class="promo-ticker-track">
+        <span>Free shipping on orders above ₹999</span>
+        <span class="promo-sep">◆</span>
+        <span>Easy returns within 7 days</span>
+        <span class="promo-sep">◆</span>
+        <span>New arrivals every week</span>
+        <span class="promo-sep">◆</span>
+        <span>Free shipping on orders above ₹999</span>
+        <span class="promo-sep">◆</span>
+        <span>Easy returns within 7 days</span>
+        <span class="promo-sep">◆</span>
+        <span>New arrivals every week</span>
     </div>
 </div>
 
-<!-- Main Navbar -->
-<nav class="navbar navbar-expand-lg sticky-top site-navbar">
-    <div class="container">
-        <!-- Logo -->
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
-            <span class="brand-monogram">iX</span>
-            <span class="brand-logo">INDISTYLEX</span>
-        </a>
-
-        <!-- Mobile: Cart + Toggle -->
-        <div class="d-flex align-items-center d-lg-none gap-2">
-            <a href="{{ url_for('cart.view') }}" class="nav-icon-btn position-relative">
-                <i class="bi bi-bag"></i>
-                {% if cart_count > 0 %}
-                <span class="icon-count">{{ cart_count }}</span>
-                {% endif %}
+<header class="store-header sticky-top">
+    <!-- Top row: logo | search | utilities -->
+    <div class="store-header-top">
+        <div class="container store-header-top-inner">
+            <a class="store-logo" href="{{ url_for('main.index') }}">
+                <span class="brand-monogram">iX</span>
+                <span class="brand-logo">INDISTYLEX</span>
             </a>
-            <button class="navbar-toggler border-0 p-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list fs-4"></i>
-            </button>
-        </div>
 
-        <!-- Collapsible Nav -->
-        <div class="collapse navbar-collapse" id="mainNav">
-            <!-- Main Links -->
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link {{ 'active' if request.endpoint == 'main.index' }}" href="{{ url_for('main.index') }}">HOME</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('shop.listing') }}">SHOP</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">CATEGORIES</a>
-                    <ul class="dropdown-menu">
-                        {% for cat in nav_categories %}
-                        <li><a class="dropdown-item" href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('shop.listing', sort='newest') }}">NEW ARRIVALS</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('shop.listing') }}">COLLECTIONS</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('shop.listing', sort='popular') }}">SALE</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.contact') }}">CONTACT</a>
-                </li>
-            </ul>
+            <form class="store-search-form d-none d-md-flex" action="{{ url_for('shop.listing') }}" method="GET">
+                <input type="search" name="q" placeholder="Search for products, categories…"
+                       value="{{ request.args.get('q', '') }}" aria-label="Search">
+                <button type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
+            </form>
 
-            <!-- Right Icons -->
-            <ul class="navbar-nav flex-row align-items-center gap-1 mt-2 mt-lg-0">
-                <!-- Search -->
-                <li class="nav-item">
-                    <button class="nav-icon-btn" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse" aria-label="Search">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </li>
+            <div class="store-utilities d-none d-lg-flex">
+                <a href="{{ url_for('main.contact') }}" class="store-utility">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="{{ url_for('order.order_history') if current_user.is_authenticated else url_for('auth.login') }}" class="store-utility">
+                    <i class="bi bi-truck"></i>
+                    <span>Track Order</span>
+                </a>
+                <a href="{{ url_for('user.wishlist') if current_user.is_authenticated else url_for('auth.login') }}" class="store-utility">
+                    <i class="bi bi-heart"></i>
+                    <span>Wishlist</span>
+                </a>
                 {% if current_user.is_authenticated %}
-                <!-- User -->
-                <li class="nav-item dropdown">
-                    <a class="nav-icon-btn dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ url_for('user.profile') }}"><i class="bi bi-person-circle me-2"></i>My Profile</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('order.order_history') }}"><i class="bi bi-box-seam me-2"></i>My Orders</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('user.wishlist') }}"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('user.addresses') }}"><i class="bi bi-geo-alt me-2"></i>Addresses</a></li>
-                        {% if current_user.is_admin %}
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
-                        {% endif %}
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                    </ul>
-                </li>
-                <!-- Wishlist -->
-                <li class="nav-item">
-                    <a class="nav-icon-btn position-relative" href="{{ url_for('user.wishlist') }}" title="Wishlist">
-                        <i class="bi bi-heart"></i>
-                        <span class="icon-count">0</span>
-                    </a>
-                </li>
+                <a href="{{ url_for('user.profile') }}" class="store-utility">
+                    <i class="bi bi-person"></i>
+                    <span>Account</span>
+                </a>
                 {% else %}
-                <li class="nav-item">
-                    <a class="nav-icon-btn" href="{{ url_for('auth.login') }}" title="Login">
-                        <i class="bi bi-person"></i>
-                    </a>
-                </li>
+                <a href="{{ url_for('auth.login') }}" class="store-utility">
+                    <i class="bi bi-person"></i>
+                    <span>Sign in</span>
+                </a>
                 {% endif %}
-                <!-- Cart (desktop) -->
-                <li class="nav-item d-none d-lg-block">
-                    <a class="nav-icon-btn position-relative" href="{{ url_for('cart.view') }}" title="Cart">
-                        <i class="bi bi-bag"></i>
-                        {% if cart_count > 0 %}
-                        <span class="icon-count">{{ cart_count }}</span>
-                        {% endif %}
-                    </a>
-                </li>
-            </ul>
+                <a href="{{ url_for('cart.view') }}" class="store-utility">
+                    <i class="bi bi-bag"></i>
+                    <span>Cart{% if cart_count %} ({{ cart_count }}){% endif %}</span>
+                </a>
+            </div>
+
+            <div class="store-mobile-actions d-flex d-lg-none gap-2">
+                <button class="nav-icon-btn" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearch" aria-label="Search">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a href="{{ url_for('cart.view') }}" class="nav-icon-btn position-relative">
+                    <i class="bi bi-bag"></i>
+                    {% if cart_count %}<span class="icon-count">{{ cart_count }}</span>{% endif %}
+                </a>
+                <button class="navbar-toggler border-0 p-1" type="button" data-bs-toggle="collapse" data-bs-target="#storeNavCollapse" aria-label="Menu">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+            </div>
         </div>
     </div>
-</nav>
 
-<!-- Search Collapse -->
-<div class="collapse search-collapse" id="searchCollapse">
-    <div class="container py-3">
-        <form action="{{ url_for('shop.listing') }}" method="GET" class="search-form-full">
-            <input type="text" name="q" placeholder="Search for products..." value="{{ request.args.get('q', '') }}" class="search-input-full" autofocus>
-            <button type="submit" class="search-btn-full"><i class="bi bi-search"></i></button>
-        </form>
+    <div class="collapse d-md-none" id="mobileSearch">
+        <div class="container py-2">
+            <form action="{{ url_for('shop.listing') }}" method="GET" class="store-search-form store-search-form--mobile">
+                <input type="search" name="q" placeholder="Search products…" value="{{ request.args.get('q', '') }}">
+                <button type="submit"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nav row with mega menus -->
+    <nav class="store-nav">
+        <div class="container">
+            <div class="collapse navbar-collapse show" id="storeNavCollapse">
+                <ul class="store-nav-list">
+                    <li class="store-nav-item">
+                        <a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a>
+                    </li>
+                    <li class="store-nav-item has-mega">
+                        <a href="{{ url_for('shop.listing') }}">Clothing <i class="bi bi-chevron-down"></i></a>
+                        <div class="store-mega-menu">
+                            <div class="store-mega-grid">
+                                {% for block in nav_mega_categories[:4] %}
+                                <div class="store-mega-col">
+                                    <h6><a href="{{ url_for('shop.category', slug=block.parent.slug) }}">{{ block.parent.name }}</a></h6>
+                                    <ul>
+                                        {% for child in block.children %}
+                                        <li><a href="{{ url_for('shop.category', slug=child.slug) }}">{{ child.name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endfor %}
+                                <div class="store-mega-col">
+                                    <h6>Gender</h6>
+                                    <ul>
+                                        <li><a href="{{ url_for('shop.listing', gender='boys') }}">Boys</a></li>
+                                        <li><a href="{{ url_for('shop.listing', gender='girls') }}">Girls</a></li>
+                                        <li><a href="{{ url_for('shop.listing', gender='kids') }}">Kids (Unisex)</a></li>
+                                    </ul>
+                                </div>
+                                <div class="store-mega-promo">
+                                    <div class="store-mega-promo-inner">
+                                        <p>Comfortable styles for every age</p>
+                                        <a href="{{ url_for('shop.listing') }}" class="btn btn-sm btn-dark">Explore Collection</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {% for cat in nav_categories[4:8] %}
+                    <li class="store-nav-item">
+                        <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="store-nav-item has-mega">
+                        <a href="{{ url_for('shop.listing') }}">Shop All <i class="bi bi-chevron-down"></i></a>
+                        <div class="store-mega-menu store-mega-menu--wide">
+                            <div class="store-mega-grid">
+                                <div class="store-mega-col">
+                                    <h6>Shop by Category</h6>
+                                    <ul>
+                                        {% for cat in nav_categories %}
+                                        <li><a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="store-mega-col">
+                                    <h6>Shop by Gender</h6>
+                                    <ul>
+                                        <li><a href="{{ url_for('shop.listing', gender='boys') }}">Boys</a></li>
+                                        <li><a href="{{ url_for('shop.listing', gender='girls') }}">Girls</a></li>
+                                        <li><a href="{{ url_for('shop.listing', gender='kids') }}">Kids (Unisex)</a></li>
+                                    </ul>
+                                </div>
+                                <div class="store-mega-col">
+                                    <h6>Quick Links</h6>
+                                    <ul>
+                                        <li><a href="{{ url_for('shop.listing', sort='popular') }}">Best Selling</a></li>
+                                        <li><a href="{{ url_for('shop.listing', sort='price_low') }}">Price: Low to High</a></li>
+                                        <li><a href="{{ url_for('shop.listing', sort='featured') }}">Featured</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="store-nav-item has-mega">
+                        <a href="{{ url_for('shop.listing') }}">Shop By Age <i class="bi bi-chevron-down"></i></a>
+                        <div class="store-mega-menu store-mega-menu--age">
+                            <div class="store-age-mega-head">
+                                <span class="store-age-mega-icon">👶</span>
+                                <div>
+                                    <strong>SHOP BY AGE</strong>
+                                    <p>Find products perfect for every age</p>
+                                </div>
+                            </div>
+                            <div class="store-age-mega-grid">
+                                {% for code, label, icon in shop_by_age_nav %}
+                                <a href="{{ url_for('shop.listing', age_group=code) }}" class="store-age-mega-item">
+                                    <span class="store-age-mega-emoji">{{ icon }}</span>
+                                    <span>{{ label }}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="store-age-mega-foot">
+                                <a href="{{ url_for('shop.listing') }}">Browse all ages →</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="store-nav-item">
+                        <a href="{{ url_for('shop.listing', sort='popular') }}">Sale</a>
+                    </li>
+                    <li class="store-nav-item">
+                        <a href="{{ url_for('main.contact') }}">Help</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Collection ticker -->
+<div class="collection-marquee-bar">
+    <div class="collection-marquee-track">
+        {% for cat in nav_categories %}
+        <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
+        <span class="marquee-sep">◆</span>
+        {% endfor %}
+        <a href="{{ url_for('shop.listing', gender='boys') }}">Boys</a>
+        <span class="marquee-sep">◆</span>
+        <a href="{{ url_for('shop.listing', gender='girls') }}">Girls</a>
+        <span class="marquee-sep">◆</span>
+        <a href="{{ url_for('shop.listing', sort='newest') }}">New Arrivals</a>
+        {% for cat in nav_categories %}
+        <span class="marquee-sep">◆</span>
+        <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
+        {% endfor %}
     </div>
 </div>

@@ -213,6 +213,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  var storeNavCollapse = document.getElementById('storeNavCollapse');
+  if (storeNavCollapse) {
+    storeNavCollapse.querySelectorAll('.store-nav-item:not(.has-mega) > a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        var bsCollapse = bootstrap.Collapse.getInstance(storeNavCollapse);
+        if (bsCollapse && window.matchMedia('(max-width: 991.98px)').matches) bsCollapse.hide();
+      });
+    });
+  }
+
+  if (window.matchMedia('(max-width: 991.98px)').matches) {
+    document.querySelectorAll('.store-nav-item.has-mega > a').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        var item = link.closest('.store-nav-item');
+        if (!item) return;
+        var open = item.classList.contains('is-open');
+        document.querySelectorAll('.store-nav-item.has-mega').forEach(function (el) {
+          el.classList.remove('is-open');
+        });
+        if (!open) item.classList.add('is-open');
+      });
+    });
+  }
+
 });
 
 /* --- Toast notification helper --- */

@@ -6,10 +6,6 @@
 
         {% if product.discount_percent > 0 %}
         <span class="collection-card-badge collection-card-badge--sale">On Sale</span>
-        {% elif product.is_featured %}
-        <span class="collection-card-badge collection-card-badge--new">Featured</span>
-        {% elif product.is_trending %}
-        <span class="collection-card-badge collection-card-badge--trend">Trending</span>
         {% endif %}
 
         <button type="button" class="collection-card-wishlist" title="Add to wishlist"
@@ -18,15 +14,16 @@
         </button>
 
         {% set sizes = product.variants.filter_by(is_active=True).all() | map(attribute='size') | unique | list %}
+        {% set colors = product.variants.filter_by(is_active=True).all() | map(attribute='color') | unique | list %}
         {% if sizes %}
         <div class="collection-card-sizes">
             <span class="collection-card-sizes-label">Select a size</span>
             <div class="collection-card-size-list">
-                {% for size in sizes[:8] %}
+                {% for size in sizes[:10] %}
                 <a href="{{ url_for('product.detail', slug=product.slug) }}#sizes" class="collection-card-size">{{ size }}</a>
                 {% endfor %}
-                {% if sizes|length > 8 %}
-                <a href="{{ url_for('product.detail', slug=product.slug) }}" class="collection-card-size">+{{ sizes|length - 8 }}</a>
+                {% if sizes|length > 10 %}
+                <a href="{{ url_for('product.detail', slug=product.slug) }}" class="collection-card-size">+more</a>
                 {% endif %}
             </div>
         </div>
@@ -34,18 +31,33 @@
     </div>
 
     <div class="collection-card-body">
-        {% if product.age_groups_label %}
-        <div class="collection-card-tag">{{ product.age_groups_label.split(', ')[0] }}</div>
-        {% elif product.gender_label %}
-        <div class="collection-card-tag">{{ product.gender_label }}</div>
-        {% endif %}
-
         <a href="{{ url_for('product.detail', slug=product.slug) }}" class="collection-card-title">{{ product.name }}</a>
 
+        {% if product.age_groups_label %}
+        <div class="collection-card-pill"><span class="pill-icon">👶</span> {{ product.age_groups_label.split(', ')[0] }}</div>
+        {% elif product.gender_label %}
+        <div class="collection-card-pill"><span class="pill-icon">✨</span> {{ product.gender_label }}</div>
+        {% elif product.is_trending %}
+        <div class="collection-card-pill"><span class="pill-icon">🔥</span> Trending</div>
+        {% elif product.is_featured %}
+        <div class="collection-card-pill"><span class="pill-icon">⭐</span> Featured</div>
+        {% endif %}
+
+        {% if colors %}
+        <div class="collection-card-swatches">
+            {% for color in colors[:4] %}
+            <span class="collection-card-swatch" title="{{ color }}" style="background: {{ color|lower }};"></span>
+            {% endfor %}
+            {% if colors|length > 4 %}
+            <span class="collection-card-swatch collection-card-swatch--more">+{{ colors|length - 4 }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <div class="collection-card-price-row">
-            <span class="collection-card-price">₹{{ "{:,.2f}".format(product.price) }}</span>
+            <span class="collection-card-price">₹ {{ "{:,.2f}".format(product.price) }}</span>
             {% if product.compare_at_price and product.compare_at_price > product.price %}
-            <span class="collection-card-compare">₹{{ "{:,.0f}".format(product.compare_at_price) }}</span>
+            <span class="collection-card-compare">₹ {{ "{:,.0f}".format(product.compare_at_price) }}</span>
             <span class="collection-card-save">Save {{ product.discount_percent }}%</span>
             {% endif %}
         </div>

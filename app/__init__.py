@@ -140,18 +140,33 @@ def create_app(config_name=None):
             if cart:
                 cart_count = sum(item.quantity for item in cart.items)
 
-        # Get active categories for navigation (cached 5 minutes)
-        cache_key = 'nav_categories'
-        active_categories = cache.get(cache_key)
-        if active_categories is None:
-            active_categories = Category.query.filter_by(
-                is_active=True, parent_id=None
-            ).order_by(Category.sort_order).all()
-            cache.set(cache_key, active_categories, timeout=300)
+        # Navigation categories (fresh query — avoids detached lazy-load on cached objects)
+        active_categories = Category.query.filter_by(
+            is_active=True, parent_id=None
+        ).order_by(Category.sort_order).all()
+
+        child_rows = Category.query.filter(
+            Category.is_active.is_(True),
+            Category.parent_id.isnot(None),
+        ).order_by(Category.sort_order).all()
+        children_by_parent = {}
+        for child in child_rows:
+            children_by_parent.setdefault(child.parent_id, []).append(child)
+
+        from app.utils.product_ages import SHOP_BY_AGE_NAV
+        nav_mega_categories = [
+            {
+                'parent': parent,
+                'children': children_by_parent.get(parent.id, [])[:14],
+            }
+            for parent in active_categories
+        ]
 
         return {
             'cart_count': cart_count,
             'nav_categories': active_categories,
+            'nav_mega_categories': nav_mega_categories,
+            'shop_by_age_nav': SHOP_BY_AGE_NAV,
             'currency_symbol': app.config.get('CURRENCY_SYMBOL', '₹'),
         }
 

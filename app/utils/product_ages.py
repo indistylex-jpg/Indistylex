@@ -55,6 +55,22 @@ AGE_GROUP_CHOICES = [
     choice for section in AGE_GROUP_SECTIONS for choice in section['choices']
 ]
 
+# Quick links for header "Shop By Age" mega menu (Miarcus-style).
+SHOP_BY_AGE_NAV = [
+    ('0-3m', '0–3 Months', '👶'),
+    ('3-6m', '3–6 Months', '🍼'),
+    ('6-9m', '6–9 Months', '🧸'),
+    ('9-12m', '9–12 Months', '🍼'),
+    ('1-2y', '1–2 Years', '🚶'),
+    ('2-3y', '2–3 Years', '🏃'),
+    ('3-4y', '3–4 Years', '🎒'),
+    ('4-5y', '4–5 Years', '⭐'),
+    ('5-6y', '5–6 Years', '🌟'),
+    ('6-7y', '6–8 Years', '⚽'),
+    ('10-11y', '9–12 Years', '📚'),
+    ('14-15y', '14–15 Years', '🎓'),
+]
+
 VALID_AGE_GROUPS = {value for value, _ in AGE_GROUP_CHOICES}
 AGE_GROUP_ORDER = [value for value, _ in AGE_GROUP_CHOICES]
 AGE_GROUP_LABELS = dict(AGE_GROUP_CHOICES)
