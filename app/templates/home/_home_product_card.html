@@ -1,0 +1,58 @@
+{% set variants = product.variants.filter_by(is_active=True).all() %}
+{% set sizes = variants | map(attribute='size') | unique | list %}
+{% set colors = variants | map(attribute='color') | unique | list %}
+<div class="home-product-card" data-gender="{{ product.gender or 'kids' }}">
+    <div class="home-product-card-media">
+        {% if product.discount_percent > 0 %}
+        <span class="home-product-sale">On Sale</span>
+        {% endif %}
+        <button type="button" class="collection-card-wishlist" data-wishlist-id="{{ product.id }}">
+            <i class="bi bi-heart"></i>
+        </button>
+        <a href="{{ url_for('product.detail', slug=product.slug) }}">
+            <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
+        </a>
+    </div>
+    <div class="home-product-card-body">
+        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-title">{{ product.name }}</a>
+        {% if product.age_groups_label %}
+        <div class="home-product-pill">👶 {{ product.age_groups_label.split(', ')[0] }}</div>
+        {% endif %}
+        {% if colors %}
+        <div class="collection-card-swatches mb-2">
+            {% for color in colors[:3] %}
+            <span class="collection-card-swatch" style="background: {{ color|lower }};" title="{{ color }}"></span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="home-product-prices">
+            <span class="home-product-price">₹ {{ "{:,.2f}".format(product.price) }}</span>
+            {% if product.compare_at_price and product.compare_at_price > product.price %}
+            <span class="home-product-compare">₹ {{ "{:,.0f}".format(product.compare_at_price) }}</span>
+            <span class="home-product-save">Save {{ product.discount_percent }}%</span>
+            {% endif %}
+        </div>
+        {% if variants %}
+        <form method="POST" action="{{ url_for('cart.add_to_cart') }}" class="home-product-cart-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="color" value="{{ variants[0].color }}">
+            <input type="hidden" name="quantity" value="1">
+            <select name="size" class="home-product-size" required aria-label="Select size">
+                <option value="">Select a size</option>
+                {% for size in sizes %}
+                {% set size_variant = variants | selectattr('size', 'equalto', size) | list | first %}
+                <option value="{{ size }}" data-color="{{ size_variant.color if size_variant else variants[0].color }}">{{ size }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="home-product-add-btn">
+                <i class="bi bi-bag-plus"></i> ADD TO CART
+            </button>
+        </form>
+        {% else %}
+        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-add-btn home-product-add-btn--link">
+            VIEW PRODUCT
+        </a>
+        {% endif %}
+    </div>
+</div>

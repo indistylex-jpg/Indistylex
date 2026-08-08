@@ -96,7 +96,7 @@
                         <a href="{{ url_for('shop.listing') }}">Clothing <i class="bi bi-chevron-down"></i></a>
                         <div class="store-mega-menu">
                             <div class="store-mega-grid">
-                                {% for block in nav_mega_categories[:4] %}
+                                {% for block in nav_mega_clothing %}
                                 <div class="store-mega-col">
                                     <h6><a href="{{ url_for('shop.category', slug=block.parent.slug) }}">{{ block.parent.name }}</a></h6>
                                     <ul>
@@ -123,9 +123,9 @@
                             </div>
                         </div>
                     </li>
-                    {% for cat in nav_categories[4:8] %}
+                    {% for link in nav_quick_links %}
                     <li class="store-nav-item">
-                        <a href="{{ url_for('shop.category', slug=cat.slug) }}">{{ cat.name.split('(')[0].strip() }}</a>
+                        <a href="{{ url_for(link.endpoint, **link.kwargs) }}">{{ link.label }}</a>
                     </li>
                     {% endfor %}
                     <li class="store-nav-item has-mega">

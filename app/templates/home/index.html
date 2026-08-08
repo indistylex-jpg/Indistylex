@@ -1,321 +1,261 @@
 {% extends 'base.html' %}
 
-{% block title %}Indistylex — Premium Clothing for Men, Women & Kids{% endblock %}
-{% block meta_description %}Shop premium clothing at Indistylex. Trendy outfits for men, women & kids. Quality fabrics, stylish designs. Free shipping above ₹999.{% endblock %}
-{% block meta_keywords %}Indistylex, clothing, fashion, online shopping, men clothing, women clothing, kids clothing, trendy outfits, affordable fashion India{% endblock %}
-{% block og_title %}Indistylex — Style That Speaks You{% endblock %}
-{% block og_description %}Discover premium clothing that combines comfort with style. Shop Men, Women & Kids collections with free shipping above ₹999.{% endblock %}
+{% block title %}Indistylex — Premium Kids Clothing 0–18 Years{% endblock %}
+{% block meta_description %}Shop beautiful kids clothing at Indistylex. Soft fabrics, trendy designs for newborn to teens. Free shipping above ₹999.{% endblock %}
 
-{% block structured_data %}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "ClothingStore",
-    "name": "Indistylex",
-    "url": "{{ request.host_url }}",
-    "description": "Premium clothing — Men, Women & Kids",
-    "currenciesAccepted": "INR",
-    "paymentAccepted": "UPI, Credit Card, Debit Card, Net Banking",
-    "priceRange": "₹₹",
-    "logo": "{{ url_for('static', filename='images/logo.svg', _external=True) }}",
-    "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "MIG 79, Dhoomanganj, Preetam Nagar",
-        "addressLocality": "Prayagraj",
-        "addressRegion": "Uttar Pradesh",
-        "postalCode": "211011",
-        "addressCountry": "IN"
-    },
-    "taxID": "09GVUPP6447P1Z3",
-    "sameAs": []
-}
-</script>
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Indistylex",
-    "url": "{{ request.host_url }}",
-    "potentialAction": {
-        "@type": "SearchAction",
-        "target": "{{ url_for('shop.listing', _external=True) }}?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-    }
-}
-</script>
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/home.css') }}?v=2" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<!-- Hero Carousel — 5 slides, auto-rotate -->
-<section class="hero-carousel">
-    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500">
-        <!-- Indicators -->
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4"></button>
+<!-- Hero Banner Carousel -->
+<section class="home-hero">
+    <div id="homeHero" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-indicators home-hero-indicators">
+            <button type="button" data-bs-target="#homeHero" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#homeHero" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#homeHero" data-bs-slide-to="2"></button>
         </div>
-
         <div class="carousel-inner">
-            <!-- Slide 1 — Kids Fashion -->
             <div class="carousel-item active">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=1920&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <p class="hero-badge">NEW COLLECTION 2026</p>
-                        <h1 class="hero-title">Style That Speaks,<br><em>Quality That Lasts.</em></h1>
-                        <p class="hero-description">Discover premium kids' clothing crafted for comfort,<br>designed for style, made for your little ones.</p>
-                        <div class="hero-actions">
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-dark">SHOP NOW <i class="bi bi-arrow-right ms-1"></i></a>
-                            <a href="{{ url_for('shop.listing', sort='newest') }}" class="btn-hero-outline-dark">EXPLORE COLLECTION</a>
-                        </div>
+                <div class="home-hero-slide" style="background-image:url('https://images.unsplash.com/photo-1503944583220-79d8926ad5e2?w=1920&q=80')">
+                    <div class="home-hero-overlay"></div>
+                    <div class="container home-hero-caption">
+                        <span class="home-hero-tag">New Collection 2026</span>
+                        <h1>Style That Speaks<br>Quality That Lasts</h1>
+                        <a href="{{ url_for('shop.listing', sort='newest') }}" class="btn-home-primary">SHOP NOW <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
-
-            <!-- Slide 2 — Newborn -->
             <div class="carousel-item">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1522771930-78848d9293e8?w=1920&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <p class="hero-badge">NEWBORN COLLECTION</p>
-                        <h1 class="hero-title">Soft & Gentle<br><em>For Your Little One.</em></h1>
-                        <p class="hero-description">Ultra-soft fabrics crafted for your baby's<br>delicate skin. Comfort meets cuteness.</p>
-                        <div class="hero-actions">
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-dark">SHOP NEWBORN <i class="bi bi-arrow-right ms-1"></i></a>
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-outline-dark">VIEW COLLECTION</a>
-                        </div>
+                <div class="home-hero-slide home-hero-slide--sale" style="background: linear-gradient(135deg, #1E4D8C 0%, #3B82F6 55%, #93C5FD 100%);">
+                    <div class="container home-hero-caption">
+                        <span class="home-hero-tag">End of Season</span>
+                        <h1>UP TO 50% OFF*</h1>
+                        <p class="home-hero-sub">Bestsellers included — limited time only</p>
+                        <a href="{{ url_for('shop.listing', sort='popular') }}" class="btn-home-primary">SHOP SALE <i class="bi bi-heart-fill"></i></a>
                     </div>
+                    <img class="home-hero-model d-none d-md-block" src="https://images.unsplash.com/photo-1621452773781-0f992fd1f5cb?w=600&q=80" alt="">
                 </div>
             </div>
-
-            <!-- Slide 3 — Girls -->
             <div class="carousel-item">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1621452773781-0f992fd1f5cb?w=1920&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <p class="hero-badge">GIRLS' COLLECTION</p>
-                        <h1 class="hero-title">Playful Styles<br><em>For Little Princesses.</em></h1>
-                        <p class="hero-description">Colorful, fun & comfortable outfits —<br>let them shine in every occasion.</p>
-                        <div class="hero-actions">
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-dark">SHOP GIRLS <i class="bi bi-arrow-right ms-1"></i></a>
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-outline-dark">NEW ARRIVALS</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 4 — Summer sale -->
-            <div class="carousel-item">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=1920&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <p class="hero-badge">LIMITED TIME OFFER</p>
-                        <h1 class="hero-title">Summer Sale<br><em>Up to 50% Off.</em></h1>
-                        <p class="hero-description">Don't miss out on adorable outfits at amazing prices.<br>Refresh their wardrobe today.</p>
-                        <div class="hero-actions">
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-dark">SHOP SALE <i class="bi bi-arrow-right ms-1"></i></a>
-                            <a href="{{ url_for('shop.listing', sort='popular') }}" class="btn-hero-outline-dark">BEST SELLERS</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 5 — Premium quality -->
-            <div class="carousel-item">
-                <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1604917621956-10dfa7cce2e7?w=1920&q=80');">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <p class="hero-badge">PREMIUM QUALITY</p>
-                        <h1 class="hero-title">Crafted With Care,<br><em>Worn With Pride.</em></h1>
-                        <p class="hero-description">Every stitch tells a story of quality.<br>Safe, skin-friendly fabrics for your precious ones.</p>
-                        <div class="hero-actions">
-                            <a href="{{ url_for('shop.listing') }}" class="btn-hero-dark">DISCOVER MORE <i class="bi bi-arrow-right ms-1"></i></a>
-                            <a href="{{ url_for('main.about') }}" class="btn-hero-outline-dark">OUR STORY</a>
-                        </div>
+                <div class="home-hero-slide" style="background-image:url('https://images.unsplash.com/photo-1522771930-78848d9293e8?w=1920&q=80')">
+                    <div class="home-hero-overlay"></div>
+                    <div class="container home-hero-caption">
+                        <span class="home-hero-tag">Newborn & Infant</span>
+                        <h1>Soft & Gentle<br>For Your Little One</h1>
+                        <a href="{{ url_for('shop.listing', age_group='0-3m') }}" class="btn-home-primary">SHOP BABY <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
+        <button class="carousel-control-prev home-hero-control" type="button" data-bs-target="#homeHero" data-bs-slide="prev">
+            <span class="home-hero-arrow"><i class="bi bi-chevron-left"></i></span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
+        <button class="carousel-control-next home-hero-control" type="button" data-bs-target="#homeHero" data-bs-slide="next">
+            <span class="home-hero-arrow"><i class="bi bi-chevron-right"></i></span>
         </button>
     </div>
 </section>
 
-<!-- Category Circles -->
-<section class="py-5 category-circles-section">
-    <div class="container">
-        <h2 class="text-center section-heading mb-4">SHOP BY AGE</h2>
-        <div class="d-flex flex-wrap justify-content-center align-items-start gap-4 gap-md-5">
-            {% set category_images = {
-                'newborn': 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&q=80',
-                'toddler': 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80',
-                'boys': 'https://images.unsplash.com/photo-1542652694-40abf526446e?w=400&q=80',
-                'girls': 'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&q=80'
-            } %}
-            {% for cat in categories %}
-            <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="category-circle-item text-decoration-none">
-                <div class="category-circle-img">
-                    {% set slug_key = cat.slug.split('-')[0]|lower %}
-                    {% set circle_img = category_images.get(slug_key, 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80') %}
-                    <img src="{{ circle_img }}" alt="{{ cat.name }}">
-                </div>
-                <span class="category-circle-name">{{ cat.name|upper }}</span>
-                <span class="category-circle-link">VIEW ALL <i class="bi bi-arrow-right"></i></span>
+<!-- USP Ticker -->
+<section class="home-usp-bar">
+    <div class="home-usp-track">
+        <div class="home-usp-item"><i class="bi bi-flower1"></i> Premium Cotton</div>
+        <div class="home-usp-item"><i class="bi bi-truck"></i> Fast Shipping</div>
+        <div class="home-usp-item"><i class="bi bi-arrow-repeat"></i> Easy Returns</div>
+        <div class="home-usp-item"><i class="bi bi-moon-stars"></i> Sleep Tested</div>
+        <div class="home-usp-item"><i class="bi bi-droplet"></i> Easy Care</div>
+        <div class="home-usp-item"><i class="bi bi-shield-check"></i> Skin Safe</div>
+        <div class="home-usp-item"><i class="bi bi-flower1"></i> Premium Cotton</div>
+        <div class="home-usp-item"><i class="bi bi-truck"></i> Fast Shipping</div>
+        <div class="home-usp-item"><i class="bi bi-arrow-repeat"></i> Easy Returns</div>
+        <div class="home-usp-item"><i class="bi bi-moon-stars"></i> Sleep Tested</div>
+    </div>
+</section>
+
+<!-- Find Their Perfect Fit -->
+<section class="home-section home-perfect-fit">
+    <div class="container text-center">
+        <h2 class="home-section-title">Find Their Perfect Fit</h2>
+        <p class="home-section-sub">Explore top-rated products loved by parents</p>
+        <div class="home-gender-toggle" id="genderToggle">
+            <button type="button" class="home-gender-btn is-active" data-gender-filter="girls">Girl</button>
+            <button type="button" class="home-gender-btn" data-gender-filter="boys">Boy</button>
+        </div>
+        <div class="home-fit-icons">
+            {% set fit_icons = [
+                ('girls', '👗', 'Frocks', url_for('shop.listing', gender='girls')),
+                ('girls', '🩱', 'Dresses', url_for('shop.listing', gender='girls')),
+                ('girls', '👚', 'Tops', url_for('shop.listing', gender='girls')),
+                ('boys', '👕', 'T-Shirts', url_for('shop.listing', gender='boys')),
+                ('boys', '🩳', 'Shorts', url_for('shop.listing', gender='boys')),
+                ('boys', '👖', 'Jeans', url_for('shop.listing', gender='boys')),
+                ('all', '🍼', 'Newborn', url_for('shop.listing', age_group='0-3m')),
+                ('all', '🎒', 'School Wear', url_for('shop.listing')),
+                ('all', '✨', 'All Products', url_for('shop.listing')),
+            ] %}
+            {% for gender, icon, label, link in fit_icons %}
+            <a href="{{ link }}" class="home-fit-icon" data-shop-gender="{{ gender }}" {% if gender == 'boys' %}hidden{% endif %}>
+                <span class="home-fit-emoji">{{ icon }}</span>
+                <span>{{ label }}</span>
             </a>
             {% endfor %}
         </div>
     </div>
 </section>
 
-<!-- Promo Banners -->
-<section class="pb-5">
+<!-- Parent Favorites -->
+{% set favorites = featured if featured else new_arrivals %}
+{% if favorites %}
+<section class="home-section home-favorites">
     <div class="container">
-        <div class="row g-3 g-lg-4">
-            <div class="col-md-4">
-                <div class="promo-card" style="background-image: url('https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=600&q=80');">
-                    <div class="promo-card-overlay"></div>
-                    <div class="promo-card-content">
-                        <span class="promo-card-tag">LIMITED TIME OFFER</span>
-                        <h3 class="promo-card-title">Spring / Summer<br>Collection</h3>
-                        <p class="promo-card-discount">UP TO<br><strong>40% OFF</strong></p>
-                        <a href="{{ url_for('shop.listing') }}" class="promo-card-btn">SHOP NOW <i class="bi bi-arrow-right"></i></a>
-                    </div>
-                </div>
+        <div class="home-section-head">
+            <div>
+                <h2 class="home-section-title mb-1">Parent Favorites ❤️</h2>
+                <p class="home-section-sub mb-0">Tried, tested, and loved by families like yours</p>
             </div>
-            <div class="col-md-4">
-                <div class="promo-card" style="background-image: url('https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=600&q=80');">
-                    <div class="promo-card-overlay"></div>
-                    <div class="promo-card-content">
-                        <span class="promo-card-tag">BEST SELLERS</span>
-                        <h3 class="promo-card-title">Top Picks<br>For Your Kids</h3>
-                        <a href="{{ url_for('shop.listing', sort='popular') }}" class="promo-card-btn">EXPLORE NOW <i class="bi bi-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="promo-card" style="background-image: url('https://images.unsplash.com/photo-1604917621956-10dfa7cce2e7?w=600&q=80');">
-                    <div class="promo-card-overlay"></div>
-                    <div class="promo-card-content">
-                        <span class="promo-card-tag">PREMIUM QUALITY</span>
-                        <h3 class="promo-card-title">Comfort<br>They Deserve</h3>
-                        <a href="{{ url_for('shop.listing', sort='newest') }}" class="promo-card-btn">SHOP NOW <i class="bi bi-arrow-right"></i></a>
-                    </div>
-                </div>
+            <div class="home-carousel-nav" data-target="#favoritesTrack">
+                <button type="button" data-dir="prev" aria-label="Previous"><i class="bi bi-chevron-left"></i></button>
+                <button type="button" data-dir="next" aria-label="Next"><i class="bi bi-chevron-right"></i></button>
             </div>
         </div>
-    </div>
-</section>
-
-<!-- Featured Products -->
-{% if featured %}
-<section class="py-5 border-top">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-heading">FEATURED</h2>
-            <a href="{{ url_for('shop.listing') }}" class="section-link">VIEW ALL <i class="bi bi-arrow-right"></i></a>
-        </div>
-        <div class="row g-3 g-md-4">
-            {% for product in featured[:6] %}
-            {% include 'components/product_card.html' %}
+        <div class="home-product-track" id="favoritesTrack">
+            {% for product in favorites[:12] %}
+            {% include 'home/_home_product_card.html' %}
             {% endfor %}
         </div>
     </div>
 </section>
 {% endif %}
+
+<!-- Shop By Category -->
+<section class="home-section home-shop-category">
+    <div class="container">
+        <h2 class="home-section-title text-center mb-4">Shop By Category</h2>
+        <div class="home-category-grid">
+            {% set cat_images = [
+                'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&q=80',
+                'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&q=80',
+                'https://images.unsplash.com/photo-1542652694-40abf526446e?w=800&q=80',
+                'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=800&q=80',
+                'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=800&q=80',
+                'https://images.unsplash.com/photo-1604917621956-10dfa7cce2e7?w=800&q=80',
+            ] %}
+            {% for cat in categories[:6] %}
+            <a href="{{ url_for('shop.category', slug=cat.slug) }}" class="home-category-tile">
+                <img src="{{ cat_images[loop.index0 % cat_images|length] }}" alt="{{ cat.name }}">
+                <div class="home-category-tile-caption">
+                    <strong>{{ cat.name.split('(')[0].strip() }}</strong>
+                    <span>{{ cat.description or 'Shop now' }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
 <!-- New Arrivals -->
 {% if new_arrivals %}
-<section class="py-5 border-top">
+<section class="home-section home-new-arrivals">
     <div class="container">
-        <div class="section-header">
-            <h2 class="section-heading">NEW ARRIVALS</h2>
-            <a href="{{ url_for('shop.listing', sort='newest') }}" class="section-link">VIEW ALL <i class="bi bi-arrow-right"></i></a>
+        <div class="home-section-head">
+            <div>
+                <h2 class="home-section-title mb-1">New Arrivals</h2>
+                <p class="home-section-sub mb-0">Fresh styles just dropped</p>
+            </div>
+            <a href="{{ url_for('shop.listing', sort='newest') }}" class="home-view-all">View all <i class="bi bi-arrow-right"></i></a>
         </div>
-        <div class="row g-3 g-md-4">
+        <div class="home-product-track home-product-track--grid">
             {% for product in new_arrivals[:6] %}
-            {% include 'components/product_card.html' %}
+            {% include 'home/_home_product_card.html' %}
             {% endfor %}
         </div>
     </div>
 </section>
 {% endif %}
 
-<!-- Trending Now -->
-{% if trending %}
-<section class="py-5 border-top">
+<!-- Lifestyle tiles -->
+<section class="home-section home-lifestyle">
     <div class="container">
-        <div class="section-header">
-            <h2 class="section-heading">TRENDING NOW</h2>
-            <a href="{{ url_for('shop.listing', sort='popular') }}" class="section-link">VIEW ALL <i class="bi bi-arrow-right"></i></a>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="home-lifestyle-card">
+                    <img src="https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=600&q=80" alt="Everyday clothing">
+                    <div class="home-lifestyle-body">
+                        <h3>Everyday Clothing</h3>
+                        <p>Comfortable daily wear for all seasons</p>
+                        <a href="{{ url_for('shop.listing') }}">Shop Now →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="home-lifestyle-card">
+                    <img src="https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=600&q=80" alt="Ethnic wear">
+                    <div class="home-lifestyle-body">
+                        <h3>Ethnic & Festive</h3>
+                        <p>Kurtas, lehengas & celebration wear</p>
+                        <a href="{{ url_for('shop.listing') }}">Shop Now →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="home-lifestyle-card">
+                    <img src="https://images.unsplash.com/photo-1604917621956-10dfa7cce2e7?w=600&q=80" alt="Winter wear">
+                    <div class="home-lifestyle-body">
+                        <h3>Winter Wear</h3>
+                        <p>Warm layers they'll love</p>
+                        <a href="{{ url_for('shop.listing') }}">Shop Now →</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="row g-3 g-md-4">
-            {% for product in trending[:6] %}
-            {% include 'components/product_card.html' %}
+    </div>
+</section>
+
+<!-- Shop By Age -->
+<section class="home-section home-shop-age">
+    <div class="container text-center">
+        <h2 class="home-section-title">Shop By Age</h2>
+        <p class="home-section-sub">Find products perfect for every age — newborn to 18 years</p>
+        <div class="home-age-row">
+            {% for code, label, icon in shop_by_age_nav %}
+            <a href="{{ url_for('shop.listing', age_group=code) }}" class="home-age-chip">
+                <span>{{ icon }}</span>
+                <small>{{ label }}</small>
+            </a>
             {% endfor %}
         </div>
     </div>
 </section>
-{% endif %}
 
-<!-- Trust Badges -->
-<section class="py-5 border-top">
+<!-- Trust badges -->
+<section class="home-trust">
     <div class="container">
         <div class="row g-4">
             <div class="col-6 col-md-3">
-                <div class="trust-badge">
-                    <div class="trust-badge-icon">
-                        <i class="bi bi-truck"></i>
-                    </div>
-                    <div class="trust-badge-text">
-                        <h6>FREE SHIPPING</h6>
-                        <p>On orders above ₹999</p>
-                    </div>
-                </div>
+                <div class="home-trust-item"><i class="bi bi-truck"></i><div><strong>Free Shipping</strong><span>Orders above ₹999</span></div></div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="trust-badge">
-                    <div class="trust-badge-icon">
-                        <i class="bi bi-arrow-repeat"></i>
-                    </div>
-                    <div class="trust-badge-text">
-                        <h6>EASY RETURNS</h6>
-                        <p>Hassle-free returns</p>
-                    </div>
-                </div>
+                <div class="home-trust-item"><i class="bi bi-arrow-repeat"></i><div><strong>Easy Returns</strong><span>7-day hassle free</span></div></div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="trust-badge">
-                    <div class="trust-badge-icon">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <div class="trust-badge-text">
-                        <h6>SECURE PAYMENTS</h6>
-                        <p>100% secure checkout</p>
-                    </div>
-                </div>
+                <div class="home-trust-item"><i class="bi bi-shield-check"></i><div><strong>Secure Pay</strong><span>100% safe checkout</span></div></div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="trust-badge">
-                    <div class="trust-badge-icon">
-                        <i class="bi bi-patch-check"></i>
-                    </div>
-                    <div class="trust-badge-text">
-                        <h6>QUALITY GUARANTEE</h6>
-                        <p>Premium quality products</p>
-                    </div>
-                </div>
+                <div class="home-trust-item"><i class="bi bi-heart"></i><div><strong>Quality Promise</strong><span>Skin-friendly fabrics</span></div></div>
             </div>
         </div>
     </div>
 </section>
 {% endblock %}
 
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/home.js') }}?v=2"></script>
+<script>
+(function () {
+  var hero = document.getElementById('homeHero');
+  if (hero) new bootstrap.Carousel(hero, { interval: 5000, ride: 'carousel', pause: 'hover' });
+})();
+</script>
+{% endblock %}

@@ -154,18 +154,42 @@ def create_app(config_name=None):
             children_by_parent.setdefault(child.parent_id, []).append(child)
 
         from app.utils.product_ages import SHOP_BY_AGE_NAV
-        nav_mega_categories = [
-            {
+
+        categories_by_slug = {c.slug: c for c in active_categories}
+
+        def _mega_block(slug):
+            parent = categories_by_slug.get(slug)
+            if not parent:
+                return None
+            return {
                 'parent': parent,
                 'children': children_by_parent.get(parent.id, [])[:14],
             }
-            for parent in active_categories
+
+        # Clothing dropdown: age-neutral + one Boys + one Girls column (not first 4 by sort).
+        nav_mega_clothing = [
+            b for slug in ('newborn-infant', 'toddler', 'boys-3-8', 'girls-3-8')
+            if (b := _mega_block(slug))
+        ]
+
+        # Top nav quick links — gender/teen/ethnic, not sliced categories (avoids duplicate "Girls").
+        nav_quick_links = [
+            {'label': 'Boys', 'endpoint': 'shop.listing', 'kwargs': {'gender': 'boys'}},
+            {'label': 'Girls', 'endpoint': 'shop.listing', 'kwargs': {'gender': 'girls'}},
+            {'label': 'Boys Teens', 'endpoint': 'shop.category', 'kwargs': {'slug': 'boys-teens'}},
+            {'label': 'Girls Teens', 'endpoint': 'shop.category', 'kwargs': {'slug': 'girls-teens'}},
+            {'label': 'Ethnic & Festive', 'endpoint': 'shop.category', 'kwargs': {'slug': 'ethnic-festive'}},
+        ]
+        nav_quick_links = [
+            link for link in nav_quick_links
+            if link['endpoint'] == 'shop.listing' or link['kwargs']['slug'] in categories_by_slug
         ]
 
         return {
             'cart_count': cart_count,
             'nav_categories': active_categories,
-            'nav_mega_categories': nav_mega_categories,
+            'nav_mega_clothing': nav_mega_clothing,
+            'nav_quick_links': nav_quick_links,
             'shop_by_age_nav': SHOP_BY_AGE_NAV,
             'currency_symbol': app.config.get('CURRENCY_SYMBOL', '₹'),
         }
