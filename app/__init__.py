@@ -72,7 +72,7 @@ def create_app(config_name=None):
             "https://www.googletagmanager.com https://www.google-analytics.com; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
-            "img-src 'self' data: https:; "
+            "img-src 'self' data: blob: https:; "
             "connect-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com "
             "https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com "
             "https://region1.google-analytics.com https://region1.analytics.google.com; "

@@ -1,8 +1,49 @@
 {% extends "admin/base_admin.html" %}
 {% block title %}{{ title }}{% endblock %}
 
-{% block content %}
-<div class="mb-4">
+{% block extra_css %}
+<style>
+  .product-image-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .product-image-preview-item,
+  .product-image-saved-item {
+    width: 200px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .product-image-preview-item img,
+  .product-image-saved-item img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    display: block;
+    background: #fff;
+  }
+  .product-image-preview-caption {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.75rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid #eee;
+    background: #fff;
+  }
+  .product-image-preview-item.is-primary {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13,110,253,.15);
+  }
+</style>
+{% endblock %}
+
+{% block content %}<div class="mb-4">
   <a href="{{ url_for('admin.products') }}" class="text-decoration-none">
     <i class="bi bi-arrow-left me-1"></i>Back to Products
   </a>
@@ -109,27 +150,27 @@
 
       <hr class="my-4">
       <h5 class="fw-semibold">Product Images</h5>
-      <p class="text-muted small mb-3">Upload one or more photos (JPG, PNG, WebP). First image becomes the main photo.</p>
+      <p class="text-muted small mb-3">Upload photos (JPG, PNG, WebP). Preview appears below — use it to pick the right <strong>color</strong> for each variant. First image = main photo.</p>
 
       {% if product and images %}
-      <div class="d-flex flex-wrap gap-3 mb-3">
+      <div class="product-image-preview-grid mb-3">
         {% for img in images %}
-        <div class="position-relative">
-          <img src="{{ image_url(img.image_url) }}"
-               class="rounded border" style="width:100px; height:100px; object-fit:cover;">
-          {% if img.is_primary %}
-          <span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size:0.6rem;">Primary</span>
-          {% endif %}
+        <div class="product-image-saved-item position-relative">
+          <img src="{{ image_url(img.image_url) }}" alt="Product photo">
+          <div class="product-image-preview-caption">
+            {% if img.is_primary %}<span class="badge bg-primary me-1">Main</span>{% endif %}
+            Saved image {{ loop.index }}
+          </div>
         </div>
         {% endfor %}
       </div>
       {% endif %}
 
       <div class="mb-2">
-        <input type="file" name="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
+        <input type="file" name="images" id="product-images-input" class="form-control"
+               accept="image/jpeg,image/jpg,image/png,image/webp" multiple>
       </div>
-      <div id="image-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
-
+      <div id="image-preview" class="product-image-preview-grid"></div>
       <hr class="my-4">
       <h5 class="fw-semibold">{{ 'Add More Variants' if product else 'Variants' }}</h5>
       <p class="text-muted small mb-3">Add size, color, SKU and stock for each variant. Use “Add another variant” for more rows.</p>
@@ -188,8 +229,9 @@
   const rows = document.getElementById('variant-rows');
   const addBtn = document.getElementById('add-variant-row');
   const tpl = document.getElementById('variant-row-template');
-  const imageInput = document.querySelector('input[name="images"]');
+  const imageInput = document.getElementById('product-images-input');
   const preview = document.getElementById('image-preview');
+  let previewUrls = [];
 
   addBtn?.addEventListener('click', function () {
     rows.appendChild(tpl.content.cloneNode(true));
@@ -204,15 +246,46 @@
     }
   });
 
-  imageInput?.addEventListener('change', function () {
+  function clearPreviewUrls() {
+    previewUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+    previewUrls = [];
+  }
+
+  function renderImagePreviews(files) {
+    clearPreviewUrls();
     preview.innerHTML = '';
-    Array.from(this.files || []).forEach(function (file) {
+    if (!files || !files.length) return;
+
+    Array.from(files).forEach(function (file, index) {
+      if (!file.type.startsWith('image/')) return;
+
+      const card = document.createElement('div');
+      card.className = 'product-image-preview-item' + (index === 0 ? ' is-primary' : '');
+
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      img.className = 'rounded border';
-      img.style.cssText = 'width:80px;height:80px;object-fit:cover;';
-      preview.appendChild(img);
+      const url = URL.createObjectURL(file);
+      previewUrls.push(url);
+      img.src = url;
+      img.alt = file.name;
+
+      const caption = document.createElement('div');
+      caption.className = 'product-image-preview-caption';
+      if (index === 0) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-primary me-1';
+        badge.textContent = 'Main';
+        caption.appendChild(badge);
+      }
+      caption.appendChild(document.createTextNode(file.name));
+
+      card.appendChild(img);
+      card.appendChild(caption);
+      preview.appendChild(card);
     });
+  }
+
+  imageInput?.addEventListener('change', function () {
+    renderImagePreviews(this.files);
   });
 })();
 </script>
