@@ -6,6 +6,7 @@ from app.models.review import Review
 from app.models.coupon import Coupon
 from app.models.wishlist import Wishlist
 from app.models.b2b_sale import B2BSale, B2BSaleItem
+from app.models.expense import Expense
 
 __all__ = [
     'User', 'Address',
@@ -16,4 +17,5 @@ __all__ = [
     'Coupon',
     'Wishlist',
     'B2BSale', 'B2BSaleItem',
+    'Expense',
 ]

@@ -301,6 +301,17 @@ class TestAdminRoutes:
         resp = client.get('/admin/products/add')
         assert resp.status_code == 200
 
+    def test_admin_add_variant(self, client, admin_user, sample_product):
+        login_admin(client)
+        resp = client.post(f'/admin/products/{sample_product.id}/variants/add', data={
+            'size': '12M',
+            'color': 'Red',
+            'sku': 'TEST-12M-RED',
+            'stock_quantity': '5',
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b'TEST-12M-RED' in resp.data or b'added' in resp.data.lower()
+
     def test_admin_add_category_page(self, client, admin_user):
         login_admin(client)
         resp = client.get('/admin/categories/add')
@@ -331,6 +342,55 @@ class TestAdminRoutes:
         assert b'B2B-' in resp.data or b'recorded' in resp.data.lower()
         db.session.refresh(variant)
         assert variant.stock_quantity == 8
+
+    def test_admin_expenses_page(self, client, admin_user):
+        login_admin(client)
+        resp = client.get('/admin/expenses')
+        assert resp.status_code == 200
+        assert b'Expenses' in resp.data
+
+    def test_admin_add_expense_page(self, client, admin_user):
+        login_admin(client)
+        resp = client.get('/admin/expenses/add')
+        assert resp.status_code == 200
+
+    def test_admin_record_expense(self, client, admin_user):
+        login_admin(client)
+        resp = client.post('/admin/expenses/add', data={
+            'expense_date': '2026-08-01',
+            'category': 'packaging',
+            'description': 'Bubble wrap rolls',
+            'amount': '350',
+            'payment_method': 'cash',
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert b'Bubble wrap' in resp.data or b'recorded' in resp.data.lower()
+
+    def test_order_shipped_auto_expense(self, client, admin_user, sample_user):
+        from app.models.order import Order
+        from app.models.expense import Expense
+
+        order = Order(
+            user_id=sample_user.id,
+            subtotal=Decimal('1000'),
+            shipping_cost=Decimal('60'),
+            total=Decimal('1060'),
+            shipping_address='{"line1":"Test St"}',
+            status='processing',
+        )
+        db.session.add(order)
+        db.session.commit()
+
+        login_admin(client)
+        resp = client.post(
+            f'/admin/orders/{order.id}/status',
+            data={'status': 'shipped'},
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        expense = Expense.query.filter_by(source_type='order', source_id=order.id, category='shipping').first()
+        assert expense is not None
+        assert float(expense.amount) == 60
 
 
 # ────────────────────────── Checkout Routes ──────────────────────────

@@ -16,6 +16,12 @@ from app.services.inventory_service import (
     get_low_stock_products, record_b2b_sale, cancel_b2b_sale,
 )
 from app.models.b2b_sale import B2BSale
+from app.models.expense import Expense
+from app.forms.expense_forms import ExpenseForm
+from app.services.expense_service import (
+    record_expense, delete_expense, get_expense_totals, get_expense_by_category,
+    auto_record_order_shipping, auto_record_order_refund,
+)
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -135,6 +141,12 @@ def dashboard():
     week_ago = today - timedelta(days=6)
     today_range = f"{week_ago.strftime('%b %d')} - {today.strftime('%b %d, %Y')}"
 
+    # Expenses — current month totals (auto + manual)
+    month_start = today.replace(day=1).date()
+    total_expenses, expense_count = get_expense_totals(start_date=month_start)
+    net_profit = float(total_revenue or 0) - float(total_expenses)
+    expense_by_category = get_expense_by_category(start_date=month_start)
+
     return render_template('admin/dashboard.html',
                            total_orders=total_orders,
                            total_revenue=total_revenue,
@@ -155,7 +167,11 @@ def dashboard():
                            top_products=top_products,
                            category_names=json.dumps(category_names),
                            category_counts=json.dumps(category_counts),
-                           today_range=today_range)
+                           today_range=today_range,
+                           total_expenses=total_expenses,
+                           expense_count=expense_count,
+                           net_profit=net_profit,
+                           expense_by_category=expense_by_category)
 
 
 # ── Categories ────────────────────────────────────────────────────────
@@ -400,6 +416,18 @@ def add_variant(product_id):
     return redirect(url_for('admin.edit_product', product_id=product_id))
 
 
+@admin_bp.route('/variants/<int:variant_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_variant(variant_id):
+    variant = ProductVariant.query.get_or_404(variant_id)
+    product_id = variant.product_id
+    db.session.delete(variant)
+    db.session.commit()
+    flash('Variant deleted.', 'info')
+    return redirect(url_for('admin.edit_product', product_id=product_id))
+
+
 @admin_bp.route('/products/<int:product_id>/images/<int:image_id>/delete', methods=['POST'])
 @login_required
 @admin_required
@@ -468,15 +496,19 @@ def update_order_status(order_id):
         return redirect(url_for('admin.order_detail', order_id=order_id))
 
     from datetime import datetime
+    old_status = order.status
     if new_status == 'shipped':
         order.shipped_at = datetime.utcnow()
+        auto_record_order_shipping(order, created_by_id=current_user.id)
     elif new_status == 'delivered':
         order.delivered_at = datetime.utcnow()
-    elif new_status == 'cancelled' and order.status not in ['cancelled', 'refunded']:
+    elif new_status == 'cancelled' and old_status not in ['cancelled', 'refunded']:
         # Restore stock
         from app.services.inventory_service import restore_stock
         for item in order.items.all():
             restore_stock(item.variant_id, item.quantity)
+    elif new_status == 'refunded' and old_status != 'refunded':
+        auto_record_order_refund(order, created_by_id=current_user.id)
 
     order.status = new_status
     db.session.commit()
@@ -853,3 +885,91 @@ def variant_by_sku(sku):
         'retail_price': float(variant.product.price),
         'suggested_wholesale': round(float(variant.product.price) * 0.7, 2),
     })
+
+
+# ── Expenses ──────────────────────────────────────────────────────────
+@admin_bp.route('/expenses')
+@login_required
+@admin_required
+def expenses():
+    """List all expenses with filters and monthly totals."""
+    page = request.args.get('page', 1, type=int)
+    category = request.args.get('category', '').strip()
+    month = request.args.get('month', '')
+
+    query = Expense.query
+    if category:
+        query = query.filter_by(category=category)
+    if month:
+        try:
+            y, m = month.split('-')
+            query = query.filter(
+                extract('year', Expense.expense_date) == int(y),
+                extract('month', Expense.expense_date) == int(m),
+            )
+        except ValueError:
+            pass
+
+    pagination = query.order_by(Expense.expense_date.desc(), Expense.id.desc()).paginate(
+        page=page, per_page=25, error_out=False
+    )
+
+    today = datetime.utcnow()
+    month_start = today.replace(day=1).date()
+    total_all, count_all = get_expense_totals()
+    total_month, count_month = get_expense_totals(start_date=month_start)
+    by_category = get_expense_by_category(start_date=month_start)
+
+    from app.models.expense import EXPENSE_CATEGORIES
+    return render_template(
+        'admin/expenses.html',
+        expenses=pagination,
+        category_filter=category,
+        month_filter=month,
+        total_all=total_all,
+        count_all=count_all,
+        total_month=total_month,
+        count_month=count_month,
+        by_category=by_category,
+        categories=EXPENSE_CATEGORIES,
+    )
+
+
+@admin_bp.route('/expenses/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_expense():
+    """Add a manual business expense."""
+    form = ExpenseForm()
+    if form.validate_on_submit():
+        expense, error = record_expense(
+            amount=form.amount.data,
+            category=form.category.data,
+            description=form.description.data,
+            created_by_id=current_user.id,
+            payment_method=form.payment_method.data,
+            reference=form.reference.data,
+            notes=form.notes.data,
+            expense_date=form.expense_date.data,
+        )
+        if error:
+            flash(error, 'danger')
+        else:
+            flash(f'Expense recorded: ₹{expense.amount:,.0f} — {expense.description}', 'success')
+            return redirect(url_for('admin.expenses'))
+    elif request.method == 'GET':
+        form.expense_date.data = datetime.utcnow().date()
+
+    return render_template('admin/expense_form.html', form=form, title='Add Expense')
+
+
+@admin_bp.route('/expenses/<int:expense_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_expense_view(expense_id):
+    ok, error = delete_expense(expense_id)
+    if ok:
+        flash('Expense deleted.', 'success')
+    else:
+        flash(error, 'danger')
+    return redirect(url_for('admin.expenses'))

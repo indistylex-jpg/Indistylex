@@ -1,0 +1,169 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<div class="dash-header d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Expenses</h4>
+    <p class="text-muted mb-0">Track business costs — manual entries + auto from shipping & refunds.</p>
+  </div>
+  <a href="{{ url_for('admin.add_expense') }}" class="btn btn-dark">
+    <i class="bi bi-plus-lg me-1"></i>Add Expense
+  </a>
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-info">
+          <p class="stat-label">This Month</p>
+          <h3 class="stat-value text-danger">₹{{ "{:,.0f}".format(total_month) }}</h3>
+          <span class="stat-period">{{ count_month }} entries</span>
+        </div>
+        <div class="stat-icon" style="background:#FEE2E2;color:#DC2626;">
+          <i class="bi bi-calendar-month"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-info">
+          <p class="stat-label">All Time</p>
+          <h3 class="stat-value">₹{{ "{:,.0f}".format(total_all) }}</h3>
+          <span class="stat-period">{{ count_all }} entries</span>
+        </div>
+        <div class="stat-icon" style="background:#FEF3C7;color:#D97706;">
+          <i class="bi bi-wallet2"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6">
+    <div class="dash-card h-100">
+      <div class="dash-card-body py-3">
+        <h6 class="fw-semibold mb-2 small text-muted">This month by category</h6>
+        <div class="d-flex flex-wrap gap-2">
+          {% for row in by_category %}
+          <span class="badge bg-light text-dark border">
+            {{ row.label }}: ₹{{ "{:,.0f}".format(row.total) }}
+          </span>
+          {% else %}
+          <span class="text-muted small">No expenses this month yet.</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="dash-card mb-4">
+  <div class="dash-card-body py-3">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small">Category</label>
+        <select name="category" class="form-select form-select-sm">
+          <option value="">All categories</option>
+          {% for val, label in categories %}
+          <option value="{{ val }}" {{ 'selected' if category_filter == val }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small">Month</label>
+        <input type="month" name="month" class="form-control form-control-sm" value="{{ month_filter }}">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+        <a href="{{ url_for('admin.expenses') }}" class="btn btn-sm btn-link">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="dash-card">
+  <div class="dash-card-body p-0">
+    <div class="table-responsive">
+      <table class="table dash-table mb-0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Payment</th>
+            <th>Reference</th>
+            <th>Source</th>
+            <th>Added by</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exp in expenses.items %}
+          <tr>
+            <td class="text-muted small">{{ exp.expense_date.strftime('%d %b %Y') }}</td>
+            <td><span class="badge bg-light text-dark">{{ exp.category_label }}</span></td>
+            <td class="fw-medium">{{ exp.description }}</td>
+            <td class="fw-bold text-danger">₹{{ "{:,.2f}".format(exp.amount) }}</td>
+            <td class="small text-uppercase">{{ exp.payment_method }}</td>
+            <td class="small text-muted">{{ exp.reference or '—' }}</td>
+            <td>
+              {% if exp.source_type == 'manual' %}
+              <span class="badge bg-secondary">Manual</span>
+              {% else %}
+              <span class="badge bg-info text-dark">Auto</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ exp.created_by.first_name if exp.created_by else 'System' }}</td>
+            <td>
+              {% if exp.source_type == 'manual' %}
+              <form method="POST" action="{{ url_for('admin.delete_expense_view', expense_id=exp.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this expense?')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="text-center text-muted py-5">
+              No expenses yet.
+              <a href="{{ url_for('admin.add_expense') }}">Add your first expense</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if expenses.pages > 1 %}
+<nav class="mt-4 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if expenses.has_prev %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.expenses', page=expenses.prev_num, category=category_filter, month=month_filter) }}">&laquo;</a></li>
+    {% endif %}
+    {% for p in expenses.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+      <li class="page-item {{ 'active' if p == expenses.page }}">
+        <a class="page-link" href="{{ url_for('admin.expenses', page=p, category=category_filter, month=month_filter) }}">{{ p }}</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if expenses.has_next %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.expenses', page=expenses.next_num, category=category_filter, month=month_filter) }}">&raquo;</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

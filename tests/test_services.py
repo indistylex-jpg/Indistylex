@@ -146,3 +146,109 @@ class TestInventoryService:
         assert error is None
         assert float(sale.subtotal) == 200
         assert float(sale.total) == 180
+
+
+# ────────────────────────── Expense Service ──────────────────────────
+
+class TestExpenseService:
+
+    def test_record_manual_expense(self, db, admin_user):
+        from app.services.expense_service import record_expense, get_expense_totals
+        from app.models.expense import Expense
+
+        expense, error = record_expense(
+            amount=500,
+            category='marketing',
+            description='Facebook ads',
+            created_by_id=admin_user.id,
+            payment_method='upi',
+        )
+        assert error is None
+        assert expense.id is not None
+        assert float(expense.amount) == 500
+
+        total, count = get_expense_totals()
+        assert float(total) == 500
+        assert count == 1
+
+    def test_record_expense_invalid_amount(self, db, admin_user):
+        from app.services.expense_service import record_expense
+
+        expense, error = record_expense(
+            amount=0,
+            category='other',
+            description='Test',
+            created_by_id=admin_user.id,
+        )
+        assert expense is None
+        assert 'greater than zero' in error.lower()
+
+    def test_auto_shipping_no_duplicate(self, db, admin_user, sample_user):
+        from app.models.order import Order
+        from app.models.expense import Expense
+        from app.services.expense_service import auto_record_order_shipping
+
+        order = Order(
+            user_id=sample_user.id,
+            subtotal=Decimal('1000'),
+            shipping_cost=Decimal('80'),
+            total=Decimal('1080'),
+            shipping_address='{"line1":"Test"}',
+            status='confirmed',
+        )
+        db.session.add(order)
+        db.session.commit()
+
+        exp1 = auto_record_order_shipping(order, created_by_id=admin_user.id)
+        exp2 = auto_record_order_shipping(order, created_by_id=admin_user.id)
+        assert exp1 is not None
+        assert exp2.id == exp1.id
+        assert Expense.query.filter_by(source_type='order', source_id=order.id, category='shipping').count() == 1
+
+    def test_auto_refund_expense(self, db, admin_user, sample_user):
+        from app.models.order import Order
+        from app.models.expense import Expense
+        from app.services.expense_service import auto_record_order_refund
+
+        order = Order(
+            user_id=sample_user.id,
+            subtotal=Decimal('500'),
+            total=Decimal('500'),
+            shipping_address='{"line1":"Test"}',
+            status='delivered',
+        )
+        db.session.add(order)
+        db.session.commit()
+
+        expense = auto_record_order_refund(order, created_by_id=admin_user.id)
+        assert expense is not None
+        assert expense.category == 'refund'
+        assert float(expense.amount) == 500
+
+    def test_delete_manual_expense_only(self, db, admin_user):
+        from app.services.expense_service import record_expense, delete_expense
+        from app.models.expense import Expense
+
+        expense, _ = record_expense(
+            amount=100,
+            category='other',
+            description='Tea',
+            created_by_id=admin_user.id,
+        )
+        ok, error = delete_expense(expense.id)
+        assert ok is True
+        assert Expense.query.get(expense.id) is None
+
+    def test_cannot_delete_auto_expense(self, db, admin_user):
+        from app.services.expense_service import record_expense, delete_expense
+
+        expense, _ = record_expense(
+            amount=80,
+            category='shipping',
+            description='Auto shipping',
+            source_type='order',
+            source_id=1,
+        )
+        ok, error = delete_expense(expense.id)
+        assert ok is False
+        assert 'cannot be deleted' in error.lower()
