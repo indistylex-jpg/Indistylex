@@ -165,13 +165,13 @@ class TestImageService:
         from app.services.image_service import resolve_image_url
         with app.app_context():
             url = resolve_image_url('products/abc.jpg')
-            assert '/static/uploads/products/abc.jpg' in url
+            assert url == '/uploads/products/abc.jpg'
 
     def test_resolve_image_url_legacy(self, app):
         from app.services.image_service import resolve_image_url
         with app.app_context():
             url = resolve_image_url('/static/uploads/products/abc.jpg')
-            assert url == '/static/uploads/products/abc.jpg'
+            assert url == '/uploads/products/abc.jpg'
 
     def test_image_disk_path(self, app):
         from app.services.image_service import image_disk_path

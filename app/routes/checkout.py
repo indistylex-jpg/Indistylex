@@ -115,7 +115,7 @@ def checkout_page():
                 color=item.variant.color,
                 price=item.variant.product.price,
                 quantity=item.quantity,
-                image_url=item.variant.product.primary_image,
+                image_url=item.variant.product.primary_image_url,
             )
             db.session.add(order_item)
 

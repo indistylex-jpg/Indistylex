@@ -45,30 +45,47 @@ def _prepare_image_for_save(img):
     return img.convert('RGB')
 
 
-def normalize_stored_image_path(path):
-    """Normalize DB-stored image path to a static URL path."""
+def stored_path_to_relative(path):
+    """Normalize any stored image path to products/file.jpg style relative path."""
     if not path:
         return None
     path = path.strip()
     if path.startswith(('http://', 'https://')):
         return path
-    if path.startswith('/static/'):
+
+    for prefix in (
+        '/static/uploads/', 'static/uploads/',
+        '/uploads/', 'uploads/',
+    ):
+        if path.startswith(prefix):
+            path = path[len(prefix):]
+            break
+
+    return path.lstrip('/')
+
+
+def normalize_stored_image_path(path):
+    """Normalize DB-stored image path to a browser URL (/uploads/... or external)."""
+    if not path:
+        return None
+    path = path.strip()
+    if path.startswith(('http://', 'https://')):
         return path
-    if path.startswith('static/'):
-        return f'/{path}'
-    return f'/static/uploads/{path.lstrip("/")}'
+
+    rel = stored_path_to_relative(path)
+    if not rel:
+        return None
+    return f'/uploads/{rel}'
 
 
-def resolve_image_url(path, fallback='images/placeholders/product.png'):
+def resolve_image_url(path, fallback='images/logo.svg'):
     """Return a browser-ready image URL for templates and APIs."""
     normalized = normalize_stored_image_path(path)
     if not normalized:
         return url_for('static', filename=fallback)
     if normalized.startswith(('http://', 'https://')):
         return normalized
-    if normalized.startswith('/static/'):
-        return normalized
-    return url_for('static', filename=normalized.lstrip('/'))
+    return normalized
 
 
 def image_disk_path(stored_path):
@@ -76,12 +93,7 @@ def image_disk_path(stored_path):
     if not stored_path or stored_path.startswith(('http://', 'https://')):
         return None
 
-    rel = stored_path.strip()
-    for prefix in ('/static/uploads/', 'static/uploads/', '/uploads/', 'uploads/'):
-        if rel.startswith(prefix):
-            rel = rel[len(prefix):]
-            break
-    rel = rel.lstrip('/')
+    rel = stored_path_to_relative(stored_path)
     if not rel:
         return None
     return os.path.join(current_app.config['UPLOAD_FOLDER'], rel)

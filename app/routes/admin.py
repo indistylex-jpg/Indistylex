@@ -27,17 +27,19 @@ admin_bp = Blueprint('admin', __name__)
 
 
 def _save_product_images(product):
-    """Attach uploaded images to a product. Returns count saved."""
+    """Attach uploaded images to a product. Returns (saved_count, failed_count)."""
     images = request.files.getlist('images')
     existing_count = product.images.count()
     has_primary = product.images.filter_by(is_primary=True).count() > 0
     saved = 0
+    failed = 0
 
     for i, img_file in enumerate(images):
         if not img_file or not img_file.filename:
             continue
         url = save_image(img_file, subfolder='products')
         if not url:
+            failed += 1
             continue
         img = ProductImage(
             product_id=product.id,
@@ -48,7 +50,7 @@ def _save_product_images(product):
         db.session.add(img)
         saved += 1
 
-    return saved
+    return saved, failed
 
 
 def _save_variants_from_request(product):
@@ -88,6 +90,15 @@ def _save_variants_from_request(product):
         added += 1
 
     return added, skipped
+
+
+def _delete_product_record(product):
+    """Delete a product, its variants, and image files from disk."""
+    name = product.name
+    for img in product.images.all():
+        delete_image(img.image_url)
+    db.session.delete(product)
+    return name
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────
@@ -385,7 +396,7 @@ def add_product():
         db.session.add(product)
         db.session.flush()
 
-        image_count = _save_product_images(product)
+        image_count, image_failed = _save_product_images(product)
         variant_count, skipped_skus = _save_variants_from_request(product)
         db.session.commit()
 
@@ -395,6 +406,8 @@ def add_product():
         if variant_count:
             parts.append(f'{variant_count} variant(s)')
         flash('. '.join(parts) + '.', 'success')
+        if image_failed:
+            flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
         for sku in skipped_skus:
             flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
         return redirect(url_for('admin.products'))
@@ -418,7 +431,7 @@ def edit_product(product_id):
         product.gender = form.gender.data or None
         product.age_group = form.age_group.data or None
 
-        image_count = _save_product_images(product)
+        image_count, image_failed = _save_product_images(product)
         variant_count, skipped_skus = _save_variants_from_request(product)
         db.session.commit()
 
@@ -428,6 +441,8 @@ def edit_product(product_id):
         if variant_count:
             parts.append(f'{variant_count} new variant(s)')
         flash('. '.join(parts) + '.', 'success')
+        if image_failed:
+            flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
         for sku in skipped_skus:
             flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
         return redirect(url_for('admin.products'))
@@ -501,13 +516,45 @@ def delete_product_image(product_id, image_id):
 @admin_required
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
-    name = product.name
-    # Delete associated images from disk
-    for img in product.images.all():
-        delete_image(img.image_url)
-    db.session.delete(product)
+    name = _delete_product_record(product)
     db.session.commit()
     flash(f'Product "{name}" deleted.', 'info')
+    return redirect(url_for('admin.products'))
+
+
+@admin_bp.route('/products/bulk-delete', methods=['POST'])
+@login_required
+@admin_required
+def bulk_delete_products():
+    """Delete multiple products at once."""
+    raw_ids = request.form.getlist('product_ids')
+    if not raw_ids:
+        flash('Select at least one product to delete.', 'warning')
+        return redirect(url_for('admin.products'))
+
+    product_ids = []
+    for raw_id in raw_ids:
+        try:
+            product_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not product_ids:
+        flash('No valid products selected.', 'warning')
+        return redirect(url_for('admin.products'))
+
+    products = Product.query.filter(Product.id.in_(product_ids)).all()
+    if not products:
+        flash('Selected products were not found.', 'warning')
+        return redirect(url_for('admin.products'))
+
+    deleted_names = [_delete_product_record(product) for product in products]
+    db.session.commit()
+
+    if len(deleted_names) == 1:
+        flash(f'Product "{deleted_names[0]}" deleted.', 'info')
+    else:
+        flash(f'{len(deleted_names)} products deleted.', 'info')
     return redirect(url_for('admin.products'))
 
 

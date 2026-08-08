@@ -36,6 +36,18 @@ def create_app(config_name=None):
         upload_folder = os.path.normpath(os.path.join(app.root_path, upload_folder))
     app.config['UPLOAD_FOLDER'] = upload_folder
     os.makedirs(upload_folder, exist_ok=True)
+    for sub in ('products', 'categories', 'thumbnails'):
+        os.makedirs(os.path.join(upload_folder, sub), exist_ok=True)
+
+    # Serve uploaded files through Flask (works even when nginx static alias differs)
+    @app.route('/uploads/<path:filename>')
+    def serve_upload(filename):
+        from flask import send_from_directory, abort
+        upload_root = os.path.normpath(app.config['UPLOAD_FOLDER'])
+        safe_path = os.path.normpath(os.path.join(upload_root, filename))
+        if not safe_path.startswith(upload_root) or not os.path.isfile(safe_path):
+            abort(404)
+        return send_from_directory(upload_root, filename)
 
     # ── Security Headers ───────────────────────────────────────────
     @app.after_request

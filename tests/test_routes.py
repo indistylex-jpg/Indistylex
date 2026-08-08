@@ -323,6 +323,26 @@ class TestAdminRoutes:
         assert product.variants.count() == 1
         assert product.variants.first().sku == 'FULL-ROM-PINK'
 
+    def test_admin_bulk_delete_products(self, client, admin_user, sample_product, sample_category):
+        login_admin(client)
+        extra = Product(
+            name='Bulk Delete Me',
+            slug='bulk-delete-me',
+            price=Decimal('299'),
+            category_id=sample_category.id,
+            is_active=True,
+        )
+        db.session.add(extra)
+        db.session.commit()
+
+        resp = client.post('/admin/products/bulk-delete', data={
+            'product_ids': [str(sample_product.id), str(extra.id)],
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        assert Product.query.get(sample_product.id) is None
+        assert Product.query.get(extra.id) is None
+        assert b'deleted' in resp.data.lower()
+
     def test_admin_add_variant(self, client, admin_user, sample_product):
         login_admin(client)
         resp = client.post(f'/admin/products/{sample_product.id}/variants/add', data={

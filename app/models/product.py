@@ -75,13 +75,18 @@ class Product(db.Model):
         if not img:
             img = self.images.first()
         if not img:
-            return '/static/images/logo.svg'
-        from app.services.image_service import normalize_stored_image_path
-        return normalize_stored_image_path(img.image_url) or '/static/images/logo.svg'
+            return None
+        return img.image_url
+
+    @property
+    def primary_image_url(self):
+        from app.services.image_service import resolve_image_url
+        return resolve_image_url(self.primary_image)
 
     @property
     def all_images(self):
-        return [img.image_url for img in self.images.order_by(ProductImage.sort_order).all()]
+        from app.services.image_service import resolve_image_url
+        return [resolve_image_url(img.image_url) for img in self.images.order_by(ProductImage.sort_order).all()]
 
     @property
     def discount_percent(self):

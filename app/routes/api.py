@@ -645,7 +645,7 @@ def create_order(user):
             color=variant.color,
             price=float(product.price),
             quantity=cart_item.quantity,
-            image_url=product.primary_image
+            image_url=product.primary_image_url
         )
         db.session.add(order_item)
 
@@ -852,12 +852,13 @@ def _serialize_user(user):
 
 
 def _serialize_category(cat):
+    from app.services.image_service import resolve_image_url
     return {
         'id': cat.id,
         'name': cat.name,
         'slug': cat.slug,
         'description': cat.description,
-        'image_url': cat.image_url,
+        'image_url': resolve_image_url(cat.image_url) if cat.image_url else None,
         'product_count': cat.active_products_count
     }
 
@@ -870,7 +871,7 @@ def _serialize_product_list(product):
         'price': float(product.price),
         'compare_at_price': float(product.compare_at_price) if product.compare_at_price else None,
         'discount_percent': product.discount_percent,
-        'image': product.primary_image,
+        'image': product.primary_image_url,
         'brand': product.brand,
         'average_rating': product.average_rating,
         'review_count': product.review_count,
@@ -934,7 +935,7 @@ def _serialize_cart(cart):
                 'variant_id': item.variant_id,
                 'product_name': product.name,
                 'product_slug': product.slug,
-                'product_image': product.primary_image,
+                'product_image': product.primary_image_url,
                 'size': item.variant.size,
                 'color': item.variant.color,
                 'price': float(product.price),

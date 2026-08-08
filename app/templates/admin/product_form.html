@@ -93,6 +93,18 @@
             <label class="form-check-label">Active (visible on store)</label>
           </div>
         </div>
+        <div class="col-md-4">
+          <div class="form-check mt-4">
+            {{ form.is_featured(class="form-check-input") }}
+            <label class="form-check-label">Featured (show on homepage)</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-check mt-4">
+            {{ form.is_trending(class="form-check-input") }}
+            <label class="form-check-label">Trending</label>
+          </div>
+        </div>
       </div>
 
       <hr class="my-4">

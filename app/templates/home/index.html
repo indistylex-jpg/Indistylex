@@ -215,6 +215,23 @@
     </div>
 </section>
 
+<!-- Featured Products -->
+{% if featured %}
+<section class="py-5 border-top">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-heading">FEATURED</h2>
+            <a href="{{ url_for('shop.listing') }}" class="section-link">VIEW ALL <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-3 g-md-4">
+            {% for product in featured[:6] %}
+            {% include 'components/product_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- New Arrivals -->
 {% if new_arrivals %}
 <section class="py-5 border-top">
