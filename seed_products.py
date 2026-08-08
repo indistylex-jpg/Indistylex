@@ -222,7 +222,9 @@ def seed():
         # Create products with variants and images
         sku_counter = 1000
         for p in PRODUCTS:
-            cat = cat_map[p['category']]
+            cat = resolve_category(p)
+            if not cat:
+                raise RuntimeError(f'No category for product: {p["name"]}')
             product = Product(
                 name=p['name'],
                 short_description=p['short'],
