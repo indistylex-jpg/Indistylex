@@ -1,0 +1,157 @@
+<form method="GET" action="{{ url_for('shop.listing') }}" class="shopFilterForm collection-filter-form">
+    {% if search_query %}
+    <input type="hidden" name="q" value="{{ search_query }}">
+    {% endif %}
+    {% if current_category and not category %}
+    <input type="hidden" name="category" value="{{ current_category }}">
+    {% endif %}
+    <input type="hidden" name="sort" class="filterSortInput" value="{{ current_sort }}">
+
+    <div class="collection-filter-bar">
+        <!-- Price -->
+        <div class="collection-filter-item">
+            <button type="button" class="collection-filter-btn {{ 'is-active' if request.args.get('min_price') or request.args.get('max_price') }}"
+                    data-filter-toggle="price">
+                Price <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collection-filter-panel" data-filter-panel="price" hidden>
+                <div class="collection-filter-panel-head">
+                    <strong>Price</strong>
+                    <button type="button" class="collection-filter-clear" data-clear-group="price">Clear</button>
+                </div>
+                <div class="collection-price-range">
+                    <input type="number" class="collection-price-input" name="min_price"
+                           placeholder="₹ Min" value="{{ request.args.get('min_price', '') }}" min="0">
+                    <span>–</span>
+                    <input type="number" class="collection-price-input" name="max_price"
+                           placeholder="₹ Max" value="{{ request.args.get('max_price', '') }}" min="0">
+                </div>
+                <button type="submit" class="collection-filter-apply">Apply</button>
+            </div>
+        </div>
+
+        <!-- Category -->
+        <div class="collection-filter-item">
+            <button type="button" class="collection-filter-btn {{ 'is-active' if request.args.get('category') or current_category }}"
+                    data-filter-toggle="category">
+                Category <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collection-filter-panel collection-filter-panel--wide" data-filter-panel="category" hidden>
+                <div class="collection-filter-panel-head">
+                    <strong>Category</strong>
+                    <button type="button" class="collection-filter-clear" data-clear-group="category">Clear</button>
+                </div>
+                <ul class="collection-filter-options">
+                    {% for cat in categories %}
+                    <li>
+                        <label class="collection-filter-option">
+                            <input type="radio" name="category" value="{{ cat.slug }}"
+                                   {{ 'checked' if (request.args.get('category') or current_category) == cat.slug }}>
+                            <span>{{ cat.name }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <button type="submit" class="collection-filter-apply">Apply</button>
+            </div>
+        </div>
+
+        <!-- Color -->
+        <div class="collection-filter-item">
+            <button type="button" class="collection-filter-btn {{ 'is-active' if request.args.get('color') }}"
+                    data-filter-toggle="color">
+                Color <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collection-filter-panel collection-filter-panel--wide" data-filter-panel="color" hidden>
+                <div class="collection-filter-panel-head">
+                    <strong>Color</strong>
+                    <button type="button" class="collection-filter-clear" data-clear-group="color">Clear</button>
+                </div>
+                <div class="collection-color-grid">
+                    {% for color in filter_colors %}
+                    <label class="collection-color-chip" title="{{ color }}">
+                        <input type="radio" name="color" value="{{ color|lower }}"
+                               {{ 'checked' if request.args.get('color') == color|lower }}>
+                        <span class="collection-color-dot" style="background: {{ color|lower }};"></span>
+                        <span>{{ color }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="collection-filter-apply">Apply</button>
+            </div>
+        </div>
+
+        <!-- Age / Size -->
+        <div class="collection-filter-item">
+            <button type="button" class="collection-filter-btn {{ 'is-active' if request.args.get('age_group') or request.args.get('size') }}"
+                    data-filter-toggle="age">
+                Age / Size <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collection-filter-panel collection-filter-panel--wide" data-filter-panel="age" hidden>
+                <div class="collection-filter-panel-head">
+                    <strong>Age / Size</strong>
+                    <button type="button" class="collection-filter-clear" data-clear-group="age">Clear</button>
+                </div>
+                <p class="collection-filter-subtitle">Shop by age</p>
+                {% for section in age_group_sections %}
+                <div class="collection-age-block">
+                    <div class="collection-age-block-title">{{ section.title }}</div>
+                    <div class="collection-age-chips">
+                        {% for value, label in section.choices %}
+                        <label class="collection-age-chip">
+                            <input type="radio" name="age_group" value="{{ value }}"
+                                   {{ 'checked' if request.args.get('age_group') == value }}>
+                            <span>{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% if filter_sizes %}
+                <p class="collection-filter-subtitle mt-3">Shop by size</p>
+                <div class="collection-size-chips">
+                    {% for size in filter_sizes %}
+                    <label class="collection-size-chip">
+                        <input type="radio" name="size" value="{{ size }}"
+                               {{ 'checked' if request.args.get('size') == size }}>
+                        <span>{{ size }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <button type="submit" class="collection-filter-apply">Apply</button>
+            </div>
+        </div>
+
+        <!-- Gender -->
+        <div class="collection-filter-item">
+            <button type="button" class="collection-filter-btn {{ 'is-active' if request.args.get('gender') }}"
+                    data-filter-toggle="gender">
+                Gender <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collection-filter-panel" data-filter-panel="gender" hidden>
+                <div class="collection-filter-panel-head">
+                    <strong>Gender</strong>
+                    <button type="button" class="collection-filter-clear" data-clear-group="gender">Clear</button>
+                </div>
+                <ul class="collection-filter-options">
+                    {% for value, label in gender_choices %}
+                    <li>
+                        <label class="collection-filter-option">
+                            <input type="radio" name="gender" value="{{ value }}"
+                                   {{ 'checked' if request.args.get('gender') == value }}>
+                            <span>{{ label }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <button type="submit" class="collection-filter-apply">Apply</button>
+            </div>
+        </div>
+
+        {% if active_filters %}
+        <a href="{{ url_for('shop.listing', q=search_query) if search_query else url_for('shop.listing') }}"
+           class="collection-clear-all">Clear all</a>
+        {% endif %}
+    </div>
+</form>

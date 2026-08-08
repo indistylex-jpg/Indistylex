@@ -161,6 +161,17 @@ def create_app(config_name=None):
         from app.services.image_service import resolve_image_url
         return resolve_image_url(path, fallback=fallback)
 
+    @app.template_global()
+    def shop_page_url(page_num):
+        """Build paginated shop URL preserving filters and category slug."""
+        from flask import request, url_for
+        kwargs = dict(request.view_args or {})
+        for key, value in request.args.items():
+            if key != 'page':
+                kwargs[key] = value
+        kwargs['page'] = page_num
+        return url_for(request.endpoint, **kwargs)
+
     # Register error handlers
     @app.errorhandler(404)
     def not_found(error):

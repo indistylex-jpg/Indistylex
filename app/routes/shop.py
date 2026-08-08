@@ -1,111 +1,61 @@
-from flask import Blueprint, render_template, request, current_app
-from app.models.product import Product, Category
-from app.extensions import cache
-from app.utils.product_ages import apply_age_group_filter, AGE_GROUP_SECTIONS
+from flask import Blueprint, render_template, request, redirect, url_for, current_app
+
+from app.models.product import Category
+from app.services.shop_filter_service import (
+    GENDER_FILTER_CHOICES,
+    SORT_OPTIONS,
+    active_filter_count,
+    build_listing_query,
+    get_filter_colors,
+    get_filter_sizes,
+)
+from app.utils.product_ages import AGE_GROUP_SECTIONS
 
 shop_bp = Blueprint('shop', __name__)
 
 
-@shop_bp.route('/')
-def listing():
-    """Product listing with filters, search, and pagination."""
-    page = request.args.get('page', 1, type=int)
+def _listing_context(args, category=None):
+    page = args.get('page', 1, type=int)
     per_page = current_app.config.get('PRODUCTS_PER_PAGE', 12)
-
-    # Base query - only active products in active categories
-    query = Product.query.filter_by(is_active=True).join(Category).filter(
-        Category.is_active == True
-    )
-
-    # Category filter
-    category_slug = request.args.get('category')
-    if category_slug:
-        category = Category.query.filter_by(slug=category_slug, is_active=True).first()
-        if category:
-            # Include sub-categories
-            cat_ids = [category.id] + [c.id for c in category.children.filter_by(is_active=True).all()]
-            query = query.filter(Product.category_id.in_(cat_ids))
-
-    # Gender filter
-    gender = request.args.get('gender')
-    if gender:
-        query = query.filter(Product.gender == gender)
-
-    # Age group filter — matches any checked age band on the product
-    age_group = request.args.get('age_group')
-    query = apply_age_group_filter(query, age_group, Product)
-
-    # Price filter
-    min_price = request.args.get('min_price', type=float)
-    max_price = request.args.get('max_price', type=float)
-    if min_price is not None:
-        query = query.filter(Product.price >= min_price)
-    if max_price is not None:
-        query = query.filter(Product.price <= max_price)
-
-    # Search
-    search = request.args.get('q', '').strip()
-    if search:
-        search_term = f'%{search}%'
-        query = query.filter(
-            (Product.name.ilike(search_term)) |
-            (Product.description.ilike(search_term)) |
-            (Product.brand.ilike(search_term))
-        )
-
-    # Sort
-    sort = request.args.get('sort', 'newest')
-    if sort == 'price_low':
-        query = query.order_by(Product.price.asc())
-    elif sort == 'price_high':
-        query = query.order_by(Product.price.desc())
-    elif sort == 'popular':
-        query = query.order_by(Product.views_count.desc())
-    elif sort == 'name':
-        query = query.order_by(Product.name.asc())
-    else:
-        query = query.order_by(Product.created_at.desc())
-
-    # Paginate
+    query, sort = build_listing_query(args)
     products = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    # Get categories for sidebar filter
+    category_slug = args.get('category') or (category.slug if category else None)
     categories = Category.query.filter_by(
         is_active=True, parent_id=None
     ).order_by(Category.sort_order).all()
 
-    return render_template('shop/listing.html',
-                           products=products,
-                           categories=categories,
-                           age_group_sections=AGE_GROUP_SECTIONS,
-                           current_category=category_slug,
-                           current_sort=sort,
-                           search_query=search)
+    return {
+        'products': products,
+        'categories': categories,
+        'age_group_sections': AGE_GROUP_SECTIONS,
+        'gender_choices': GENDER_FILTER_CHOICES,
+        'sort_options': SORT_OPTIONS,
+        'filter_colors': get_filter_colors(),
+        'filter_sizes': get_filter_sizes(),
+        'current_category': category_slug,
+        'current_sort': sort,
+        'search_query': (args.get('q') or '').strip(),
+        'active_filters': active_filter_count(args),
+        'category': category,
+    }
+
+
+@shop_bp.route('/')
+def listing():
+    """Product listing with Miarcus-style filters."""
+    ctx = _listing_context(request.args)
+    return render_template('shop/listing.html', **ctx)
 
 
 @shop_bp.route('/category/<slug>')
 def category(slug):
-    """Category page with products."""
+    """Category page — same layout as shop listing."""
     cat = Category.query.filter_by(slug=slug, is_active=True).first_or_404()
-
-    page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('PRODUCTS_PER_PAGE', 12)
-
-    cat_ids = [cat.id] + [c.id for c in cat.children.filter_by(is_active=True).all()]
-
-    products = Product.query.filter(
-        Product.is_active == True,
-        Product.category_id.in_(cat_ids)
-    ).order_by(Product.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-
-    return render_template('shop/listing.html',
-                           products=products,
-                           category=cat,
-                           current_category=slug,
-                           age_group_sections=AGE_GROUP_SECTIONS,
-                           categories=Category.query.filter_by(is_active=True, parent_id=None).all())
+    args = request.args.copy()
+    args['category'] = slug
+    ctx = _listing_context(args, category=cat)
+    return render_template('shop/listing.html', **ctx)
 
 
 @shop_bp.route('/search')
@@ -114,24 +64,5 @@ def search():
     q = request.args.get('q', '').strip()
     if not q:
         return redirect(url_for('shop.listing'))
-
-    page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('PRODUCTS_PER_PAGE', 12)
-
-    search_term = f'%{q}%'
-    products = Product.query.filter(
-        Product.is_active == True,
-        (Product.name.ilike(search_term)) |
-        (Product.description.ilike(search_term)) |
-        (Product.brand.ilike(search_term))
-    ).join(Category).filter(
-        Category.is_active == True
-    ).order_by(Product.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-
-    return render_template('shop/listing.html',
-                           products=products,
-                           search_query=q,
-                           age_group_sections=AGE_GROUP_SECTIONS,
-                           categories=Category.query.filter_by(is_active=True, parent_id=None).all())
+    ctx = _listing_context(request.args)
+    return render_template('shop/listing.html', **ctx)

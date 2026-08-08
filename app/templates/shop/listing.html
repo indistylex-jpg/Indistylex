@@ -1,171 +1,190 @@
 {% extends "base.html" %}
-{% block title %}{{ category.name if category else "Shop All" }} — Indistylex{% endblock %}
-{% block meta_description %}{{ "Browse " + category.name + " collection" if category else "Shop all clothing" }} at Indistylex. Premium fashion. Free shipping above ₹999.{% endblock %}
+{% block title %}{{ category.name if category else ("Search: " + search_query if search_query else "Kids Clothing") }} — Indistylex{% endblock %}
+{% block meta_description %}{{ "Browse " + category.name + " at Indistylex" if category else "Shop kids clothing at Indistylex. Filter by age, size, gender, color and price." }}{% endblock %}
 
 {% block content %}
-<!-- Category Hero Banner (if viewing a category) -->
-{% if category %}
-{% set category_hero_images = {
-    'newborn': 'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=1920&q=80',
-    'toddler': 'https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=1920&q=80',
-    'boys': 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=1920&q=80',
-    'girls': 'https://images.unsplash.com/photo-1621452773781-0f992fd1f5cb?w=1920&q=80'
-} %}
-{% set hero_img = category.image_url or category_hero_images.get(category.slug.split('-')[0]|lower, 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80') %}
-<section class="category-hero" style="background-image: url('{{ hero_img }}');">
-    <div class="category-hero-overlay"></div>
-    <div class="category-hero-content">
-        <h1 class="category-hero-title">{{ category.name }}</h1>
-        <p class="category-hero-subtitle">{{ category.description or 'Explore our collection' }}</p>
-    </div>
-</section>
-{% endif %}
-
-<section class="shop-listing-section py-4">
+<section class="collection-page">
     <div class="container">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb">
+        <nav aria-label="breadcrumb" class="collection-breadcrumb">
+            <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
                 {% if category %}
                 <li class="breadcrumb-item"><a href="{{ url_for('shop.listing') }}">Shop</a></li>
                 <li class="breadcrumb-item active">{{ category.name }}</li>
+                {% elif search_query %}
+                <li class="breadcrumb-item"><a href="{{ url_for('shop.listing') }}">Shop</a></li>
+                <li class="breadcrumb-item active">Search</li>
                 {% else %}
-                <li class="breadcrumb-item active">Shop</li>
+                <li class="breadcrumb-item active">Kids Clothing</li>
                 {% endif %}
             </ol>
         </nav>
 
-        <!-- Page Title for non-category pages -->
-        {% if not category %}
-        <div class="shop-page-header mb-4">
-            <h1 class="shop-page-title">
-                {% if search_query %}Search: "{{ search_query }}"{% else %}All Products{% endif %}
-            </h1>
+        <h1 class="collection-page-title">
+            {% if category %}{{ category.name }}
+            {% elif search_query %}Search: "{{ search_query }}"
+            {% else %}Kids Clothing{% endif %}
+        </h1>
+
+        <div class="collection-toolbar">
+            <div class="collection-toolbar-filters">
+                <button type="button" class="collection-mobile-filter-btn d-lg-none"
+                        data-bs-toggle="offcanvas" data-bs-target="#collectionFilterOffcanvas">
+                    <i class="bi bi-sliders"></i> Filter & Sort
+                    {% if active_filters %}<span class="collection-filter-count">{{ active_filters }}</span>{% endif %}
+                </button>
+                <div class="d-none d-lg-block collection-filter-wrap">
+                    {% include 'shop/_filter_bar.html' %}
+                </div>
+            </div>
+            <div class="collection-toolbar-meta">
+                <span class="collection-result-count">{{ products.total }} Product{{ 's' if products.total != 1 }}</span>
+                <div class="collection-sort-wrap">
+                    <label for="sortSelect" class="collection-sort-label">Sort by</label>
+                    <select class="collection-sort-select" id="sortSelect">
+                        {% for value, label in sort_options %}
+                        <option value="{{ value }}" {{ 'selected' if current_sort == value }}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
         </div>
+
+        {% if products.items %}
+        <div class="collection-grid">
+            {% for product in products.items %}
+            {% include 'shop/_product_card.html' %}
+            {% endfor %}
+        </div>
+
+        {% if products.pages > 1 %}
+        <nav class="collection-pagination" aria-label="Product pages">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ 'disabled' if not products.has_prev }}">
+                    <a class="page-link" href="{{ shop_page_url(products.prev_num) }}"><i class="bi bi-chevron-left"></i></a>
+                </li>
+                {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                <li class="page-item {{ 'active' if page_num == products.page }}">
+                    <a class="page-link" href="{{ shop_page_url(page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not products.has_next }}">
+                    <a class="page-link" href="{{ shop_page_url(products.next_num) }}"><i class="bi bi-chevron-right"></i></a>
+                </li>
+            </ul>
+        </nav>
         {% endif %}
 
-        <div class="row">
-            <!-- Sidebar Filters -->
-            <div class="col-lg-3 d-none d-lg-block">
-                <div class="filter-sidebar">
-                    <div class="filter-sidebar-header">
-                        <h5 class="filter-sidebar-title">Filters</h5>
-                        <a href="{{ url_for('shop.listing') }}" class="filter-clear-link">Clear All</a>
-                    </div>
-                    {% include 'shop/_filter_form.html' %}
-                </div>
-            </div>
-
-            <!-- Mobile Filter Offcanvas -->
-            <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="filterOffcanvas">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title fw-bold">Filters</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-                </div>
-                <div class="offcanvas-body">
-                    {% include 'shop/_filter_form.html' %}
-                </div>
-            </div>
-
-            <!-- Product Grid -->
-            <div class="col-lg-9">
-                <!-- Toolbar -->
-                <div class="shop-toolbar">
-                    <div class="shop-toolbar-left">
-                        <button class="btn-filter-mobile d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                            <i class="bi bi-sliders"></i> Filters
-                        </button>
-                        <span class="shop-result-count">
-                            Showing {{ products.total }} results
-                            {% if search_query %} for "<strong>{{ search_query }}</strong>"{% endif %}
-                        </span>
-                    </div>
-                    <div class="shop-toolbar-right">
-                        <span class="sort-label">SORT BY:</span>
-                        <select class="sort-select" id="sortSelect">
-                            <option value="newest" {{ "selected" if current_sort == 'newest' }}>Newest</option>
-                            <option value="popular" {{ "selected" if current_sort == 'popular' }}>Popular</option>
-                            <option value="price_low" {{ "selected" if current_sort == 'price_low' }}>Price: Low → High</option>
-                            <option value="price_high" {{ "selected" if current_sort == 'price_high' }}>Price: High → Low</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Products -->
-                {% if products.items %}
-                <div class="row g-3 g-md-4 mt-1">
-                    {% for product in products.items %}
-                    <div class="col-6 col-md-4">
-                        <div class="product-card-minimal">
-                            <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-img-link">
-                                <div class="product-card-img-wrap">
-                                    <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
-                                    {% if product.discount_percent > 0 %}
-                                    <span class="product-badge-sale">-{{ product.discount_percent }}%</span>
-                                    {% endif %}
-                                </div>
-                            </a>
-                            <div class="product-card-info">
-                                <div class="product-card-name-row">
-                                    <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-name">{{ product.name }}</a>
-                                    <button class="product-card-heart" title="Add to Wishlist"><i class="bi bi-heart"></i></button>
-                                </div>
-                                <div class="product-card-price">₹{{ "%.0f"|format(product.price) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Pagination -->
-                {% if products.pages > 1 %}
-                <nav class="shop-pagination mt-5">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item {{ 'disabled' if not products.has_prev }}">
-                            <a class="page-link" href="{{ url_for('shop.listing', page=products.prev_num, category=current_category, sort=current_sort, q=search_query, age_group=request.args.get('age_group'), min_price=request.args.get('min_price'), max_price=request.args.get('max_price')) }}">
-                                <i class="bi bi-chevron-left"></i>
-                            </a>
-                        </li>
-                        {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                        {% if page_num %}
-                        <li class="page-item {{ 'active' if page_num == products.page }}">
-                            <a class="page-link" href="{{ url_for('shop.listing', page=page_num, category=current_category, sort=current_sort, q=search_query, age_group=request.args.get('age_group'), min_price=request.args.get('min_price'), max_price=request.args.get('max_price')) }}">{{ page_num }}</a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled"><span class="page-link">…</span></li>
-                        {% endif %}
-                        {% endfor %}
-                        <li class="page-item {{ 'disabled' if not products.has_next }}">
-                            <a class="page-link" href="{{ url_for('shop.listing', page=products.next_num, category=current_category, sort=current_sort, q=search_query, age_group=request.args.get('age_group'), min_price=request.args.get('min_price'), max_price=request.args.get('max_price')) }}">
-                                <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-                {% endif %}
-
-                {% else %}
-                <div class="shop-empty text-center py-5">
-                    <i class="bi bi-search display-3 text-muted"></i>
-                    <h4 class="mt-3">No products found</h4>
-                    <p class="text-muted">Try adjusting your filters or search terms</p>
-                    <a href="{{ url_for('shop.listing') }}" class="btn-primary-custom">VIEW ALL PRODUCTS</a>
-                </div>
-                {% endif %}
-            </div>
+        {% else %}
+        <div class="collection-empty">
+            <i class="bi bi-search"></i>
+            <h4>No products found</h4>
+            <p>Try adjusting your filters or search terms.</p>
+            <a href="{{ url_for('shop.listing') }}" class="btn-primary-custom">View all products</a>
         </div>
+        {% endif %}
     </div>
 </section>
+
+<!-- Mobile filter offcanvas -->
+<div class="offcanvas offcanvas-start collection-offcanvas" tabindex="-1" id="collectionFilterOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Filter & Sort</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="collection-mobile-sort mb-4">
+            <label for="sortSelectMobile" class="form-label fw-semibold">Sort by</label>
+            <select class="form-select" id="sortSelectMobile">
+                {% for value, label in sort_options %}
+                <option value="{{ value }}" {{ 'selected' if current_sort == value }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% include 'shop/_filter_bar.html' %}
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('sortSelect').addEventListener('change', function() {
-    var url = new URL(window.location);
-    url.searchParams.set('sort', this.value);
-    url.searchParams.delete('page');
-    window.location = url;
-});
+(function () {
+    var sortSelect = document.getElementById('sortSelect');
+    var sortMobile = document.getElementById('sortSelectMobile');
+    var sortHidden = document.querySelector('.filterSortInput');
+
+    function applySort(value) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('sort', value);
+        url.searchParams.delete('page');
+        window.location = url.toString();
+    }
+
+    sortSelect?.addEventListener('change', function () { applySort(this.value); });
+    sortMobile?.addEventListener('change', function () {
+        document.querySelectorAll('.filterSortInput').forEach(function (el) { el.value = this.value; }.bind(this));
+        applySort(this.value);
+    });
+
+    document.querySelectorAll('[data-filter-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var key = btn.getAttribute('data-filter-toggle');
+            var form = btn.closest('.collection-filter-form');
+            if (!form) return;
+            var panel = form.querySelector('[data-filter-panel="' + key + '"]');
+            if (!panel) return;
+            var isOpen = !panel.hidden;
+            form.querySelectorAll('.collection-filter-panel').forEach(function (p) { p.hidden = true; });
+            form.querySelectorAll('.collection-filter-btn').forEach(function (b) { b.classList.remove('is-open'); });
+            if (!isOpen) {
+                panel.hidden = false;
+                btn.classList.add('is-open');
+            }
+        });
+    });
+
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.collection-filter-panel').forEach(function (p) { p.hidden = true; });
+        document.querySelectorAll('.collection-filter-btn').forEach(function (b) { b.classList.remove('is-open'); });
+    });
+
+    document.querySelectorAll('.collection-filter-panel').forEach(function (panel) {
+        panel.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+
+    document.querySelectorAll('[data-clear-group]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var group = btn.getAttribute('data-clear-group');
+            var panel = btn.closest('.collection-filter-panel');
+            if (!panel) return;
+            if (group === 'price') {
+                panel.querySelectorAll('input[name="min_price"], input[name="max_price"]').forEach(function (i) { i.value = ''; });
+            } else if (group === 'age') {
+                panel.querySelectorAll('input[name="age_group"], input[name="size"]').forEach(function (i) { i.checked = false; });
+            } else {
+                panel.querySelectorAll('input[type="radio"]').forEach(function (i) { i.checked = false; });
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-wishlist-id]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var productId = btn.getAttribute('data-wishlist-id');
+            fetch('/user/wishlist/toggle/' + productId, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                btn.classList.toggle('is-active', data.status === 'added');
+            }).catch(function () {});
+        });
+    });
+})();
 </script>
 {% endblock %}

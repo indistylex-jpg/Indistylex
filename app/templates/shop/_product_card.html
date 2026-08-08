@@ -1,0 +1,53 @@
+<div class="collection-card">
+    <div class="collection-card-media">
+        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="collection-card-img-link">
+            <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
+        </a>
+
+        {% if product.discount_percent > 0 %}
+        <span class="collection-card-badge collection-card-badge--sale">On Sale</span>
+        {% elif product.is_featured %}
+        <span class="collection-card-badge collection-card-badge--new">Featured</span>
+        {% elif product.is_trending %}
+        <span class="collection-card-badge collection-card-badge--trend">Trending</span>
+        {% endif %}
+
+        <button type="button" class="collection-card-wishlist" title="Add to wishlist"
+                data-wishlist-id="{{ product.id }}">
+            <i class="bi bi-heart"></i>
+        </button>
+
+        {% set sizes = product.variants.filter_by(is_active=True).all() | map(attribute='size') | unique | list %}
+        {% if sizes %}
+        <div class="collection-card-sizes">
+            <span class="collection-card-sizes-label">Select a size</span>
+            <div class="collection-card-size-list">
+                {% for size in sizes[:8] %}
+                <a href="{{ url_for('product.detail', slug=product.slug) }}#sizes" class="collection-card-size">{{ size }}</a>
+                {% endfor %}
+                {% if sizes|length > 8 %}
+                <a href="{{ url_for('product.detail', slug=product.slug) }}" class="collection-card-size">+{{ sizes|length - 8 }}</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="collection-card-body">
+        {% if product.age_groups_label %}
+        <div class="collection-card-tag">{{ product.age_groups_label.split(', ')[0] }}</div>
+        {% elif product.gender_label %}
+        <div class="collection-card-tag">{{ product.gender_label }}</div>
+        {% endif %}
+
+        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="collection-card-title">{{ product.name }}</a>
+
+        <div class="collection-card-price-row">
+            <span class="collection-card-price">₹{{ "{:,.2f}".format(product.price) }}</span>
+            {% if product.compare_at_price and product.compare_at_price > product.price %}
+            <span class="collection-card-compare">₹{{ "{:,.0f}".format(product.compare_at_price) }}</span>
+            <span class="collection-card-save">Save {{ product.discount_percent }}%</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
