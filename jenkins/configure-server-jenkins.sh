@@ -77,7 +77,7 @@ if [[ ! -f "${PLUGIN_MGR}" ]]; then
     "https://github.com/jenkinsci/plugin-installation-manager-tool/releases/download/${PLUGIN_MGR_VERSION}/jenkins-plugin-manager-${PLUGIN_MGR_VERSION}.jar"
 fi
 
-JENKINS_VER="$(jenkins --version 2>/dev/null | awk '{print $NF}' || echo "2.479.1)"
+JENKINS_VER="$(jenkins --version 2>/dev/null | awk '{print $NF}' || echo "2.479.1")"
 java -jar "${PLUGIN_MGR}" \
   --jenkins-version "${JENKINS_VER}" \
   --plugin-file "${PLUGIN_FILE}" \
