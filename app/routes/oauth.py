@@ -22,8 +22,8 @@ def init_oauth(app):
         name='facebook',
         api_base_url='https://graph.facebook.com/',
         access_token_url='https://graph.facebook.com/oauth/access_token',
-        authorize_url='https://www.facebook.com/dialog/oauth',
-        client_kwargs={'scope': 'email public_profile'},
+        authorize_url='https://www.facebook.com/v21.0/dialog/oauth',
+        client_kwargs={'scope': 'public_profile'},
     )
 
 
@@ -70,19 +70,37 @@ def facebook_login():
 @oauth_bp.route('/facebook/callback')
 def facebook_callback():
     try:
-        token = oauth.facebook.authorize_access_token()
-        resp = oauth.facebook.get('me?fields=id,email,first_name,last_name')
+        oauth.facebook.authorize_access_token()
+        resp = oauth.facebook.get('me?fields=id,name,email,first_name,last_name')
         user_info = resp.json()
     except Exception:
+        current_app.logger.exception('Facebook OAuth callback failed')
         flash('Facebook login failed. Please try again.', 'danger')
         return redirect(url_for('auth.login'))
 
+    oauth_id = user_info.get('id')
+    if not oauth_id:
+        flash('Facebook login failed. Please try again.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    email = (user_info.get('email') or '').strip().lower()
+    if not email:
+        # Meta blocks email scope until added under Permissions and features.
+        email = f'fb_{oauth_id}@users.indistylex.in'
+
+    first_name = user_info.get('first_name') or ''
+    last_name = user_info.get('last_name') or ''
+    if not first_name and user_info.get('name'):
+        parts = user_info['name'].split(None, 1)
+        first_name = parts[0]
+        last_name = parts[1] if len(parts) > 1 else ''
+
     return _handle_oauth_login(
         provider='facebook',
-        oauth_id=user_info['id'],
-        email=user_info.get('email', ''),
-        first_name=user_info.get('first_name', ''),
-        last_name=user_info.get('last_name', ''),
+        oauth_id=oauth_id,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
     )
 
 
