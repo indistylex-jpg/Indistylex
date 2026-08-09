@@ -28,9 +28,12 @@ if ! command -v jenkins >/dev/null 2>&1; then
   bash "${SCRIPT_DIR}/install-server.sh"
 else
   log "Jenkins package already installed."
-  grep -q "^HTTP_PORT=" /etc/default/jenkins && \
-    sed -i "s/^HTTP_PORT=.*/HTTP_PORT=${JENKINS_PORT}/" /etc/default/jenkins || \
-    echo "HTTP_PORT=${JENKINS_PORT}" >> /etc/default/jenkins
+  install -d -m 0755 /etc/systemd/system/jenkins.service.d
+  cat > /etc/systemd/system/jenkins.service.d/indistylex-port.conf <<EOF
+[Service]
+Environment="JENKINS_PORT=${JENKINS_PORT}"
+EOF
+  systemctl daemon-reload
 fi
 
 log "Step 3/6 — Jenkins user: git access + app permissions…"

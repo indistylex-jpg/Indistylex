@@ -21,8 +21,12 @@ apt-get update -qq
 apt-get install -y jenkins
 
 echo "==> Configuring Jenkins on port ${JENKINS_PORT}…"
-sed -i "s/^HTTP_PORT=.*/HTTP_PORT=${JENKINS_PORT}/" /etc/default/jenkins || true
-grep -q "^HTTP_PORT=" /etc/default/jenkins || echo "HTTP_PORT=${JENKINS_PORT}" >> /etc/default/jenkins
+install -d -m 0755 /etc/systemd/system/jenkins.service.d
+cat > /etc/systemd/system/jenkins.service.d/indistylex-port.conf <<EOF
+[Service]
+Environment="JENKINS_PORT=${JENKINS_PORT}"
+EOF
+systemctl daemon-reload
 
 echo "==> Allowing jenkins user to run deploy script…"
 cat > /etc/sudoers.d/jenkins-indistylex <<SUDOERS
