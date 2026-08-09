@@ -178,6 +178,42 @@ def unique_product_slug(name, product_id=None):
         n += 1
 
 
+def parse_all_variant_rows_from_request(form_data):
+    """Return every variant row from the form (including blank rows)."""
+    sizes = form_data.getlist('variant_size[]')
+    colors = form_data.getlist('variant_color[]')
+    skus = form_data.getlist('variant_sku[]')
+    stocks = form_data.getlist('variant_stock[]')
+    rows = []
+    for size, color, sku, stock in zip(sizes, colors, skus, stocks):
+        try:
+            stock_qty = max(0, int(stock or 0))
+        except (TypeError, ValueError):
+            stock_qty = 0
+        rows.append({
+            'size': (size or '').strip(),
+            'color': (color or '').strip(),
+            'sku': (sku or '').strip(),
+            'stock': stock_qty,
+        })
+    return rows
+
+
+def product_form_draft_context(form_data=None, *, product=None):
+    """Repopulate admin product form after a failed save."""
+    default_row = {'size': '', 'color': '', 'sku': '', 'stock': 10}
+    if form_data is not None:
+        rows = parse_all_variant_rows_from_request(form_data)
+        return {
+            'selected_age_groups': normalize_age_groups(form_data.getlist('age_groups')),
+            'variant_draft_rows': rows if rows else [default_row.copy()],
+        }
+    return {
+        'selected_age_groups': product.age_groups_list if product else [],
+        'variant_draft_rows': [default_row.copy()],
+    }
+
+
 def parse_variant_rows_from_request(form_data):
     """Extract variant rows from variant_*[] form fields."""
     sizes = form_data.getlist('variant_size[]')

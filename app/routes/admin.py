@@ -37,6 +37,7 @@ from app.services.product_catalog_service import (
     get_store_visibility_counts,
     listing_preview,
     validate_product_submission,
+    product_form_draft_context,
 )
 
 admin_bp = Blueprint('admin', __name__)
@@ -446,15 +447,16 @@ def add_product():
     form = ProductForm()
     form.category_id.choices = get_category_choices_flat()
     category_groups = get_category_groups()
+    validation_errors = []
+    draft = product_form_draft_context(
+        request.form if request.method == 'POST' else None,
+    )
 
     if form.validate_on_submit():
-        errors = validate_product_submission(
+        validation_errors = validate_product_submission(
             form, request.form, request.files, is_new=True,
         )
-        if errors:
-            for msg in errors:
-                flash(msg, 'danger')
-        else:
+        if not validation_errors:
             product = Product()
             apply_product_fields_from_form(product, form, is_new=True)
             db.session.add(product)
@@ -475,18 +477,21 @@ def add_product():
             for sku in skipped_skus:
                 flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
             return redirect(url_for('admin.products'))
+        for msg in validation_errors:
+            flash(msg, 'danger')
 
     return render_template(
         'admin/product_form.html',
         form=form,
         title='Add Product',
         is_new=True,
+        validation_errors=validation_errors,
         age_group_sections=AGE_GROUP_SECTIONS,
         age_presets=AGE_PRESETS,
-        selected_age_groups=[],
         category_groups=category_groups,
         visibility_options=STORE_VISIBILITY_OPTIONS,
         category_meta_json=json.dumps(category_metadata_for_js()),
+        **draft,
     )
 
 
@@ -498,15 +503,17 @@ def edit_product(product_id):
     form = ProductForm(obj=product)
     form.category_id.choices = get_category_choices_flat()
     category_groups = get_category_groups()
+    validation_errors = []
+    draft = product_form_draft_context(
+        request.form if request.method == 'POST' else None,
+        product=product,
+    )
 
     if form.validate_on_submit():
-        errors = validate_product_submission(
+        validation_errors = validate_product_submission(
             form, request.form, request.files, is_new=False, product=product,
         )
-        if errors:
-            for msg in errors:
-                flash(msg, 'danger')
-        else:
+        if not validation_errors:
             apply_product_fields_from_form(product, form, is_new=False)
             apply_age_groups_from_request(product, request.form)
 
@@ -528,6 +535,8 @@ def edit_product(product_id):
             for sku in skipped_skus:
                 flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
             return redirect(url_for('admin.products'))
+        for msg in validation_errors:
+            flash(msg, 'danger')
 
     variants = product.variants.all()
     images = product.images.order_by(ProductImage.sort_order).all()
@@ -540,13 +549,14 @@ def edit_product(product_id):
         product=product,
         variants=variants,
         images=images,
+        validation_errors=validation_errors,
         age_group_sections=AGE_GROUP_SECTIONS,
         age_presets=AGE_PRESETS,
-        selected_age_groups=product.age_groups_list,
         category_groups=category_groups,
         visibility_options=STORE_VISIBILITY_OPTIONS,
         listing_preview=listing_preview(product),
         category_meta_json=json.dumps(category_metadata_for_js()),
+        **draft,
     )
 
 

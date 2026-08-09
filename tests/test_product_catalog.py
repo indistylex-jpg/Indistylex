@@ -3,6 +3,7 @@ from decimal import Decimal
 from io import BytesIO
 
 from werkzeug.datastructures import MultiDict
+from flask import request
 
 from app.models.product import Category
 from app.services.product_catalog_service import (
@@ -11,6 +12,7 @@ from app.services.product_catalog_service import (
     listing_preview,
     get_store_visibility_counts,
     suggested_gender_for_category,
+    product_form_draft_context,
 )
 from app.forms.product_forms import ProductForm
 
@@ -52,3 +54,17 @@ class TestProductCatalogService:
         db.session.commit()
         counts = get_store_visibility_counts()
         assert counts['new_arrival'] >= 1
+
+    def test_product_form_draft_context_repops_from_post(self, app, sample_category):
+        with app.test_request_context(method='POST', data={
+            'age_groups': ['3-4y', '4-5y'],
+            'variant_size[]': ['3-4Y', '5-6Y'],
+            'variant_color[]': ['Pink', 'Blue'],
+            'variant_sku[]': ['SKU-1', 'SKU-2'],
+            'variant_stock[]': ['5', '8'],
+        }):
+            draft = product_form_draft_context(request.form)
+        assert '3-4y' in draft['selected_age_groups']
+        assert len(draft['variant_draft_rows']) == 2
+        assert draft['variant_draft_rows'][0]['sku'] == 'SKU-1'
+        assert draft['variant_draft_rows'][1]['stock'] == 8

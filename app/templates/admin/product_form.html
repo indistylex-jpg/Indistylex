@@ -29,6 +29,26 @@
   {% endif %}
 </div>
 
+{% if validation_errors or form.errors %}
+<div class="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+  <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Could not save — please fix the items below</h6>
+  <ul class="mb-2 ps-3">
+    {% for err in validation_errors %}
+    <li>{{ err }}</li>
+    {% endfor %}
+    {% for field_name, field_errors in form.errors.items() %}
+      {% for err in field_errors %}
+      <li>{{ form[field_name].label.text }}: {{ err }}</li>
+      {% endfor %}
+    {% endfor %}
+  </ul>
+  <p class="mb-0 small">Your other entries are kept below — only fill in or correct what's missing.</p>
+  {% if is_new %}
+  <p class="mb-0 small mt-1"><strong>Note:</strong> If photos were required, choose them again (browsers cannot remember file uploads).</p>
+  {% endif %}
+</div>
+{% endif %}
+
 {% if product and product.variants.count() %}
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-body p-4">
@@ -276,13 +296,15 @@
           <tr><th>Size</th><th>Color</th><th>SKU</th><th>Stock</th><th></th></tr>
         </thead>
         <tbody id="variant-rows">
+          {% for row in variant_draft_rows %}
           <tr class="variant-row">
-            <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="3-4Y" {% if is_new %}required{% endif %}></td>
-            <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="Pink" {% if is_new %}required{% endif %}></td>
-            <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="IX-FRK-PINK-34" {% if is_new %}required{% endif %}></td>
-            <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="10" min="0"></td>
-            <td></td>
+            <td><input type="text" name="variant_size[]" class="form-control form-control-sm" placeholder="3-4Y" value="{{ row.size }}"></td>
+            <td><input type="text" name="variant_color[]" class="form-control form-control-sm" placeholder="Pink" value="{{ row.color }}"></td>
+            <td><input type="text" name="variant_sku[]" class="form-control form-control-sm" placeholder="IX-FRK-PINK-34" value="{{ row.sku }}"></td>
+            <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="{{ row.stock }}" min="0"></td>
+            <td>{% if not loop.first %}<button type="button" class="btn btn-sm btn-outline-danger remove-variant-row"><i class="bi bi-x-lg"></i></button>{% endif %}</td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
