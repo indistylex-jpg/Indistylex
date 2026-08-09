@@ -648,6 +648,7 @@ def create_order(user):
             size=variant.size,
             color=variant.color,
             price=float(product.price),
+            cost_price=product.cost_price,
             quantity=cart_item.quantity,
             image_url=product.primary_image_url
         )

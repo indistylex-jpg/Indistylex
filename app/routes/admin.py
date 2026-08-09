@@ -151,7 +151,8 @@ def dashboard():
     month_start = today.replace(day=1).date()
     total_expenses, expense_count = get_expense_totals(start_date=month_start)
     expense_by_category = get_expense_by_category(start_date=month_start)
-    net_profit = analytics['total_revenue'] - float(total_expenses)
+    gross_profit_month = analytics['month_gross_profit']
+    net_profit = gross_profit_month - float(total_expenses)
     store_visibility = get_store_visibility_counts()
 
     top_products = []
@@ -160,9 +161,12 @@ def dashboard():
         product = Product.query.filter_by(name=name).first()
         if product:
             img = product.images.first()
+            unit_profit = product.unit_profit
             top_products.append({
                 'name': product.name,
                 'price': float(product.price),
+                'cost_price': float(product.cost_price) if product.cost_price is not None else None,
+                'unit_profit': float(unit_profit) if unit_profit is not None else None,
                 'image': img.image_url if img else None,
                 'qty_sold': qty,
             })
@@ -180,7 +184,7 @@ def dashboard():
             })
 
     chart_keys = (
-        'monthly_labels', 'monthly_revenue', 'monthly_order_counts',
+        'monthly_labels', 'monthly_revenue', 'monthly_gross_profit', 'monthly_order_counts',
         'status_labels', 'status_counts', 'payment_labels', 'payment_counts',
         'top_product_names', 'top_product_qty', 'category_names', 'category_counts',
         'gender_labels', 'gender_counts', 'gender_colors',
@@ -196,6 +200,7 @@ def dashboard():
         total_expenses=total_expenses,
         expense_count=expense_count,
         expense_by_category=expense_by_category,
+        gross_profit_month=gross_profit_month,
         net_profit=net_profit,
         store_visibility=store_visibility,
         **template_data,

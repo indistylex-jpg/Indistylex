@@ -44,6 +44,7 @@ class Product(db.Model):
     short_description = db.Column(db.String(500))
     price = db.Column(db.Numeric(10, 2), nullable=False)
     compare_at_price = db.Column(db.Numeric(10, 2))
+    cost_price = db.Column(db.Numeric(10, 2))  # admin-only purchase cost for profit tracking
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     brand = db.Column(db.String(100))
     gender = db.Column(db.String(20))  # men, women, girls, kids, unisex
@@ -121,6 +122,19 @@ class Product(db.Model):
         if self.compare_at_price and self.compare_at_price > self.price:
             return int(((self.compare_at_price - self.price) / self.compare_at_price) * 100)
         return 0
+
+    @property
+    def unit_profit(self):
+        """Selling price minus purchase cost (admin only)."""
+        if self.cost_price is None:
+            return None
+        return self.price - self.cost_price
+
+    @property
+    def profit_margin_percent(self):
+        if self.cost_price is None or self.price <= 0:
+            return None
+        return float(round(((self.price - self.cost_price) / self.price) * 100, 1))
 
     @property
     def in_stock(self):

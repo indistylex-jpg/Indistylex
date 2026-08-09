@@ -42,7 +42,9 @@
               </th>
               <th>Product</th>
               <th>Category</th>
-              <th>Price</th>
+              <th>Sell</th>
+              <th>Cost</th>
+              <th>Profit</th>
               <th class="text-center">Stock</th>
               <th class="text-center">Status</th>
               <th class="text-center">Actions</th>
@@ -76,6 +78,23 @@
                 </td>
                 <td>{{ product.category.name if product.category else '—' }}</td>
                 <td>₹{{ "{:,.0f}".format(product.price) }}</td>
+                <td class="text-muted">
+                  {% if product.cost_price is not none %}
+                  ₹{{ "{:,.0f}".format(product.cost_price) }}
+                  {% else %}—{% endif %}
+                </td>
+                <td>
+                  {% if product.unit_profit is not none %}
+                  <span class="{{ 'text-success' if product.unit_profit >= 0 else 'text-danger' }}">
+                    ₹{{ "{:,.0f}".format(product.unit_profit) }}
+                  </span>
+                  {% if product.profit_margin_percent is not none %}
+                  <small class="text-muted">({{ product.profit_margin_percent }}%)</small>
+                  {% endif %}
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
                 <td class="text-center">{{ product.total_stock }}</td>
                 <td class="text-center">
                   <span class="badge {{ 'bg-success' if product.is_active else 'bg-secondary' }}">

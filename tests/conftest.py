@@ -100,6 +100,7 @@ def sample_product(db, sample_category):
         short_description='Soft romper',
         price=Decimal('699.00'),
         compare_at_price=Decimal('999.00'),
+        cost_price=Decimal('450.00'),
         category_id=sample_category.id,
         brand='SilkenKids',
         gender='kids',

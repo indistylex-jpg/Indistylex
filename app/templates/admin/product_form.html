@@ -109,6 +109,11 @@
         <div class="form-text">Must be higher than selling price</div>
       </div>
       <div class="col-md-3">
+        <label class="form-label">Cost Price (₹) <span class="badge bg-secondary ms-1">Admin only</span></label>
+        {{ form.cost_price(class="form-control", step="0.01", placeholder="What you paid for this item") }}
+        <div class="form-text">Hidden from customers — used for profit &amp; dashboard totals</div>
+      </div>
+      <div class="col-md-3">
         <label class="form-label">Brand</label>
         {{ form.brand(class="form-control", placeholder="Indistylex") }}
       </div>

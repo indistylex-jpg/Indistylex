@@ -23,6 +23,36 @@ def _pct_change(current, previous):
     return round(((current - previous) / previous) * 100, 1)
 
 
+def _valid_order_status_filter():
+    return Order.status.notin_(['cancelled', 'refunded'])
+
+
+def get_order_item_profit_totals(*, start_date=None, end_date=None):
+    """
+    Return (revenue, cogs, gross_profit) from sold order line items.
+    Uses cost_price snapshot on each line; missing cost counts as zero cost.
+    """
+    revenue_expr = func.sum(OrderItem.price * OrderItem.quantity)
+    cogs_expr = func.sum(func.coalesce(OrderItem.cost_price, 0) * OrderItem.quantity)
+
+    q = db.session.query(
+        revenue_expr.label('revenue'),
+        cogs_expr.label('cogs'),
+    ).join(Order, OrderItem.order_id == Order.id).filter(
+        _valid_order_status_filter()
+    )
+
+    if start_date is not None:
+        q = q.filter(Order.created_at >= start_date)
+    if end_date is not None:
+        q = q.filter(Order.created_at < end_date)
+
+    row = q.one()
+    revenue = float(row.revenue or 0)
+    cogs = float(row.cogs or 0)
+    return revenue, cogs, revenue - cogs
+
+
 def _normalize_gender(value):
     g = (value or '').lower()
     if g in ('boys', 'boy'):
@@ -126,19 +156,19 @@ def get_dashboard_analytics():
 
     total_orders = Order.query.count()
     total_revenue = db.session.query(func.sum(Order.total)).filter(
-        Order.status.notin_(['cancelled', 'refunded'])
+        _valid_order_status_filter()
     ).scalar() or 0
     total_customers = User.query.filter_by(role='customer').count()
     total_products = Product.query.filter_by(is_active=True).count()
 
     revenue_this_week = db.session.query(func.sum(Order.total)).filter(
         Order.created_at >= week_ago,
-        Order.status.notin_(['cancelled', 'refunded']),
+        _valid_order_status_filter(),
     ).scalar() or 0
     revenue_prev_week = db.session.query(func.sum(Order.total)).filter(
         Order.created_at >= two_weeks_ago,
         Order.created_at < week_ago,
-        Order.status.notin_(['cancelled', 'refunded']),
+        _valid_order_status_filter(),
     ).scalar() or 0
 
     orders_this_week = Order.query.filter(Order.created_at >= week_ago).count()
@@ -195,8 +225,24 @@ def get_dashboard_analytics():
         func.count(Order.id).label('orders'),
     ).filter(
         Order.created_at >= six_months_ago,
-        Order.status.notin_(['cancelled', 'refunded']),
+        _valid_order_status_filter(),
     ).group_by(month_expr).order_by('month').all()
+
+    profit_month_expr = (
+        func.strftime('%Y-%m', Order.created_at)
+        if db_engine == 'sqlite'
+        else func.date_format(Order.created_at, '%Y-%m')
+    )
+    monthly_profit_rows = db.session.query(
+        profit_month_expr.label('month'),
+        func.sum(
+            (OrderItem.price - func.coalesce(OrderItem.cost_price, 0)) * OrderItem.quantity
+        ).label('gross_profit'),
+    ).join(Order, OrderItem.order_id == Order.id).filter(
+        Order.created_at >= six_months_ago,
+        _valid_order_status_filter(),
+    ).group_by(profit_month_expr).order_by('month').all()
+    profit_by_month = {r.month: float(r.gross_profit or 0) for r in monthly_profit_rows}
 
     status_rows = db.session.query(
         Order.status, func.count(Order.id)
@@ -205,7 +251,7 @@ def get_dashboard_analytics():
     payment_rows = db.session.query(
         Order.payment_method, func.count(Order.id)
     ).filter(
-        Order.status.notin_(['cancelled', 'refunded'])
+        _valid_order_status_filter()
     ).group_by(Order.payment_method).all()
 
     gender_rows = db.session.query(
@@ -238,6 +284,10 @@ def get_dashboard_analytics():
     week_start = now - timedelta(days=6)
     today_range = f"{week_start.strftime('%b %d')} - {now.strftime('%b %d, %Y')}"
 
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    _, total_cogs, total_gross_profit = get_order_item_profit_totals()
+    _, month_cogs, month_gross_profit = get_order_item_profit_totals(start_date=month_start)
+
     return {
         'today_range': today_range,
         'total_orders': total_orders,
@@ -261,6 +311,7 @@ def get_dashboard_analytics():
         'customers_change_pct': _pct_change(customers_this_week, customers_prev_week),
         'monthly_labels': [r.month for r in monthly_rows],
         'monthly_revenue': [float(r.revenue or 0) for r in monthly_rows],
+        'monthly_gross_profit': [profit_by_month.get(r.month, 0) for r in monthly_rows],
         'monthly_order_counts': [int(r.orders) for r in monthly_rows],
         'status_labels': [r[0] or 'pending' for r in status_rows],
         'status_counts': [r[1] for r in status_rows],
@@ -273,5 +324,9 @@ def get_dashboard_analytics():
         'top_product_qty': [int(r.total_qty) for r in top_products_rows],
         'category_names': [r.name.split('(')[0].strip() for r in category_rows],
         'category_counts': [int(r.count) for r in category_rows],
+        'total_cogs': total_cogs,
+        'total_gross_profit': total_gross_profit,
+        'month_cogs': month_cogs,
+        'month_gross_profit': month_gross_profit,
         'gender_category_bars': get_gender_category_inventory(),
     }

@@ -79,6 +79,7 @@ class OrderItem(db.Model):
     size = db.Column(db.String(20))
     color = db.Column(db.String(50))
     price = db.Column(db.Numeric(10, 2), nullable=False)
+    cost_price = db.Column(db.Numeric(10, 2))  # snapshot of product cost at checkout
     quantity = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(500))
 
@@ -87,6 +88,17 @@ class OrderItem(db.Model):
     @property
     def line_total(self):
         return self.price * self.quantity
+
+    @property
+    def line_cost(self):
+        if self.cost_price is None:
+            return 0
+        return self.cost_price * self.quantity
+
+    @property
+    def line_profit(self):
+        unit_cost = self.cost_price or 0
+        return (self.price - unit_cost) * self.quantity
 
     def __repr__(self):
         return f'<OrderItem {self.product_name} x{self.quantity}>'

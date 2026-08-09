@@ -114,6 +114,7 @@ def checkout_page():
                 size=item.variant.size,
                 color=item.variant.color,
                 price=item.variant.product.price,
+                cost_price=item.variant.product.cost_price,
                 quantity=item.quantity,
                 image_url=item.variant.product.primary_image_url,
             )

@@ -33,6 +33,7 @@ class ProductForm(FlaskForm):
     description = TextAreaField('Full Description', validators=[Optional()])
     price = DecimalField('Price (₹)', validators=[DataRequired(), NumberRange(min=0.01)], places=2)
     compare_at_price = DecimalField('Compare at Price (₹)', validators=[Optional(), NumberRange(min=0)], places=2)
+    cost_price = DecimalField('Cost Price (₹)', validators=[Optional(), NumberRange(min=0)], places=2)
     category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
     brand = StringField('Brand', validators=[Optional(), Length(max=100)])
     gender = SelectField('Gender', choices=GENDER_CHOICES, validators=[Optional()])
