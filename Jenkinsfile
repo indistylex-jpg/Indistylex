@@ -14,12 +14,12 @@ pipeline {
         )
         choice(
             name: 'DEPLOY_TARGET',
-            choices: ['remote', 'local'],
-            description: 'remote = SSH from laptop to server | local = run on server Jenkins (no SSH)'
+            choices: ['local', 'remote'],
+            description: 'local = on-server Jenkins (default) | remote = SSH from another Jenkins host'
         )
         booleanParam(
             name: 'RUN_MIGRATIONS',
-            defaultValue: false,
+            defaultValue: true,
             description: 'Run optional SQL migrations (MySQL only, staging/production)'
         )
         booleanParam(
@@ -39,6 +39,7 @@ pipeline {
         PRODUCTION_HOST = '138.201.50.228'
         PRODUCTION_USER = 'indistylex-deploy'
         SSH_CREDENTIAL = 'indistylex-server-ssh'
+        ON_SERVER = "${fileExists('/var/www/html/indistylex/jenkins/deploy.sh') ? 'true' : 'false'}"
     }
 
     options {
@@ -99,11 +100,15 @@ App directory   : ${APP_DIR}
             }
             steps {
                 script {
-                    if (params.DEPLOY_TARGET == 'local' && !fileExists(env.APP_DIR)) {
+                    def useLocal = params.DEPLOY_TARGET == 'local' || env.ON_SERVER == 'true'
+                    if (params.DEPLOY_TARGET == 'remote' && env.ON_SERVER == 'true') {
+                        echo 'Server Jenkins detected — forcing local deploy (DEPLOY_TARGET=local).'
+                    }
+                    if (!useLocal && !fileExists(env.APP_DIR)) {
                         error("""
-DEPLOY_TARGET=local only works when Jenkins runs ON the server (${env.APP_DIR} must exist).
-On your laptop, use DEPLOY_TARGET=remote and add credential ${env.SSH_CREDENTIAL}.
-Run: cd jenkins && ./setup-server-ssh-credential.sh
+DEPLOY_TARGET=remote is for laptop Jenkins only.
+On the production server, use DEPLOY_TARGET=local.
+Install server Jenkins: bash jenkins/configure-server-jenkins.sh
 """)
                     }
 
@@ -115,7 +120,11 @@ Run: cd jenkins && ./setup-server-ssh-credential.sh
                         "APP_DIR=${APP_DIR}"
                     ].join(' ')
 
-                    if (params.DEPLOY_TARGET == 'remote') {
+                    if (useLocal) {
+                        sh """
+                            ${deployEnv} bash ${APP_DIR}/jenkins/deploy.sh
+                        """
+                    } else {
                         sshagent(credentials: [env.SSH_CREDENTIAL]) {
                             sh """
                                 ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes \\
@@ -123,10 +132,6 @@ Run: cd jenkins && ./setup-server-ssh-credential.sh
                                     'cd ${APP_DIR} && ${deployEnv} bash jenkins/deploy.sh'
                             """
                         }
-                    } else {
-                        sh """
-                            ${deployEnv} bash ${APP_DIR}/jenkins/deploy.sh
-                        """
                     }
                 }
             }

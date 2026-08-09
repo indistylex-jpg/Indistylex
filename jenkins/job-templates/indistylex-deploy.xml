@@ -28,16 +28,16 @@
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>DEPLOY_TARGET</name>
-          <description>remote = SSH from laptop | local = on-server Jenkins</description>
+          <description>local = on-server Jenkins (default) | remote = SSH from laptop Jenkins</description>
           <choices class="java.util.Arrays$ArrayList">
-            <a class="string-array"><string>remote</string></a>
             <a class="string-array"><string>local</string></a>
+            <a class="string-array"><string>remote</string></a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>RUN_MIGRATIONS</name>
-          <description>Run optional SQL migrations</description>
-          <defaultValue>false</defaultValue>
+          <description>Run SQL migrations via apply_sql_migrations.py</description>
+          <defaultValue>true</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>AUTO_ROLLBACK_ON_FAILURE</name>

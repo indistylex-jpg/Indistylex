@@ -66,7 +66,7 @@ indistylex-deploy ALL=(root) NOPASSWD: /bin/systemctl restart indistylex
 indistylex-deploy ALL=(root) NOPASSWD: /bin/systemctl status indistylex
 indistylex-deploy ALL=(root) NOPASSWD: /bin/systemctl is-active indistylex
 indistylex-deploy ALL=(root) NOPASSWD: /bin/chown -R www-data\:www-data ${APP_DIR}
-indistylex-deploy ALL=(root) NOPASSWD: /bin/chmod 600 ${APP_DIR}/.env
+indistylex-deploy ALL=(root) NOPASSWD: /bin/chmod 640 ${APP_DIR}/.env
 SUDOERS
 chmod 440 /etc/sudoers.d/indistylex-deploy
 visudo -cf /etc/sudoers.d/indistylex-deploy
@@ -79,7 +79,7 @@ find "${APP_DIR}" -type d -exec chmod g+s {} \;
 
 log "Fixing app ownership…"
 chown -R www-data:www-data "${APP_DIR}"
-chmod 600 "${APP_DIR}/.env" 2>/dev/null || true
+chmod 640 "${APP_DIR}/.env" 2>/dev/null || true
 
 cat <<EOF
 
@@ -87,22 +87,17 @@ cat <<EOF
  Server deploy setup complete.
 ==============================================
 
-Manual deploy (no credentials prompt after git is configured):
+Deploy through Jenkins on the server (required):
 
-  cd ${APP_DIR}
-  git pull ${GIT_REMOTE} ${STAGING_BRANCH}
-  systemctl restart indistylex
+  http://138.201.50.228:8081  →  indistylex-deploy
+  ENVIRONMENT=staging | ROLLOUT_ACTION=deploy | DEPLOY_TARGET=local
 
-Or use the deploy script:
+First-time Jenkins setup:
+
+  sudo bash jenkins/configure-server-jenkins.sh
+
+Emergency manual deploy (avoid if Jenkins is up):
 
   ENVIRONMENT=staging ROLLOUT_ACTION=deploy bash jenkins/deploy.sh
-
-Rollback:
-
-  ENVIRONMENT=staging ROLLOUT_ACTION=rollback bash jenkins/deploy.sh
-
-Dry-run:
-
-  ENVIRONMENT=production ROLLOUT_ACTION=dry-run bash jenkins/deploy.sh
 
 EOF

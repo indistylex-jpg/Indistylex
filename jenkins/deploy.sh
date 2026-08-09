@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
-# Deploy Indistylex — used by Jenkins pipeline and manual server commands.
+# Deploy Indistylex — used by Jenkins on the server (primary) and emergency manual use.
 #
-# Manual (no credentials needed on server if git remote is already configured):
+# Standard deploy: use server Jenkins at http://138.201.50.228:8081
+#   Job: indistylex-deploy → ENVIRONMENT=staging, DEPLOY_TARGET=local, ROLLOUT_ACTION=deploy
+#
+# Emergency manual (avoid if Jenkins is available):
 #   cd /var/www/html/indistylex
 #   ENVIRONMENT=staging ROLLOUT_ACTION=deploy bash jenkins/deploy.sh
-#
-# Rollback last deploy:
-#   ROLLOUT_ACTION=rollback bash jenkins/deploy.sh
-#
-# Dry-run (show plan only):
-#   ROLLOUT_ACTION=dry-run bash jenkins/deploy.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -107,7 +104,13 @@ run_migrations() {
     log "Skipping migrations — no .env file."
     return 0
   fi
-  log "Running optional SQL migrations…"
+  log "Running SQL migrations…"
+  if [[ -x "${VENV_DIR}/bin/python" && -f "${APP_DIR}/scripts/apply_sql_migrations.py" ]]; then
+    # shellcheck disable=SC1091
+    source "${VENV_DIR}/bin/activate"
+    python "${APP_DIR}/scripts/apply_sql_migrations.py" || true
+    return 0
+  fi
   set -a
   # shellcheck disable=SC1091
   source "${APP_DIR}/.env"
@@ -126,7 +129,7 @@ run_migrations() {
         fi
       done
     else
-      log "Skipping migrations — DB_PASSWORD not set in .env."
+      log "Skipping migrations — set DATABASE_URL in .env or install venv + apply_sql_migrations.py."
     fi
   fi
 }
@@ -134,7 +137,7 @@ run_migrations() {
 fix_permissions() {
   log "Fixing permissions…"
   ${SUDO} chown -R www-data:www-data "${APP_DIR}"
-  ${SUDO} chmod 600 "${APP_DIR}/.env" 2>/dev/null || true
+  ${SUDO} chmod 640 "${APP_DIR}/.env" 2>/dev/null || true
   ${SUDO} chmod +x "${APP_DIR}/jenkins/"*.sh 2>/dev/null || true
 }
 
