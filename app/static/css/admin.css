@@ -1110,7 +1110,11 @@ body.admin-body {
   color: #6c757d;
   border-top: 1px solid #eee;
 }
-.product-image-preview-item.is-primary { border-color: #2563EB; }
+.product-image-preview-item.is-primary,
+.product-image-saved-item.is-primary { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25); }
+.product-image-actions .btn { font-size: 0.72rem; }
+.product-image-preview-item.is-selectable { cursor: pointer; }
+.product-image-preview-item.is-selectable:hover { border-color: #93C5FD; }
 .visibility-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .visibility-badge {
   font-size: 0.62rem;

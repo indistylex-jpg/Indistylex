@@ -89,23 +89,54 @@
 
   const imageInput = document.getElementById('product-images-input');
   const preview = document.getElementById('image-preview');
+  const primaryNewIndexInput = document.getElementById('primary-new-upload-index');
   let previewUrls = [];
+
   function clearPreviewUrls() {
     previewUrls.forEach(function (url) { URL.revokeObjectURL(url); });
     previewUrls = [];
   }
+
+  function markNewUploadPrimary(index) {
+    if (primaryNewIndexInput) {
+      primaryNewIndexInput.value = String(index);
+    }
+    preview?.querySelectorAll('.product-image-preview-item').forEach(function (card, i) {
+      card.classList.toggle('is-primary', i === index);
+      const caption = card.querySelector('.product-image-preview-caption');
+      if (!caption) return;
+      caption.innerHTML = '';
+      if (i === index) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-primary me-1';
+        badge.textContent = 'Main';
+        caption.appendChild(badge);
+      }
+      caption.appendChild(document.createTextNode('New upload ' + (i + 1)));
+    });
+  }
+
   imageInput?.addEventListener('change', function () {
     clearPreviewUrls();
     preview.innerHTML = '';
-    Array.from(this.files || []).forEach(function (file, index) {
-      if (!file.type.startsWith('image/')) return;
+    const files = Array.from(this.files || []).filter(function (file) {
+      return file.type.startsWith('image/');
+    });
+
+    files.forEach(function (file, index) {
       const card = document.createElement('div');
-      card.className = 'product-image-preview-item' + (index === 0 ? ' is-primary' : '');
+      card.className = 'product-image-preview-item is-selectable' + (index === 0 ? ' is-primary' : '');
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', 'Set new upload ' + (index + 1) + ' as main photo');
+      card.dataset.uploadIndex = String(index);
+
       const img = document.createElement('img');
       const url = URL.createObjectURL(file);
       previewUrls.push(url);
       img.src = url;
       img.alt = file.name;
+
       const caption = document.createElement('div');
       caption.className = 'product-image-preview-caption';
       if (index === 0) {
@@ -114,11 +145,32 @@
         badge.textContent = 'Main';
         caption.appendChild(badge);
       }
-      caption.appendChild(document.createTextNode(file.name));
+      caption.appendChild(document.createTextNode('New upload ' + (index + 1)));
+
       card.appendChild(img);
       card.appendChild(caption);
       preview.appendChild(card);
     });
+
+    if (files.length) {
+      markNewUploadPrimary(0);
+    } else if (primaryNewIndexInput) {
+      primaryNewIndexInput.value = '';
+    }
+  });
+
+  preview?.addEventListener('click', function (e) {
+    const card = e.target.closest('.product-image-preview-item');
+    if (!card || card.dataset.uploadIndex === undefined) return;
+    markNewUploadPrimary(parseInt(card.dataset.uploadIndex, 10));
+  });
+
+  preview?.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const card = e.target.closest('.product-image-preview-item');
+    if (!card || card.dataset.uploadIndex === undefined) return;
+    e.preventDefault();
+    markNewUploadPrimary(parseInt(card.dataset.uploadIndex, 10));
   });
 
   /* Ensure CSRF token is present on multipart save (meta → hidden field). */

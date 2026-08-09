@@ -2,7 +2,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block extra_css %}
-<link href="{{ url_for('static', filename='css/admin.css') }}?v=7" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/admin.css') }}?v=8" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -213,20 +213,51 @@
       </div>
     </div>
     {% if product and images %}
+    <p class="text-muted small mb-2">Click <strong>Set as main</strong> on the photo customers should see first on the website.</p>
     <div class="product-image-preview-grid mb-3">
       {% for img in images %}
-      <div class="product-image-saved-item">
+      <div class="product-image-saved-item {{ 'is-primary' if img.is_primary }}">
         <img src="{{ image_url(img.image_url) }}" alt="Product photo">
         <div class="product-image-preview-caption">
           {% if img.is_primary %}<span class="badge bg-primary me-1">Main</span>{% endif %}
-          Saved {{ loop.index }}
+          Photo {{ loop.index }}
+        </div>
+        <div class="product-image-actions p-2 pt-0">
+          {% if img.is_primary %}
+          <span class="btn btn-sm btn-primary w-100 disabled" aria-current="true">
+            <i class="bi bi-star-fill me-1"></i>Main photo
+          </span>
+          {% else %}
+          <form method="POST" action="{{ url_for('admin.set_product_primary_image', product_id=product.id, image_id=img.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+              <i class="bi bi-star me-1"></i>Set as main
+            </button>
+          </form>
+          {% endif %}
+          <form method="POST" action="{{ url_for('admin.delete_product_image', product_id=product.id, image_id=img.id) }}"
+                class="mt-1" onsubmit="return confirm('Remove this photo?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+              <i class="bi bi-trash me-1"></i>Remove
+            </button>
+          </form>
         </div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
+    {% set primary_image_id_val = namespace(id='') %}
+    {% if images %}
+    {% for img in images %}
+      {% if img.is_primary %}{% set primary_image_id_val.id = img.id %}{% endif %}
+    {% endfor %}
+    {% endif %}
+    <input type="hidden" name="primary_image_id" id="primary-image-id" value="{{ primary_image_id_val.id }}">
+    <input type="hidden" name="primary_new_upload_index" id="primary-new-upload-index" value="0">
     <input type="file" name="images" id="product-images-input" class="form-control"
            accept="image/jpeg,image/jpg,image/png,image/webp" multiple {% if is_new and not (product and images) %}required{% endif %}>
+    <div class="form-text">For new uploads, click a preview below to choose which one becomes the main photo.</div>
     <div id="image-preview" class="product-image-preview-grid mt-2"></div>
   </div>
 
@@ -281,5 +312,5 @@
 
 {% block extra_js %}
 <script>window.PRODUCT_CATEGORY_META = {{ category_meta_json | safe }};</script>
-<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=3"></script>
 {% endblock %}

@@ -42,15 +42,39 @@ from app.services.product_catalog_service import (
 admin_bp = Blueprint('admin', __name__)
 
 
+def _set_primary_image(product, image_id):
+    """Mark one product image as the main photo shown on the storefront."""
+    img = ProductImage.query.filter_by(id=image_id, product_id=product.id).first()
+    if not img:
+        return False
+    ProductImage.query.filter_by(product_id=product.id).update(
+        {ProductImage.is_primary: False}, synchronize_session=False
+    )
+    img.is_primary = True
+    return True
+
+
+def _ensure_primary_image(product):
+    """Ensure exactly one primary image when product has photos."""
+    if not product.images.count():
+        return
+    primary = product.images.filter_by(is_primary=True).first()
+    if primary:
+        return
+    first = product.images.order_by(ProductImage.sort_order).first()
+    if first:
+        first.is_primary = True
+
+
 def _save_product_images(product):
     """Attach uploaded images to a product. Returns (saved_count, failed_count)."""
     images = request.files.getlist('images')
     existing_count = product.images.count()
-    has_primary = product.images.filter_by(is_primary=True).count() > 0
     saved = 0
     failed = 0
+    new_image_ids = []
 
-    for i, img_file in enumerate(images):
+    for img_file in images:
         if not img_file or not img_file.filename:
             continue
         url = save_image(img_file, subfolder='products')
@@ -60,11 +84,27 @@ def _save_product_images(product):
         img = ProductImage(
             product_id=product.id,
             image_url=url,
-            is_primary=(not has_primary and saved == 0),
+            is_primary=False,
             sort_order=existing_count + saved,
         )
         db.session.add(img)
+        db.session.flush()
+        new_image_ids.append(img.id)
         saved += 1
+
+    primary_id = request.form.get('primary_image_id', type=int)
+    primary_new_index = request.form.get('primary_new_upload_index', type=int)
+
+    if primary_id and _set_primary_image(product, primary_id):
+        pass
+    elif (
+        primary_new_index is not None
+        and new_image_ids
+        and 0 <= primary_new_index < len(new_image_ids)
+    ):
+        _set_primary_image(product, new_image_ids[primary_new_index])
+    else:
+        _ensure_primary_image(product)
 
     return saved, failed
 
@@ -471,6 +511,10 @@ def edit_product(product_id):
             apply_age_groups_from_request(product, request.form)
 
             image_count, image_failed = _save_product_images(product)
+            primary_id = request.form.get('primary_image_id', type=int)
+            if primary_id:
+                _set_primary_image(product, primary_id)
+            _ensure_primary_image(product)
             variant_count, skipped_skus = _save_variants_from_request(product)
             db.session.commit()
 
@@ -551,13 +595,31 @@ def delete_variant(variant_id):
     return redirect(url_for('admin.edit_product', product_id=product_id))
 
 
+@admin_bp.route('/products/<int:product_id>/images/<int:image_id>/set-primary', methods=['POST'])
+@login_required
+@admin_required
+def set_product_primary_image(product_id, image_id):
+    product = Product.query.get_or_404(product_id)
+    if not _set_primary_image(product, image_id):
+        flash('Image not found.', 'danger')
+    else:
+        db.session.commit()
+        flash('Main product photo updated.', 'success')
+    return redirect(url_for('admin.edit_product', product_id=product_id))
+
+
 @admin_bp.route('/products/<int:product_id>/images/<int:image_id>/delete', methods=['POST'])
 @login_required
 @admin_required
 def delete_product_image(product_id, image_id):
     img = ProductImage.query.filter_by(id=image_id, product_id=product_id).first_or_404()
+    was_primary = img.is_primary
     delete_image(img.image_url)
     db.session.delete(img)
+    db.session.flush()
+    if was_primary:
+        product = Product.query.get_or_404(product_id)
+        _ensure_primary_image(product)
     db.session.commit()
     flash('Image deleted.', 'info')
     return redirect(url_for('admin.edit_product', product_id=product_id))
