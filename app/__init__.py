@@ -273,6 +273,19 @@ def create_app(config_name=None):
             return {'error': 'Too many requests. Please slow down.'}, 429
         return render_template('errors/429.html'), 429
 
+    @app.errorhandler(400)
+    def bad_request(error):
+        from flask import request, flash, redirect
+        description = str(getattr(error, 'description', '') or error)
+        if 'CSRF' in description or 'csrf' in description.lower():
+            if request.is_json:
+                return {'error': 'Session expired. Please refresh and try again.'}, 400
+            flash('Your session expired. Please try saving again.', 'warning')
+            return redirect(request.referrer or request.path or '/')
+        if request.is_json:
+            return {'error': description or 'Bad request'}, 400
+        return description or 'Bad Request', 400
+
     # Load user callback
     from app.models.user import User
 

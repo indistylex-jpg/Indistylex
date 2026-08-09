@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db, limiter
 from app.forms.auth_forms import LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm
@@ -35,6 +35,7 @@ def login():
             db.session.commit()
 
             login_user(user, remember=form.remember_me.data)
+            session.permanent = True
 
             # Merge guest cart with user cart
             _merge_guest_cart(user)
@@ -77,6 +78,7 @@ def register():
 
         send_welcome_email(user)
         login_user(user)
+        session.permanent = True
         _merge_guest_cart(user)
 
         flash('Account created successfully! Welcome to Indistylex.', 'success')

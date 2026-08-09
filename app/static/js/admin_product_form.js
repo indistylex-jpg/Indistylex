@@ -121,6 +121,22 @@
     });
   });
 
+  /* Ensure CSRF token is present on multipart save (meta → hidden field). */
+  const productForm = document.getElementById('product-form');
+  productForm?.addEventListener('submit', function () {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const token = meta ? meta.content : '';
+    if (!token) return;
+    let field = productForm.querySelector('input[name="csrf_token"]');
+    if (!field) {
+      field = document.createElement('input');
+      field.type = 'hidden';
+      field.name = 'csrf_token';
+      productForm.prepend(field);
+    }
+    field.value = token;
+  });
+
   updateGenderHint();
   updateListingPreview();
 })();

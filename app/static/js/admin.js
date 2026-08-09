@@ -67,6 +67,22 @@ document.addEventListener('DOMContentLoaded', function () {
     return el ? el.content : '';
   }
 
+  /* Keep CSRF on all admin POST forms (multipart saves especially). */
+  document.querySelectorAll('form[method="post"], form[method="POST"]').forEach(function (form) {
+    form.addEventListener('submit', function () {
+      var token = getCsrf();
+      if (!token) return;
+      var field = form.querySelector('input[name="csrf_token"]');
+      if (!field) {
+        field = document.createElement('input');
+        field.type = 'hidden';
+        field.name = 'csrf_token';
+        form.insertBefore(field, form.firstChild);
+      }
+      if (!field.value) field.value = token;
+    });
+  });
+
   /* --- Order status update --- */
   document.querySelectorAll('.order-status-select').forEach(function (select) {
     select.addEventListener('change', function () {

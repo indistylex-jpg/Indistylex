@@ -30,10 +30,15 @@ class Config:
     FACEBOOK_CLIENT_ID = os.environ.get('FACEBOOK_APP_ID', '')
     FACEBOOK_CLIENT_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '')
 
-    # File Uploads
+    # File Uploads (default 20 MB — product forms often attach several photos)
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', 'static/uploads')
-    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 5 * 1024 * 1024))
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 20 * 1024 * 1024))
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+
+    # CSRF — token check is enough behind Nginx/ProxyFix; strict referrer
+    # checks falsely fail on privacy browsers / www↔apex redirects.
+    WTF_CSRF_TIME_LIMIT = int(os.environ.get('WTF_CSRF_TIME_LIMIT', 7200))
+    WTF_CSRF_SSL_STRICT = os.environ.get('WTF_CSRF_SSL_STRICT', 'False').lower() == 'true'
 
     # Redis / Caching
     REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
@@ -65,15 +70,15 @@ class Config:
     SOCIAL_PINTEREST = os.environ.get('SOCIAL_PINTEREST', 'https://www.pinterest.com/indistylex')
     SOCIAL_WHATSAPP = os.environ.get('SOCIAL_WHATSAPP', 'https://wa.me/916394142176')
 
-    # Session security
+    # Session security (permanent sessions refreshed each request)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    PERMANENT_SESSION_LIFETIME = 1800  # 30 minutes
+    PERMANENT_SESSION_LIFETIME = int(os.environ.get('PERMANENT_SESSION_LIFETIME', 28800))  # 8 hours
     SESSION_COOKIE_NAME = '__indistylex_sid'
     SESSION_REFRESH_EACH_REQUEST = True
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_DURATION = 604800  # 7 days
-    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = os.environ.get('REMEMBER_COOKIE_SECURE', 'False').lower() == 'true'
     REMEMBER_COOKIE_SAMESITE = 'Lax'
 
     # Password hashing
@@ -98,6 +103,7 @@ class DevelopmentConfig(Config):
     )
     CACHE_TYPE = os.environ.get('CACHE_TYPE', 'SimpleCache')
     SESSION_COOKIE_SECURE = False
+    REMEMBER_COOKIE_SECURE = False
     BCRYPT_LOG_ROUNDS = 12
 
 
@@ -106,6 +112,10 @@ class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+    REMEMBER_COOKIE_SECURE = os.environ.get(
+        'REMEMBER_COOKIE_SECURE',
+        os.environ.get('SESSION_COOKIE_SECURE', 'False'),
+    ).lower() == 'true'
     PREFERRED_URL_SCHEME = os.environ.get('PREFERRED_URL_SCHEME', 'http')
     SESSION_COOKIE_SAMESITE = 'Lax'
 

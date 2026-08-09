@@ -125,6 +125,7 @@ def _handle_oauth_login(provider, oauth_id, email, first_name, last_name):
         return redirect(url_for('auth.login'))
 
     login_user(user, remember=True)
+    session.permanent = True
 
     # Merge guest cart
     _merge_guest_cart(user)

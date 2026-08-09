@@ -59,6 +59,8 @@
 
 <form method="POST" enctype="multipart/form-data" novalidate id="product-form">
   {{ form.hidden_tag() }}
+  {# Explicit token keeps multipart saves working if hidden_tag is dropped by the browser #}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <!-- 1. Basics -->
   <div class="product-form-section">
@@ -274,5 +276,5 @@
 
 {% block extra_js %}
 <script>window.PRODUCT_CATEGORY_META = {{ category_meta_json | safe }};</script>
-<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=2"></script>
 {% endblock %}
