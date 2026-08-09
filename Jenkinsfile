@@ -37,7 +37,7 @@ pipeline {
     environment {
         APP_DIR = '/var/www/html/indistylex'
         PRODUCTION_HOST = '138.201.50.228'
-        PRODUCTION_USER = 'root'
+        PRODUCTION_USER = 'indistylex-deploy'
         SSH_CREDENTIAL = 'indistylex-server-ssh'
     }
 
@@ -118,9 +118,9 @@ Run: cd jenkins && ./setup-server-ssh-credential.sh
                     if (params.DEPLOY_TARGET == 'remote') {
                         sshagent(credentials: [env.SSH_CREDENTIAL]) {
                             sh """
-                                ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 \\
+                                ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes \\
                                     ${PRODUCTION_USER}@${PRODUCTION_HOST} \\
-                                    '${deployEnv} bash -s' < jenkins/deploy.sh
+                                    'cd ${APP_DIR} && ${deployEnv} bash jenkins/deploy.sh'
                             """
                         }
                     } else {
@@ -162,9 +162,9 @@ Run: cd jenkins && ./setup-server-ssh-credential.sh
                         if (params.DEPLOY_TARGET == 'remote') {
                             sshagent(credentials: [env.SSH_CREDENTIAL]) {
                                 sh """
-                                    ssh -o StrictHostKeyChecking=accept-new \\
+                                    ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes \\
                                         ${PRODUCTION_USER}@${PRODUCTION_HOST} \\
-                                        '${deployEnv} bash -s' < jenkins/deploy.sh
+                                        'cd ${APP_DIR} && ${deployEnv} bash jenkins/deploy.sh'
                                 """
                             }
                         } else {

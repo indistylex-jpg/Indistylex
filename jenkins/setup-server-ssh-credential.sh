@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 JENKINS_HOME="${JENKINS_HOME:-${SCRIPT_DIR}/.jenkins_home}"
 KEY_PATH="${1:-${HOME}/.ssh/id_ed25519}"
 CREDENTIAL_ID="${SERVER_SSH_CREDENTIAL_ID:-indistylex-server-ssh}"
-SERVER_USER="${PRODUCTION_USER:-root}"
+SERVER_USER="${PRODUCTION_USER:-indistylex-deploy}"
 SERVER_HOST="${PRODUCTION_HOST:-138.201.50.228}"
 
 if [[ ! -f "${KEY_PATH}" ]]; then

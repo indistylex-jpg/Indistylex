@@ -61,15 +61,21 @@ fi
 
 log "Configuring sudoers for passwordless deploy…"
 cat > /etc/sudoers.d/indistylex-deploy <<SUDOERS
-# Indistylex — allow deploy + service restart without password
-root ALL=(ALL) NOPASSWD: ${APP_DIR}/jenkins/deploy.sh
-root ALL=(ALL) NOPASSWD: ${APP_DIR}/jenkins/health-check.sh
-root ALL=(ALL) NOPASSWD: /bin/systemctl restart indistylex, /bin/systemctl status indistylex, /bin/systemctl is-active indistylex
-jenkins ALL=(ALL) NOPASSWD: ${APP_DIR}/jenkins/deploy.sh
-jenkins ALL=(ALL) NOPASSWD: ${APP_DIR}/jenkins/health-check.sh
-jenkins ALL=(ALL) NOPASSWD: /bin/systemctl restart indistylex, /bin/systemctl status indistylex, /bin/systemctl is-active indistylex
+# Indistylex deploy user — Jenkins SSH (minimal sudo)
+indistylex-deploy ALL=(root) NOPASSWD: /bin/systemctl restart indistylex
+indistylex-deploy ALL=(root) NOPASSWD: /bin/systemctl status indistylex
+indistylex-deploy ALL=(root) NOPASSWD: /bin/systemctl is-active indistylex
+indistylex-deploy ALL=(root) NOPASSWD: /bin/chown -R www-data\:www-data ${APP_DIR}
+indistylex-deploy ALL=(root) NOPASSWD: /bin/chmod 600 ${APP_DIR}/.env
 SUDOERS
 chmod 440 /etc/sudoers.d/indistylex-deploy
+visudo -cf /etc/sudoers.d/indistylex-deploy
+
+log "Ensuring deploy user exists and can write to app dir…"
+id indistylex-deploy >/dev/null 2>&1 || useradd -m -s /bin/bash indistylex-deploy
+usermod -aG www-data indistylex-deploy
+chmod -R g+rwX "${APP_DIR}"
+find "${APP_DIR}" -type d -exec chmod g+s {} \;
 
 log "Fixing app ownership…"
 chown -R www-data:www-data "${APP_DIR}"
