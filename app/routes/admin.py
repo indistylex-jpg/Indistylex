@@ -171,14 +171,22 @@ def dashboard():
                 'qty_sold': qty,
             })
         else:
-            top_products.append({'name': name, 'price': 0, 'image': None, 'qty_sold': qty})
+            top_products.append({
+                'name': name,
+                'price': 0,
+                'unit_profit': None,
+                'image': None,
+                'qty_sold': qty,
+            })
 
     if not top_products:
         for p in Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).limit(5).all():
             img = p.images.first()
+            unit_profit = p.unit_profit
             top_products.append({
                 'name': p.name,
                 'price': float(p.price),
+                'unit_profit': float(unit_profit) if unit_profit is not None else None,
                 'image': img.image_url if img else None,
                 'qty_sold': 0,
             })

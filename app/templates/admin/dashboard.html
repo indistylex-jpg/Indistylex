@@ -312,7 +312,7 @@
             <div class="product-details">
               <span class="product-name">{{ item.name }}</span>
               <span class="product-price">₹{{ "{:,.0f}".format(item.price) }}</span>
-              {% if item.unit_profit is not none %}
+              {% if item.unit_profit is defined and item.unit_profit is not none %}
               <span class="product-meta text-success small">+₹{{ "{:,.0f}".format(item.unit_profit) }}/unit profit</span>
               {% endif %}
             </div>
