@@ -115,7 +115,11 @@ run_migrations() {
   if [[ -n "${DATABASE_URL:-}" && "${DATABASE_URL}" == mysql* ]]; then
     DB_PASS="${DB_PASSWORD:-${MYSQL_PASSWORD:-}}"
     if [[ -n "${DB_PASS}" ]]; then
-      for sql in scripts/alter_product_age_groups_v2.sql scripts/create_expenses_table.sql; do
+      for sql in \
+        scripts/alter_product_age_groups_v2.sql \
+        scripts/create_expenses_table.sql \
+        scripts/alter_product_cost_price.sql \
+        scripts/alter_order_item_cost_price.sql; do
         if [[ -f "${APP_DIR}/${sql}" ]]; then
           log "Applying ${sql} (ignore errors if already applied)…"
           mysql -u "${DB_USER:-indistylex}" -p"${DB_PASS}" indistylex < "${APP_DIR}/${sql}" || true
