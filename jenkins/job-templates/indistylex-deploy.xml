@@ -1,0 +1,79 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+  <actions/>
+  <description>Indistylex CI/CD — development (tests), staging (develop), production (main) with rollback.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ENVIRONMENT</name>
+          <description>development = tests only | staging = develop branch | production = main branch</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array"><string>development</string></a>
+            <a class="string-array"><string>staging</string></a>
+            <a class="string-array"><string>production</string></a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ROLLOUT_ACTION</name>
+          <description>deploy | rollback | dry-run | restart-only | health-check</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array"><string>deploy</string></a>
+            <a class="string-array"><string>rollback</string></a>
+            <a class="string-array"><string>dry-run</string></a>
+            <a class="string-array"><string>restart-only</string></a>
+            <a class="string-array"><string>health-check</string></a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>DEPLOY_TARGET</name>
+          <description>remote = SSH from laptop | local = on-server Jenkins</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array"><string>remote</string></a>
+            <a class="string-array"><string>local</string></a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>RUN_MIGRATIONS</name>
+          <description>Run optional SQL migrations</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>AUTO_ROLLBACK_ON_FAILURE</name>
+          <description>Auto rollback if health check fails after deploy</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REMOTE</name>
+          <description>Git remote on server</description>
+          <defaultValue>shivam74826</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>git@github.com:shivam74826/Indistylex.git</url>
+          <credentialsId>indistylex-github-ssh</credentialsId>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/develop</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="empty-list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>Jenkinsfile</scriptPath>
+    <lightweight>true</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

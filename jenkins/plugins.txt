@@ -3,6 +3,7 @@ workflow-aggregator:latest
 workflow-job:latest
 pipeline-model-definition:latest
 git:latest
+ssh-credentials:latest
 credentials-binding:latest
 ssh-agent:latest
 timestamper:latest
