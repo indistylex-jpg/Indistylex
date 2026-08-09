@@ -12,9 +12,9 @@ apt-get install -y openjdk-21-jre-headless curl git
 
 echo "==> Adding Jenkins apt repository…"
 install -d -m 0755 /usr/share/keyrings
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
-  | gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/" \
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key \
+  -o /usr/share/keyrings/jenkins-keyring.asc
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" \
   > /etc/apt/sources.list.d/jenkins.list
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
