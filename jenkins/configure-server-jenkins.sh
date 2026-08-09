@@ -153,7 +153,7 @@ HOW TO DEPLOY (every time after git push):
        ENVIRONMENT     = staging
        ROLLOUT_ACTION  = deploy
        DEPLOY_TARGET   = local
-       RUN_MIGRATIONS  = ✓ (checked)
+       RUN_MIGRATIONS  = true (checked)
 
 First login: get admin password with:
   sudo cat ${JENKINS_HOME}/secrets/initialAdminPassword
