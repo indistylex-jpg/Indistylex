@@ -153,6 +153,25 @@ def _apply_product_age_groups(product):
     apply_age_groups_from_request(product, request.form)
 
 
+def _flash_product_form_errors(form, validation_errors=None):
+    """Flash WTForms and custom validation messages (deduplicated)."""
+    seen = set()
+    for msg in validation_errors or []:
+        if msg and msg not in seen:
+            flash(msg, 'danger')
+            seen.add(msg)
+    for field_name, field_errors in form.errors.items():
+        try:
+            label = form[field_name].label.text
+        except KeyError:
+            label = field_name.replace('_', ' ').title()
+        for err in field_errors:
+            msg = f'{label}: {err}'
+            if msg not in seen:
+                flash(msg, 'danger')
+                seen.add(msg)
+
+
 def _delete_product_record(product):
     """Delete a product and clean up related records."""
     name = product.name
@@ -452,33 +471,38 @@ def add_product():
         request.form if request.method == 'POST' else None,
     )
 
-    if form.validate_on_submit():
-        validation_errors = validate_product_submission(
-            form, request.form, request.files, is_new=True,
-        )
-        if not validation_errors:
-            product = Product()
-            apply_product_fields_from_form(product, form, is_new=True)
-            db.session.add(product)
-            db.session.flush()
-            apply_age_groups_from_request(product, request.form)
-
-            image_count, image_failed = _save_product_images(product)
-            variant_count, skipped_skus = _save_variants_from_request(product)
-            db.session.commit()
-
-            places = listing_preview(product)
-            flash(
-                f'Product "{product.name}" created. Visible on: {"; ".join(places)}.',
-                'success',
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            validation_errors = validate_product_submission(
+                form, request.form, request.files, is_new=True,
             )
-            if image_failed:
-                flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
-            for sku in skipped_skus:
-                flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
-            return redirect(url_for('admin.products'))
-        for msg in validation_errors:
-            flash(msg, 'danger')
+            if not validation_errors:
+                product = Product()
+                apply_product_fields_from_form(product, form, is_new=True)
+                db.session.add(product)
+                db.session.flush()
+                apply_age_groups_from_request(product, request.form)
+
+                image_count, image_failed = _save_product_images(product)
+                variant_count, skipped_skus = _save_variants_from_request(product)
+                db.session.commit()
+
+                places = listing_preview(product)
+                flash(
+                    f'Product "{product.name}" saved successfully. Visible on: {"; ".join(places)}.',
+                    'success',
+                )
+                if image_failed:
+                    flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+                for sku in skipped_skus:
+                    flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+                return redirect(url_for('admin.products'))
+            _flash_product_form_errors(form, validation_errors)
+        else:
+            validation_errors = validate_product_submission(
+                form, request.form, request.files, is_new=True,
+            )
+            _flash_product_form_errors(form, validation_errors)
 
     return render_template(
         'admin/product_form.html',
@@ -509,34 +533,39 @@ def edit_product(product_id):
         product=product,
     )
 
-    if form.validate_on_submit():
-        validation_errors = validate_product_submission(
-            form, request.form, request.files, is_new=False, product=product,
-        )
-        if not validation_errors:
-            apply_product_fields_from_form(product, form, is_new=False)
-            apply_age_groups_from_request(product, request.form)
-
-            image_count, image_failed = _save_product_images(product)
-            primary_id = request.form.get('primary_image_id', type=int)
-            if primary_id:
-                _set_primary_image(product, primary_id)
-            _ensure_primary_image(product)
-            variant_count, skipped_skus = _save_variants_from_request(product)
-            db.session.commit()
-
-            places = listing_preview(product)
-            flash(
-                f'Product "{product.name}" updated. Visible on: {"; ".join(places)}.',
-                'success',
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            validation_errors = validate_product_submission(
+                form, request.form, request.files, is_new=False, product=product,
             )
-            if image_failed:
-                flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
-            for sku in skipped_skus:
-                flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
-            return redirect(url_for('admin.products'))
-        for msg in validation_errors:
-            flash(msg, 'danger')
+            if not validation_errors:
+                apply_product_fields_from_form(product, form, is_new=False)
+                apply_age_groups_from_request(product, request.form)
+
+                image_count, image_failed = _save_product_images(product)
+                primary_id = request.form.get('primary_image_id', type=int)
+                if primary_id:
+                    _set_primary_image(product, primary_id)
+                _ensure_primary_image(product)
+                variant_count, skipped_skus = _save_variants_from_request(product)
+                db.session.commit()
+
+                places = listing_preview(product)
+                flash(
+                    f'Product "{product.name}" saved successfully. Visible on: {"; ".join(places)}.',
+                    'success',
+                )
+                if image_failed:
+                    flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+                for sku in skipped_skus:
+                    flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+                return redirect(url_for('admin.edit_product', product_id=product.id))
+            _flash_product_form_errors(form, validation_errors)
+        else:
+            validation_errors = validate_product_submission(
+                form, request.form, request.files, is_new=False, product=product,
+            )
+            _flash_product_form_errors(form, validation_errors)
 
     variants = product.variants.all()
     images = product.images.order_by(ProductImage.sort_order).all()
@@ -746,7 +775,7 @@ def add_coupon():
     if request.method == 'POST':
         from datetime import datetime
         discount_type = request.form['discount_type']
-        if discount_type not in ('percentage', 'fixed'):
+        if discount_type not in ('percentage', 'flat'):
             flash('Invalid discount type.', 'danger')
             return redirect(url_for('admin.add_coupon'))
         coupon = Coupon(
@@ -776,7 +805,7 @@ def edit_coupon(coupon_id):
     if request.method == 'POST':
         from datetime import datetime
         discount_type = request.form['discount_type']
-        if discount_type not in ('percentage', 'fixed'):
+        if discount_type not in ('percentage', 'flat'):
             flash('Invalid discount type.', 'danger')
             return redirect(url_for('admin.edit_coupon', coupon_id=coupon_id))
         coupon.code = request.form['code'].strip().upper()

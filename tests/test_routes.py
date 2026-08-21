@@ -359,6 +359,56 @@ class TestAdminRoutes:
         assert product.variants.count() == 1
         assert product.variants.first().sku == 'FULL-ROM-PINK'
 
+    def test_admin_edit_product_save(self, client, admin_user, sample_product, sample_category):
+        login_admin(client)
+        sample_product.set_age_groups_list(['3-4y', '4-5y'])
+        db.session.commit()
+
+        resp = client.post(
+            f'/admin/products/edit/{sample_product.id}',
+            data={
+                'name': 'Updated Romper Name',
+                'category_id': sample_category.id,
+                'price': '749.00',
+                'compare_at_price': '999.00',
+                'gender': 'kids',
+                'age_groups': ['3-4y', '4-5y'],
+                'is_active': 'y',
+            },
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b'saved successfully' in resp.data.lower()
+        db.session.refresh(sample_product)
+        assert sample_product.name == 'Updated Romper Name'
+        assert Decimal(str(sample_product.price)) == Decimal('749.00')
+
+    def test_admin_edit_product_shows_validation_errors(self, client, admin_user, sample_product, sample_category):
+        login_admin(client)
+        resp = client.post(
+            f'/admin/products/edit/{sample_product.id}',
+            data={
+                'name': '',
+                'category_id': sample_category.id,
+                'price': '749.00',
+                'gender': 'kids',
+                'is_active': 'y',
+            },
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b'Could not save' in resp.data or b'required' in resp.data.lower()
+
+    def test_admin_edit_product_form_has_no_nested_forms(self, client, admin_user, sample_product):
+        login_admin(client)
+        resp = client.get(f'/admin/products/edit/{sample_product.id}')
+        assert resp.status_code == 200
+        html = resp.data.decode('utf-8')
+        product_form_start = html.find('id="product-form"')
+        product_form_end = html.find('</form>', product_form_start)
+        product_form_chunk = html[product_form_start:product_form_end]
+        assert product_form_chunk.count('<form') == 1
+
     def test_admin_bulk_delete_products(self, client, admin_user, sample_product, sample_category):
         login_admin(client)
         extra = Product(

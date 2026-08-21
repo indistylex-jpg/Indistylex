@@ -175,7 +175,95 @@
 
   /* Ensure CSRF token is present on multipart save (meta → hidden field). */
   const productForm = document.getElementById('product-form');
-  productForm?.addEventListener('submit', function () {
+  const saveErrors = document.getElementById('product-form-save-errors');
+  const isNewProduct = productForm?.dataset.isNew === 'true';
+
+  function showSaveErrors(messages) {
+    if (!saveErrors) return;
+    if (!messages.length) {
+      saveErrors.classList.add('d-none');
+      saveErrors.innerHTML = '';
+      return;
+    }
+    saveErrors.classList.remove('d-none');
+    saveErrors.innerHTML =
+      '<h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Please fix the following before saving</h6>' +
+      '<ul class="mb-0 ps-3">' +
+      messages.map(function (msg) { return '<li>' + msg + '</li>'; }).join('') +
+      '</ul>';
+    saveErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function fieldValue(name) {
+    const el = productForm?.querySelector('[name="' + name + '"]');
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  function validateProductForm() {
+    const errors = [];
+    if (!fieldValue('name')) {
+      errors.push('Product name is required.');
+    }
+    if (!fieldValue('category_id')) {
+      errors.push('Category is required.');
+    }
+    const price = parseFloat(fieldValue('price'));
+    if (!fieldValue('price') || Number.isNaN(price) || price <= 0) {
+      errors.push('Selling price is required and must be greater than zero.');
+    }
+    const compareAt = fieldValue('compare_at_price');
+    if (compareAt) {
+      const compareVal = parseFloat(compareAt);
+      if (!Number.isNaN(compareVal) && !Number.isNaN(price) && compareVal <= price) {
+        errors.push('Compare-at price must be higher than selling price.');
+      }
+    }
+    const agesChecked = productForm.querySelectorAll('input[name="age_groups"]:checked').length;
+    if (!agesChecked) {
+      errors.push('Select at least one suitable age band.');
+    }
+    const isLive = document.querySelector('[data-visibility-field="is_active"]')?.checked;
+    if (isLive && !fieldValue('gender')) {
+      errors.push('Gender is required for products that are live on the store.');
+    }
+    const variantRows = productForm.querySelectorAll('#variant-rows .variant-row');
+    let completeVariants = 0;
+    let partialVariants = 0;
+    variantRows.forEach(function (row) {
+      const size = (row.querySelector('[name="variant_size[]"]')?.value || '').trim();
+      const color = (row.querySelector('[name="variant_color[]"]')?.value || '').trim();
+      const sku = (row.querySelector('[name="variant_sku[]"]')?.value || '').trim();
+      if (size && color && sku) {
+        completeVariants += 1;
+      } else if (size || color || sku) {
+        partialVariants += 1;
+      }
+    });
+    if (partialVariants) {
+      errors.push('Each variant row needs Size, Color, and SKU — or leave the row blank.');
+    }
+    if (isNewProduct && !completeVariants) {
+      errors.push('Add at least one complete variant (size, color, SKU).');
+    }
+    if (isNewProduct) {
+      const imageInputEl = document.getElementById('product-images-input');
+      const hasNewImages = imageInputEl && imageInputEl.files && imageInputEl.files.length > 0;
+      if (!hasNewImages) {
+        errors.push('Upload at least one product photo.');
+      }
+    }
+    return errors;
+  }
+
+  productForm?.addEventListener('submit', function (e) {
+    const validationErrors = validateProductForm();
+    if (validationErrors.length) {
+      e.preventDefault();
+      showSaveErrors(validationErrors);
+      return;
+    }
+    showSaveErrors([]);
+
     const meta = document.querySelector('meta[name="csrf-token"]');
     const token = meta ? meta.content : '';
     if (!token) return;
@@ -188,6 +276,11 @@
     }
     field.value = token;
   });
+
+  const serverErrors = document.getElementById('product-form-server-errors');
+  if (serverErrors) {
+    serverErrors.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   updateGenderHint();
   updateListingPreview();
