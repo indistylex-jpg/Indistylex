@@ -86,13 +86,14 @@ document.addEventListener('DOMContentLoaded', function () {
         method: 'POST',
         headers: { 'X-CSRFToken': getCsrf() }
       })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (data.success) {
-          location.reload();
-        } else {
-          showToast(data.message || 'Could not remove item', 'danger');
-        }
+      .then(function (res) {
+        return res.json().then(function (data) {
+          if (res.ok && data.success) {
+            location.reload();
+          } else {
+            showToast(data.message || 'Could not remove item', 'danger');
+          }
+        });
       })
       .catch(function () {
         showToast('Something went wrong', 'danger');

@@ -11,6 +11,20 @@ from app.utils.helpers import generate_session_id
 cart_bp = Blueprint('cart', __name__)
 
 
+def _wants_json_response():
+    """True for fetch/XHR calls from cart.js (expects JSON, not redirect)."""
+    if request.is_json:
+        return True
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return True
+    if request.headers.get('X-CSRFToken'):
+        return True
+    best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    return best == 'application/json' and (
+        request.accept_mimetypes[best] > request.accept_mimetypes['text/html']
+    )
+
+
 def _get_or_create_cart():
     """Get current user's cart or create one."""
     if current_user.is_authenticated:
@@ -96,9 +110,25 @@ def add_to_cart():
     return redirect(url_for('cart.view'))
 
 
+def _apply_cart_quantity_change(cart, cart_item, quantity):
+    """Update or remove a cart line. Returns (success, message)."""
+    if quantity <= 0:
+        db.session.delete(cart_item)
+        db.session.commit()
+        return True, 'Item removed from cart.'
+
+    in_stock, msg = check_stock(cart_item.variant_id, quantity)
+    if not in_stock:
+        return False, msg
+
+    cart_item.quantity = quantity
+    db.session.commit()
+    return True, 'Cart updated.'
+
+
 @cart_bp.route('/update', methods=['POST'])
 def update_cart():
-    """Update cart item quantity."""
+    """Update cart item quantity (HTML form)."""
     item_id = request.form.get('item_id', type=int)
     quantity = request.form.get('quantity', type=int)
 
@@ -113,17 +143,42 @@ def update_cart():
         flash('Item not found in cart.', 'danger')
         return redirect(url_for('cart.view'))
 
-    if quantity <= 0:
-        db.session.delete(cart_item)
-        flash('Item removed from cart.', 'info')
+    ok, msg = _apply_cart_quantity_change(cart, cart_item, quantity)
+    if ok:
+        flash(msg, 'info' if quantity <= 0 else 'success')
     else:
-        in_stock, msg = check_stock(cart_item.variant_id, quantity)
-        if not in_stock:
-            flash(msg, 'warning')
-            return redirect(url_for('cart.view'))
-        cart_item.quantity = quantity
+        flash(msg, 'warning')
+    return redirect(url_for('cart.view'))
 
-    db.session.commit()
+
+@cart_bp.route('/update/<int:item_id>', methods=['POST'])
+def update_cart_item(item_id):
+    """Update cart item quantity (AJAX from cart page)."""
+    data = request.get_json(silent=True) or {}
+    quantity = data.get('quantity', request.form.get('quantity', type=int))
+
+    if quantity is None:
+        if _wants_json_response():
+            return jsonify({'success': False, 'message': 'Invalid request.'}), 400
+        flash('Invalid request.', 'danger')
+        return redirect(url_for('cart.view'))
+
+    cart = _get_or_create_cart()
+    cart_item = CartItem.query.filter_by(id=item_id, cart_id=cart.id).first()
+
+    if not cart_item:
+        if _wants_json_response():
+            return jsonify({'success': False, 'message': 'Item not found in cart.'}), 404
+        flash('Item not found in cart.', 'danger')
+        return redirect(url_for('cart.view'))
+
+    ok, msg = _apply_cart_quantity_change(cart, cart_item, quantity)
+    if _wants_json_response():
+        if ok:
+            return jsonify({'success': True, 'message': msg, 'count': cart.item_count})
+        return jsonify({'success': False, 'message': msg}), 400
+
+    flash(msg, 'success' if ok else 'warning')
     return redirect(url_for('cart.view'))
 
 
@@ -133,11 +188,19 @@ def remove_from_cart(item_id):
     cart = _get_or_create_cart()
     cart_item = CartItem.query.filter_by(id=item_id, cart_id=cart.id).first()
 
-    if cart_item:
-        db.session.delete(cart_item)
-        db.session.commit()
-        flash('Item removed from cart.', 'info')
+    if not cart_item:
+        if _wants_json_response():
+            return jsonify({'success': False, 'message': 'Item not found in cart.'}), 404
+        flash('Item not found in cart.', 'danger')
+        return redirect(url_for('cart.view'))
 
+    db.session.delete(cart_item)
+    db.session.commit()
+
+    if _wants_json_response():
+        return jsonify({'success': True, 'message': 'Item removed from cart.', 'count': cart.item_count})
+
+    flash('Item removed from cart.', 'info')
     return redirect(url_for('cart.view'))
 
 

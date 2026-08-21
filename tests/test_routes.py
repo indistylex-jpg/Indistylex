@@ -232,6 +232,30 @@ class TestCartRoutes:
         data = resp.get_json()
         assert 'count' in data
 
+    def test_remove_from_cart_ajax(self, client, sample_product, app):
+        variant = sample_product.variants.first()
+        client.post('/cart/add', data={'variant_id': variant.id, 'quantity': 1})
+
+        with client.session_transaction() as sess:
+            session_id = sess.get('session_id')
+
+        with app.app_context():
+            from app.models.cart import Cart, CartItem
+            cart = Cart.query.filter_by(session_id=session_id).first()
+            assert cart is not None
+            item = CartItem.query.filter_by(cart_id=cart.id).first()
+            assert item is not None
+            item_id = item.id
+
+        resp = client.post(
+            f'/cart/remove/{item_id}',
+            headers={'X-CSRFToken': 'test', 'X-Requested-With': 'XMLHttpRequest'},
+        )
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['success'] is True
+        assert data['count'] == 0
+
 
 # ────────────────────────── User Account Routes ──────────────────────────
 
