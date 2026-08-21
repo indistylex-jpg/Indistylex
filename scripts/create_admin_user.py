@@ -27,7 +27,7 @@ def _generate_password(length=16):
 
 def main():
     parser = argparse.ArgumentParser(description='Create or promote an admin user')
-    parser.add_argument('--email', required=True, help='Login email (e.g. satyam@indistylex.in)')
+    parser.add_argument('--email', required=True, help='Login email (e.g. satyam@indistylex.com)')
     parser.add_argument('--first-name', default='Admin')
     parser.add_argument('--last-name', default='User')
     parser.add_argument(

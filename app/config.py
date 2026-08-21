@@ -15,7 +15,7 @@ class Config:
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@indistylex.in')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@indistylex.com')
 
     # Razorpay
     RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
@@ -60,12 +60,12 @@ class Config:
     CURRENCY_SYMBOL = '₹'
 
     # Admin
-    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@indistylex.in')
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@indistylex.com')
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-this-password')
 
     # Social profiles
     SOCIAL_FACEBOOK = os.environ.get('SOCIAL_FACEBOOK', 'https://www.facebook.com/indistylex')
-    SOCIAL_INSTAGRAM = os.environ.get('SOCIAL_INSTAGRAM', 'https://www.instagram.com/indistylex')
+    SOCIAL_INSTAGRAM = os.environ.get('SOCIAL_INSTAGRAM', 'https://www.instagram.com/indistylex_clothing')
     SOCIAL_TWITTER = os.environ.get('SOCIAL_TWITTER', 'https://twitter.com/indistylex')
     SOCIAL_PINTEREST = os.environ.get('SOCIAL_PINTEREST', 'https://www.pinterest.com/indistylex')
     SOCIAL_WHATSAPP = os.environ.get('SOCIAL_WHATSAPP', 'https://wa.me/916394142176')

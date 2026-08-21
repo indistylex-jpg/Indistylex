@@ -86,7 +86,7 @@ def facebook_callback():
     email = (user_info.get('email') or '').strip().lower()
     if not email:
         # Meta blocks email scope until added under Permissions and features.
-        email = f'fb_{oauth_id}@users.indistylex.in'
+        email = f'fb_{oauth_id}@users.indistylex.com'
 
     first_name = user_info.get('first_name') or ''
     last_name = user_info.get('last_name') or ''

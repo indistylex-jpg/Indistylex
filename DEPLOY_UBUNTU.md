@@ -88,7 +88,7 @@ FACEBOOK_APP_ID=
 FACEBOOK_APP_SECRET=
 
 # Admin
-ADMIN_EMAIL=admin@indistylex.in
+ADMIN_EMAIL=admin@indistylex.com
 ADMIN_PASSWORD=YourAdminPassword!
 
 # Security
@@ -194,7 +194,7 @@ server {
     listen 80;
     server_name your-domain.com www.your-domain.com;
 
-    client_max_body_size 5M;
+    client_max_body_size 50M;
 
     # Serve static files directly
     location /static/ {

@@ -72,7 +72,7 @@ Hi [Name]! 👋
 
 I love your content, especially [specific post/reel you liked]. Your little one is adorable! 🥰
 
-I'm the founder of Indistylex — we make premium kids' clothing (0-12 years) that's comfy, stylish, and affordable.
+I'm the founder of Indistylex — we make premium kids' clothing (0-18 years) that's comfy, stylish, and affordable.
 
 Would you be interested in a collaboration? I'd love to send some outfits for [kid's name] — no strings attached!
 
@@ -87,7 +87,7 @@ Amazing! So happy to connect! 🎉
 
 Here's what I had in mind:
 📦 I'll send 2-3 outfits for [kid's name] (you choose styles!)
-📸 If you love them, share 1 post + stories tagging @indistylex
+📸 If you love them, share 1 post + stories tagging @indistylex_clothing
 🎁 Your followers get 10% off with code [THEIR_NAME]10
 
 No pressure at all — if the outfits aren't the right fit (literally!), no worries.
@@ -129,7 +129,7 @@ Would you be open to discussing this further?
 Best regards,
 [Your Name]
 Founder, Indistylex
-indistylex.com | @indistylex
+indistylex.com | @indistylex_clothing
 ```
 
 ---
@@ -139,7 +139,7 @@ indistylex.com | @indistylex
 ```
 📋 INDISTYLEX COLLABORATION BRIEF
 
-Brand: Indistylex (@indistylex)
+Brand: Indistylex (@indistylex_clothing)
 Website: indistylex.com
 Products: [List items being sent]
 
@@ -156,7 +156,7 @@ DELIVERABLES:
 □ 1 Instagram Reel (15-30 seconds)
 □ 1 Feed Post (carousel or single)
 □ 2-3 Stories with product tag + link
-□ Tag @indistylex in all content
+□ Tag @indistylex_clothing in all content
 □ Use hashtag #Indistylex #IndistylexKids
 
 CREATIVE FREEDOM:

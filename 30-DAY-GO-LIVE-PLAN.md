@@ -24,7 +24,7 @@ This plan combines **technical production readiness**, **business setup**, and *
 | Products on site | Shop page live with catalog | ✅ Verified |
 | Old server | `78.46.145.88` (Hetzner) | ⚠️ Deprecated — update `DEPLOYMENT.md` |
 
-> **Note:** Website templates still use `support@indistylex.in` in many places. Standardize to `@indistylex.com` emails across site, emails, and JSON-LD.
+> **Note:** All public-facing emails use `@indistylex.com` (support, admin, noreply) across site templates, emails, and JSON-LD.
 
 ---
 
@@ -44,7 +44,7 @@ Checked against `digital-marketing-setup/` guides and live site on June 13, 2026
 | SEO robots.txt | `12-SEO-TECHNICAL.md` | Blocks admin/auth, lists sitemap |
 | Google Tag Manager | `05-TRACKING-SETUP.md` | `GTM-KH75QZKH` in page source |
 | Facebook Page | `02-META-BUSINESS.md` | `facebook.com/indistylex` exists |
-| Instagram profile | `03-INSTAGRAM-BUSINESS.md` | `instagram.com/indistylex` exists |
+| Instagram profile | `03-INSTAGRAM-BUSINESS.md` | `@indistylex_clothing` / instagram.com/indistylex_clothing |
 | Legal pages live | `09-LEGAL-COMPLIANCE.md` | Privacy, terms, FAQ, contact pages |
 | GST in schema | `09-LEGAL-COMPLIANCE.md` | `09GVUPP6447P1Z3` in JSON-LD |
 | Business address in schema | — | Prayagraj address in `base.html` |
@@ -80,7 +80,7 @@ These cannot be verified without login access. **Please confirm each in your acc
 | WhatsApp button on website | `07-WHATSAPP-SETUP.md` | No `wa.me` link found on live site | 🟠 High |
 | Newsletter → Brevo API | `06-EMAIL-SETUP.md` | Code: toast only, no backend | 🟠 High |
 | Contact form → email | — | Code: logs only, no email sent | 🟠 High |
-| Email addresses inconsistent | `08-DOMAIN-DNS.md` | Site shows `support@indistylex.in`, docs use `.com` | 🟠 High |
+| Email addresses | `08-DOMAIN-DNS.md` | Standardized to `@indistylex.com` on site + docs | ✅ Done |
 | `sameAs` social in JSON-LD | `12-SEO-TECHNICAL.md` | Empty array in schema — add IG/FB URLs | 🟡 Medium |
 | Missing OG image | `12-SEO-TECHNICAL.md` | `og-default.jpg` referenced but missing | 🟡 Medium |
 | Microsoft Clarity in HTML | `05-TRACKING-SETUP.md` | Not detected in page source | 🟡 Medium |
@@ -190,10 +190,10 @@ Redeploy after this fix, then verify with Meta Pixel Helper and GA4 Realtime.
 - [ ] **Newsletter:** connect footer form to Brevo API
 - [ ] **Footer social links:** update to real URLs:
   - `https://www.facebook.com/indistylex`
-  - `https://www.instagram.com/indistylex`
+  - `https://www.instagram.com/indistylex_clothing`
 - [ ] **WhatsApp floating button:** add `wa.me/91XXXXXXXXXX` (your business number)
 - [ ] **JSON-LD `sameAs`:** add Instagram + Facebook URLs
-- [ ] Replace all `support@indistylex.in` → `support@indistylex.com` in templates
+- [x] Standardize all public emails to `@indistylex.com` in templates
 - [ ] Add missing `og-default.jpg` and product placeholder image
 - [ ] Deploy and test all changes on live site
 

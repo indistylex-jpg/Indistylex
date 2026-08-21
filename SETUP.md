@@ -116,7 +116,7 @@ The app will be available at: **http://127.0.0.1:5000**
 
 | Field    | Value                  |
 |----------|------------------------|
-| Email    | `admin@indistylex.in`  |
+| Email    | `admin@indistylex.com`  |
 | Password | `change-this-password` |
 
 > The admin user is auto-created on first run using `ADMIN_EMAIL` and `ADMIN_PASSWORD` from your `.env` file (or the defaults above). You can change these by setting the environment variables before starting the app.

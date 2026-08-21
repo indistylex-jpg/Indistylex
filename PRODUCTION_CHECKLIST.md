@@ -193,7 +193,7 @@ FACEBOOK_APP_SECRET=<FACEBOOK_APP_SECRET>
 # FILE UPLOADS
 # ═══════════════════════════════════════════════════════
 UPLOAD_FOLDER=app/static/uploads
-MAX_CONTENT_LENGTH=5242880
+MAX_CONTENT_LENGTH=52428800
 
 # ═══════════════════════════════════════════════════════
 # ADMIN (first-time seed only — change password after login)
@@ -339,7 +339,7 @@ server {
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
     # Max upload size (match Flask MAX_CONTENT_LENGTH)
-    client_max_body_size 5M;
+    client_max_body_size 50M;
 
     # Static files — served directly by Nginx (fast)
     location /static/ {

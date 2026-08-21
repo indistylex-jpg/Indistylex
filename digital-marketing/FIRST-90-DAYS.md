@@ -1,7 +1,7 @@
 # First 90 Days — Action Checklist
 
 ## Week 1: Foundation
-- [ ] Create Instagram Business account (@indistylex)
+- [ ] Create Instagram Business account (@indistylex_clothing)
 - [ ] Create Facebook Business Page
 - [ ] Set up Google Analytics 4 on website
 - [ ] Set up Google Search Console

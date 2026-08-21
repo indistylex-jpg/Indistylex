@@ -13,7 +13,7 @@
 | **Google Analytics 4** | `G-QXW7GBCQNJ` | ✅ Installed | `app/templates/base.html` |
 | **Google Tag Manager** | `GTM-KH75QZKH` | ✅ Installed | `app/templates/base.html` |
 | Meta Pixel | _Add when created_ | ⏳ Pending | GTM or `base.html` |
-| Microsoft Clarity | _Add when created_ | ⏳ Pending | GTM or `base.html` |
+| Microsoft Clarity | Via **GTM** (Indistylex project) | ⏳ Click **Start setup** in Clarity UI | GTM publish required |
 | Google Search Console | _Add property URL_ | ⏳ Pending | DNS / HTML file |
 | Domain | `indistylex.com` | ✅ Live | Server `138.201.50.228` |
 
@@ -219,7 +219,7 @@ Then verify:
 | Tagline | Style That Speaks, Quality That Lasts |
 | GSTIN | 09GVUPP6447P1Z3 |
 | Phone | +91 63941 42176 |
-| Support email | support@indistylex.com (update from .in) |
+| Support email | support@indistylex.com |
 
 ---
 

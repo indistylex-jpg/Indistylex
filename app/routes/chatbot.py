@@ -9,7 +9,7 @@ chatbot_bp = Blueprint('chatbot', __name__)
 # Knowledge base for the chatbot
 STORE_INFO = {
     'name': 'Indistylex',
-    'email': 'support@indistylex.in',
+    'email': 'support@indistylex.com',
     'phone': '+91-6394142176',
     'hours': 'Mon–Sun, 10 AM – 9:30 PM IST',
     'shipping_time': '3–7 business days',

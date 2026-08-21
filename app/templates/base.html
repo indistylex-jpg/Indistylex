@@ -76,7 +76,7 @@
         },
         "taxID": "09GVUPP6447P1Z3",
         "telephone": "+916394142176",
-        "email": "support@indistylex.in",
+        "email": "support@indistylex.com",
         "sameAs": [
             "{{ config.SOCIAL_INSTAGRAM }}",
             "{{ config.SOCIAL_FACEBOOK }}"
@@ -100,8 +100,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
 
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css') }}?v=15" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/chatbot.css') }}?v=7" rel="stylesheet">
+    <link href="{{ static_v('css/style.css') }}" rel="stylesheet">
+    <link href="{{ static_v('css/chatbot.css') }}" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
 </head>

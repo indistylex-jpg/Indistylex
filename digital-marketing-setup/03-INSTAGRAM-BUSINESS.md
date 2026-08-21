@@ -12,8 +12,7 @@ Converts your Instagram to a Business account with analytics, shopping, ads, con
 ### 1.1 Download & Sign Up
 1. Download Instagram app (iOS/Android)
 2. Sign up with **business email**: `hello@indistylex.com`
-3. Choose username: `indistylex`
-   - If taken, try: `indistylex.in`, `indistylex_kids`, `shopindistylex`
+3. Username: **`indistylex_clothing`** (official account — do not use other handles)
 
 ### 1.2 Switch to Business Account
 1. Go to **Profile** → **Settings** ⚙️

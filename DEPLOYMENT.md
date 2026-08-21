@@ -77,14 +77,14 @@ RAZORPAY_KEY_ID=rzp_live_xxxxx
 RAZORPAY_KEY_SECRET=your_secret
 
 # Admin
-ADMIN_EMAIL=admin@indistylex.in
+ADMIN_EMAIL=admin@indistylex.com
 ADMIN_PASSWORD=IndistyAdmin2026!
 
 # Misc
 REDIS_URL=redis://localhost:6379/0
 CACHE_TYPE=RedisCache
 UPLOAD_FOLDER=app/static/uploads
-MAX_CONTENT_LENGTH=5242880
+MAX_CONTENT_LENGTH=524288000
 EOF
 
 chmod 600 /var/www/indistylex/.env
@@ -139,7 +139,7 @@ server {
     listen 80;
     server_name _;   # Replace _ with your domain
 
-    client_max_body_size 5M;
+    client_max_body_size 50M;
 
     location /static/ {
         alias /var/www/indistylex/app/static/;

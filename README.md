@@ -5,7 +5,7 @@
 **Trade Name:** Indistylex  
 **Proprietor:** Satyam Pandey  
 **GSTIN:** 09GVUPP6447P1Z3  
-**Domain:** indistylex.in  
+**Domain:** indistylex.com  
 
 ---
 
@@ -209,7 +209,7 @@ Configuration is managed via environment variables and `app/config.py`.
 | `REDIS_URL`              | Redis connection URL                 | redis://localhost:6379|
 | `GOOGLE_CLIENT_ID`       | Google OAuth client ID               | (optional)           |
 | `GOOGLE_CLIENT_SECRET`   | Google OAuth secret                  | (optional)           |
-| `ADMIN_EMAIL`            | Admin user email                     | admin@indistylex.in  |
+| `ADMIN_EMAIL`            | Admin user email                     | admin@indistylex.com  |
 | `ADMIN_PASSWORD`         | Admin user password                  | (set on first run)   |
 
 ---
@@ -385,7 +385,7 @@ Proprietary — Indistylex (Prop: Satyam Pandey). All rights reserved.
 
 ## Contact
 
-- **Email:** support@indistylex.in
+- **Email:** support@indistylex.com
 - **Phone:** +91 63941 42176
 - **Address:** MIG 79, Dhoomanganj, Preetam Nagar, Prayagraj, UP 211011
 # Silkensway_Clothing_final_flask

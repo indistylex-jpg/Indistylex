@@ -1,6 +1,17 @@
 # 10 — Analytics & Tracking Setup
 
-## Essential Tools to Set Up
+> **Live status (Aug 2026)**  
+> | Tool | ID | Site code | Your action |
+> |------|-----|-----------|-------------|
+> | GA4 | `G-QXW7GBCQNJ` | ✅ `base.html` | Verify Realtime at analytics.google.com |
+> | GTM | `GTM-KH75QZKH` | ✅ `base.html` | Publish container after adding tags |
+> | Microsoft Clarity | Via GTM | ⏳ You’re on setup screen | Click **Start setup** in Clarity → publish GTM |
+> | Meta Pixel | — | ❌ Not yet | Create in Meta Events Manager → add via GTM |
+> | Search Console | — | External | Verify at search.google.com + submit sitemap |
+>
+> Credentials: `digital-marketing-setup/TRACKING-CREDENTIALS.md`
+
+---
 
 | Tool                    | Purpose                      | Priority | Cost    |
 |-------------------------|------------------------------|----------|---------|
@@ -14,23 +25,28 @@
 
 ## Step 1: Google Analytics 4 (GA4)
 
-### Setup:
-1. Go to https://analytics.google.com
-2. Create account: "Indistylex"
-3. Create property: "Indistylex Website"
-4. Get Measurement ID: `G-XXXXXXXXXX`
+### Add to website (`base.html` in `<head>`) — **already done:**
 
-### Add to website (`base.html` in `<head>`):
+Measurement ID: **`G-QXW7GBCQNJ`** (see `app/templates/base.html`)
+
 ```html
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<!-- Google tag (gtag.js) — LIVE -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QXW7GBCQNJ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
+  gtag('config', 'G-QXW7GBCQNJ');
 </script>
 ```
+
+GTM container **`GTM-KH75QZKH`** is also in `base.html`. Do **not** duplicate GA4 inside GTM (double pageviews).
+
+### Setup (if starting fresh):
+1. Go to https://analytics.google.com
+2. Create account: "Indistylex"
+3. Create property: "Indistylex Website"
+4. Measurement ID: `G-QXW7GBCQNJ` ← already in production
 
 ### E-commerce Events to Track:
 ```javascript
@@ -97,10 +113,22 @@ gtag('event', 'purchase', {
 
 ## Step 4: Microsoft Clarity (Free Heatmaps)
 
-### Setup:
-1. Go to https://clarity.microsoft.com
-2. Sign up, create project
-3. Add tracking code to `base.html`:
+### Recommended: Connect via Google Tag Manager (you’re here now)
+
+Clarity detected **`GTM-KH75QZKH`** on indistylex.com. **No code from developer needed** if you use this flow:
+
+1. In Clarity → **Start setup** (purple button on Getting Started).
+2. Sign in to Google → select container **`GTM-KH75QZKH`**.
+3. Clarity adds its tag to GTM automatically.
+4. Open [Google Tag Manager](https://tagmanager.google.com) → **Submit** → **Publish** (version name e.g. `Clarity added`).
+5. Visit indistylex.com in a new tab → wait 2–5 min → Clarity **Dashboard** should show sessions.
+
+**After publish:** `git pull` + restart site on server if CSP was updated (allows `clarity.ms` domains).
+
+### Alternative: Manual code (only if not using GTM)
+
+1. Go to https://clarity.microsoft.com → Settings → Setup → copy **Project ID**
+2. Add tracking code to `base.html` or GTM Custom HTML tag:
 ```html
 <script type="text/javascript">
 (function(c,l,a,r,i,t,y){
@@ -110,6 +138,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 })(window, document, "clarity", "script", "YOUR_PROJECT_ID");
 </script>
 ```
+3. Save Project ID in `digital-marketing-setup/TRACKING-CREDENTIALS.md`
 
 ### What to look for:
 - Where users click (dead clicks = confusing UX)
