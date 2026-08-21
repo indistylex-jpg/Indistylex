@@ -141,7 +141,7 @@ Reply ✅ when you've read it.
 Hi [Manager Name] — your Indistylex manager access:
 
 🔐 Admin: https://indistylex.com/admin
-📧 Email: admin@indistylex.in
+📧 Email: admin@indistylex.com
 🔑 Password: [share from CREDENTIALS.md privately — NOT in group]
 
 Daily:

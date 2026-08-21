@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indistylex — Thank You Cards (print & cut)</title>
+  <link rel="stylesheet" href="print-common.css">
+  <style>
+    /* 4×6" cards — 2 per A4 row in landscape-ish layout: 2 columns × 2 rows */
+    @page { size: A4 portrait; margin: 8mm; }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 6mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4mm;
+    }
+
+    .card {
+      width: 101.6mm;  /* 4 inch */
+      height: 152.4mm; /* 6 inch */
+      margin: auto;
+      border: 1px dashed #94A3B8;
+      border-radius: 4mm;
+      padding: 8mm 7mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(180deg, #EFF6FF 0%, #fff 35%);
+      overflow: hidden;
+    }
+
+    @media print {
+      .card { border: 0.3mm dashed #ccc; }
+    }
+
+    .card .icon {
+      margin-bottom: 6mm;
+    }
+
+    .card h2 {
+      font-size: 15px;
+      color: var(--brand);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 4mm;
+    }
+
+    .card .message {
+      font-size: 10px;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 5mm;
+      flex: 1;
+    }
+
+    .card .highlight {
+      background: var(--light);
+      border-radius: 6px;
+      padding: 4mm 5mm;
+      font-size: 9px;
+      width: 100%;
+      margin-bottom: 4mm;
+    }
+
+    .card .highlight strong {
+      display: block;
+      color: var(--brand);
+      font-size: 10px;
+      margin-bottom: 2mm;
+    }
+
+    .card .social {
+      font-size: 8.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card .social span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .card .footer-line {
+      margin-top: auto;
+      padding-top: 3mm;
+      border-top: 1px solid var(--light);
+      font-size: 8px;
+      color: var(--muted);
+      width: 100%;
+    }
+
+    .card .footer-line strong { color: var(--brand); }
+  </style>
+</head>
+<body>
+  <div class="print-bar no-print">
+    <button type="button" onclick="window.print()">Print thank-you cards</button>
+    <p>4 cards per A4 sheet (4×6″ each). Cut on dashed lines. Place on top of tissue-wrapped item before sealing polybag.</p>
+  </div>
+
+  <div class="sheet">
+    <!-- Card template × 4 -->
+    <article class="card">
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1E4D8C"/>
+              <stop offset="100%" stop-color="#2563EB"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="44" height="44" rx="11" fill="url(#g1)"/>
+          <path d="M22 14 L18 18 L14 16 L15.5 22 L15.5 32 L30.5 32 L30.5 22 L32 16 L28 18 L24 14 L22 17 Z" fill="#fff"/>
+        </svg>
+      </div>
+      <h2>Thank you for choosing Indistylex!</h2>
+      <p class="message">We hope your little one loves their new outfit. Every piece is picked with care for comfort, quality, and style.</p>
+      <div class="highlight">
+        <strong>Share your unboxing</strong>
+        Tag us <span>@indistylex_clothing</span> on Instagram — we love seeing happy kids!
+      </div>
+      <div class="social">
+        <span>Instagram</span> @indistylex_clothing · <span>Facebook</span> /indistylex<br>
+        <span>Website</span> indistylex.com
+      </div>
+      <div class="footer-line">
+        <strong>Need help?</strong> WhatsApp +91 63941 42176 · support@indistylex.com<br>
+        7-day easy returns · Mon–Sat 10AM–7PM
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="11" fill="#1E4D8C"/><path d="M22 14 L18 18 L14 16 L15.5 22 L15.5 32 L30.5 32 L30.5 22 L32 16 L28 18 L24 14 L22 17 Z" fill="#fff"/></svg>
+      </div>
+      <h2>Thank you for choosing Indistylex!</h2>
+      <p class="message">We hope your little one loves their new outfit. Every piece is picked with care for comfort, quality, and style.</p>
+      <div class="highlight">
+        <strong>Share your unboxing</strong>
+        Tag us <span>@indistylex_clothing</span> on Instagram — we love seeing happy kids!
+      </div>
+      <div class="social">
+        <span>Instagram</span> @indistylex_clothing · <span>Facebook</span> /indistylex<br>
+        <span>Website</span> indistylex.com
+      </div>
+      <div class="footer-line">
+        <strong>Need help?</strong> WhatsApp +91 63941 42176 · support@indistylex.com<br>
+        7-day easy returns · Mon–Sat 10AM–7PM
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="11" fill="#1E4D8C"/><path d="M22 14 L18 18 L14 16 L15.5 22 L15.5 32 L30.5 32 L30.5 22 L32 16 L28 18 L24 14 L22 17 Z" fill="#fff"/></svg>
+      </div>
+      <h2>Thank you for choosing Indistylex!</h2>
+      <p class="message">We hope your little one loves their new outfit. Every piece is picked with care for comfort, quality, and style.</p>
+      <div class="highlight">
+        <strong>Share your unboxing</strong>
+        Tag us <span>@indistylex_clothing</span> on Instagram — we love seeing happy kids!
+      </div>
+      <div class="social">
+        <span>Instagram</span> @indistylex_clothing · <span>Facebook</span> /indistylex<br>
+        <span>Website</span> indistylex.com
+      </div>
+      <div class="footer-line">
+        <strong>Need help?</strong> WhatsApp +91 63941 42176 · support@indistylex.com<br>
+        7-day easy returns · Mon–Sat 10AM–7PM
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="11" fill="#1E4D8C"/><path d="M22 14 L18 18 L14 16 L15.5 22 L15.5 32 L30.5 32 L30.5 22 L32 16 L28 18 L24 14 L22 17 Z" fill="#fff"/></svg>
+      </div>
+      <h2>Thank you for choosing Indistylex!</h2>
+      <p class="message">We hope your little one loves their new outfit. Every piece is picked with care for comfort, quality, and style.</p>
+      <div class="highlight">
+        <strong>Share your unboxing</strong>
+        Tag us <span>@indistylex_clothing</span> on Instagram — we love seeing happy kids!
+      </div>
+      <div class="social">
+        <span>Instagram</span> @indistylex_clothing · <span>Facebook</span> /indistylex<br>
+        <span>Website</span> indistylex.com
+      </div>
+      <div class="footer-line">
+        <strong>Need help?</strong> WhatsApp +91 63941 42176 · support@indistylex.com<br>
+        7-day easy returns · Mon–Sat 10AM–7PM
+      </div>
+    </article>
+  </div>
+</body>
+</html>

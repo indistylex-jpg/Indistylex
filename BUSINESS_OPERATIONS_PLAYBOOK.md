@@ -55,8 +55,8 @@ You are a DevOps engineer running a clothing business for the first time. You al
 | **Brand / Trade Name** | Indistylex |
 | **Legal Structure** | Proprietorship (Prop: Satyam Pandey) |
 | **GSTIN** | 09GVUPP6447P1Z3 |
-| **Category** | Kids' clothing (0–12 years) |
-| **Price Range** | ₹499 – ₹2,499 |
+| **Category** | Kids' clothing (0–18 years) |
+| **Price Range** | ₹299 – ₹2,499 |
 | **Website** | https://indistylex.com |
 | **Support Email** | support@indistylex.com |
 | **Phone / WhatsApp** | +91 63941 42176 |
@@ -441,6 +441,7 @@ Morning routine:
 | Mobile app (Flutter) | ✅ Built | indistylex_app/ |
 | SEO (sitemap, robots, JSON-LD) | ✅ Live | /sitemap.xml |
 | Analytics (GA4 + GTM) | ✅ Installed | G-QXW7GBCQNJ |
+| Coupon / discount codes | ✅ Built | Admin → Coupons |
 
 ### 8.2 Website Admin Daily Tasks
 
@@ -451,7 +452,7 @@ Morning routine:
 | Add new products | Admin → Products → Add | When new stock arrives |
 | Update stock counts | Admin → Products → Edit variant | After every sale |
 | Moderate reviews | Admin → Reviews | Weekly |
-| Create coupon codes | Admin → Coupons | For campaigns |
+| Create coupon codes | Admin → Coupons | For campaigns — see **§8.4** |
 | Check dashboard metrics | Admin → Dashboard | Weekly |
 
 ### 8.3 Website Gaps to Fix (Before Full Launch)
@@ -466,6 +467,57 @@ Morning routine:
 | Meta Pixel installed | 🟠 High | `digital-marketing-setup/05-TRACKING-SETUP.md` |
 
 > Full technical checklist: `Indistylex/30-DAY-GO-LIVE-PLAN.md`
+
+### 8.4 Coupon Codes (Admin → Coupons)
+
+Discount codes for **website campaigns only** — customers apply them on the **Cart** page before checkout.
+
+#### Why use coupons (benefits)
+
+| Benefit | What you get |
+|---------|--------------|
+| **More conversions** | First-time buyers order when they see “10% off with WELCOME10” |
+| **Protect MRP** | Temporary discount — no permanent price cut on website or marketplaces |
+| **Track marketing** | Different codes per channel (`INSTA10`, `WHATSAPP15`) → see what works |
+| **Control cost** | End date, max uses, minimum cart — festival codes don’t run forever |
+| **Influencer / referrals** | Unique limited codes (`PRIYA20`, max 50 uses) |
+
+> Aligns with §4 Pricing Rules: *offer discounts via coupons, not permanent price cuts.*
+
+#### How to create (5 minutes)
+
+1. Open **https://indistylex.com/admin** → sidebar **Coupons** → **Add Coupon**.
+2. Fill in:
+
+| Field | Example | Notes |
+|-------|---------|-------|
+| Coupon Code | `WELCOME10` | Uppercase; share this publicly |
+| Discount Type | Percentage | Or flat ₹ off |
+| Discount Value | `10` | 10% or ₹100 |
+| Min Order Amount | `499` | Optional — cart must reach this |
+| Max Uses | `100` or `0` | `0` = unlimited |
+| Valid From / Until | Campaign dates | Auto-expires after sale |
+| Active | ✓ | Uncheck to pause instantly |
+
+3. **Create Coupon** → share code on Instagram (`@indistylex_clothing`), WhatsApp, email.
+4. Customer: Cart → enter code → **Apply** → discount shows → checkout.
+
+#### Starter codes to create
+
+| Code | Type | Value | Min ₹ | Max uses | Campaign |
+|------|------|-------|-------|----------|----------|
+| `WELCOME10` | 10% | — | 499 | ∞ | New visitors / email signup |
+| `INSTA10` | 10% | — | 599 | 500 | Instagram bio link |
+| `FIRST50` | Flat ₹50 | — | 799 | 200 | Launch — friends & family |
+| `DIWALI25` | 25% | — | 1499 | 300 | Festival (set 7-day dates) |
+
+#### Track performance
+
+- **Admin → Coupons** — column **Uses** (e.g. `12 / 100`).
+- **Admin → Orders** — order detail shows coupon code used.
+- Log redemptions in **Weekly KPIs** tab when comparing campaigns.
+
+> **Full guide with examples:** `operations-templates/COUPON-CODES-GUIDE.md`
 
 ---
 
@@ -522,8 +574,8 @@ Track in a simple spreadsheet:
 
 | Requirement | Priority | Action |
 |-------------|----------|--------|
-| GST monthly filing (GSTR-1, GSTR-3B) | 🔴 Ongoing | Hire CA or use ClearTax/Zoho |
-| Business bank account (current) | 🔴 High | Separate from personal |
+| GST monthly filing (GSTR-1, GSTR-3B) | 🔴 Ongoing | CA + ClearTax/Zoho — see **`operations-templates/GST-MONTHLY-FILING-GUIDE.md`** |
+| Business bank account (current) | 🔴 High | See **`operations-templates/BUSINESS-BANKING-MONEY-GUIDE.md`** |
 | MSME / Udyam registration | 🟡 Recommended | Free at udyamregistration.gov.in |
 | Trademark (Indistylex) | 🟡 Recommended | Apply at ipindia.gov.in |
 | Shop & Establishment license | 🟡 Depends on UP rules | Check local municipality |
@@ -539,6 +591,10 @@ Track in a simple spreadsheet:
 
 > **Full HSN list for all Indistylex products:** `operations-templates/HSN_CODES.md` and `Indistylex-Business-Tracker.xlsx` → SKU & HSN Codes tab
 
+> **GST monthly filing (GSTR-1, GSTR-3B) — end-to-end guide:** `operations-templates/GST-MONTHLY-FILING-GUIDE.md`
+
+> **Business bank account & money handling:** `operations-templates/BUSINESS-BANKING-MONEY-GUIDE.md`
+
 > Full legal guide: `Digital Markting/digital-marketing-setup/09-LEGAL-COMPLIANCE.md`
 
 ---
@@ -546,6 +602,8 @@ Track in a simple spreadsheet:
 ## 11. Finance & Accounting
 
 ### 11.1 Money Flow
+
+> **Step-by-step banking, payouts & reconciliation:** `operations-templates/BUSINESS-BANKING-MONEY-GUIDE.md`
 
 ```
 REVENUE IN
@@ -867,6 +925,9 @@ Customer Browser / App
 |------|---------|
 | **`operations-templates/Indistylex-Business-Tracker.xlsx`** | **Master Excel — 9 tabs: Inventory, Orders, Expenses, Weekly KPIs, B2B, SKU & HSN, P&L, Amazon, Flipkart** |
 | `operations-templates/HSN_CODES.md` | SKU naming rules + HSN/GST quick reference |
+| `operations-templates/COUPON-CODES-GUIDE.md` | Create & manage website discount codes (Admin → Coupons) |
+| `operations-templates/GST-MONTHLY-FILING-GUIDE.md` | GST monthly filing end-to-end (GSTR-1, GSTR-3B, ITC, income tax overview) |
+| `operations-templates/BUSINESS-BANKING-MONEY-GUIDE.md` | Business current account + money in/out step-by-step |
 | `operations-templates/README.md` | How to use the workbook |
 
 ### Technology

@@ -11,11 +11,12 @@ class CategoryCard extends StatelessWidget {
 
   const CategoryCard({super.key, required this.category});
 
+  static const _base = 'https://indistylex.com/static/images/lifestyle';
   static const _fallbackImages = {
-    'newborn': 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&q=80',
-    'toddler': 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&q=80',
-    'boys': 'https://images.unsplash.com/photo-1542652694-40abf526446e?w=400&q=80',
-    'girls': 'https://images.unsplash.com/photo-1476234251651-f353703a034d?w=400&q=80',
+    'newborn': '$_base/hero-baby-indian.jpg',
+    'toddler': '$_base/hero-collection-indian-kids.jpg',
+    'boys': '$_base/lifestyle-everyday-boy.jpg',
+    'girls': '$_base/lifestyle-everyday-girl.jpg',
   };
 
   String _imageUrl() {
@@ -25,8 +26,7 @@ class CategoryCard extends StatelessWidget {
     final slugKey = category.slug.isNotEmpty
         ? category.slug.split('-').first.toLowerCase()
         : category.name.split(' ').first.toLowerCase();
-    return _fallbackImages[slugKey] ??
-        'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80';
+    return _fallbackImages[slugKey] ?? '$_base/hero-collection-indian-kids.jpg';
   }
 
   @override
@@ -43,7 +43,7 @@ class CategoryCard extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.accent, width: 3),
+                border: Border.all(color: AppColors.accent, width: 2.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),

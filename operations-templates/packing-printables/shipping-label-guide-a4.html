@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indistylex — Shipping Label Guide (A4)</title>
+  <link rel="stylesheet" href="print-common.css">
+  <style>
+    @page { size: A4 portrait; margin: 10mm; }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 12mm 14mm;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .diagram-wrap {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .polybag {
+      width: 140mm;
+      height: 180mm;
+      border: 3px solid var(--brand);
+      border-radius: 8px;
+      position: relative;
+      background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+      flex-shrink: 0;
+    }
+
+    .polybag .label-zone {
+      position: absolute;
+      top: 12mm;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100mm;
+      height: 150mm;
+      border: 3px dashed var(--accent);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8mm;
+    }
+
+    .polybag .label-zone h2 {
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .polybag .label-zone p {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .polybag .barcode-mock {
+      width: 70mm;
+      height: 18mm;
+      background: repeating-linear-gradient(
+        90deg,
+        #0f172a 0 2px,
+        #fff 2px 4px
+      );
+      margin: 8mm 0 4mm;
+      border-radius: 2px;
+    }
+
+    .polybag .seal {
+      position: absolute;
+      bottom: 10mm;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: var(--muted);
+      background: #fff;
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .polybag .no-label {
+      position: absolute;
+      bottom: 28mm;
+      left: 8mm;
+      right: 8mm;
+      font-size: 9px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .instructions {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .instructions h3 {
+      font-size: 13px;
+      color: var(--brand);
+      margin-bottom: 10px;
+    }
+
+    .instructions ol {
+      font-size: 11px;
+      padding-left: 18px;
+      line-height: 1.7;
+    }
+
+    .instructions li { margin-bottom: 8px; }
+
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .do-dont div {
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 10px;
+    }
+
+    .do {
+      background: #ECFDF5;
+      border: 1px solid #6EE7B7;
+    }
+
+    .dont {
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+    }
+
+    .do h4 { color: #047857; margin-bottom: 6px; font-size: 11px; }
+    .dont h4 { color: #B91C1C; margin-bottom: 6px; font-size: 11px; }
+
+    .do ul, .dont ul { list-style: none; }
+    .do li::before { content: "✓ "; font-weight: 800; }
+    .dont li::before { content: "✗ "; font-weight: 800; }
+
+    .checklist {
+      margin-top: 16px;
+      border: 2px solid var(--brand);
+      border-radius: 10px;
+      padding: 12px;
+      background: var(--bg);
+    }
+
+    .checklist h3 {
+      font-size: 12px;
+      color: var(--brand);
+      margin-bottom: 8px;
+    }
+
+    .checklist li {
+      font-size: 11px;
+      margin-bottom: 6px;
+      list-style: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-bar no-print">
+    <button type="button" onclick="window.print()">Print label guide</button>
+    <p>Hang next to printer / packing table. Shows where to stick courier label on polybag after packing.</p>
+  </div>
+
+  <div class="sheet">
+    <div class="logo-mark" style="margin-bottom:8px;">
+      <svg width="36" height="36" viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" rx="11" fill="#1E4D8C"/><path d="M22 14 L18 18 L14 16 L15.5 22 L15.5 32 L30.5 32 L30.5 22 L32 16 L28 18 L24 14 L22 17 Z" fill="#fff"/></svg>
+      <div><div class="word">INDISTYLEX</div><div class="tag">Shipping label guide</div></div>
+    </div>
+
+    <h1>Attach shipping label — last step</h1>
+    <p class="subtitle">After polybag is sealed with item + invoice inside, print label from Shiprocket / Delhivery / admin and stick as shown.</p>
+
+    <div class="diagram-wrap">
+      <div class="polybag">
+        <div class="label-zone">
+          <h2>STICK LABEL HERE</h2>
+          <div class="barcode-mock" aria-hidden="true"></div>
+          <p>Courier label<br>Barcode must scan<br>Address facing out</p>
+        </div>
+        <div class="no-label">Do not cover seal line with label</div>
+        <div class="seal">Sealed edge ↓</div>
+      </div>
+
+      <div class="instructions">
+        <h3>Steps</h3>
+        <ol>
+          <li>Complete packing: tissue → thank-you card → invoice in polybag → seal.</li>
+          <li>Weigh package on scale; enter weight in courier portal if required.</li>
+          <li>Print AWB / shipping label (thermal or A4 cut to size).</li>
+          <li>Peel backing; place label centered on <strong>front</strong> of polybag.</li>
+          <li>Smooth flat — no bubbles over barcode.</li>
+          <li>Mark order <strong>Shipped</strong> in admin; send tracking link to customer.</li>
+        </ol>
+
+        <div class="do-dont">
+          <div class="do">
+            <h4>Do</h4>
+            <ul>
+              <li>Label on flat surface</li>
+              <li>Barcode fully visible</li>
+              <li>Sender = Prayagraj address</li>
+              <li>Match weight slab</li>
+            </ul>
+          </div>
+          <div class="dont">
+            <h4>Don't</h4>
+            <ul>
+              <li>Fold label over edge</li>
+              <li>Cover barcode with tape</li>
+              <li>Ship without invoice inside</li>
+              <li>Mix up two order labels</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="checklist">
+      <h3>Pre-handover checklist</h3>
+      <ul>
+        <li><span class="check"></span> Order ID on label matches packed item</li>
+        <li><span class="check"></span> Invoice inside polybag</li>
+        <li><span class="check"></span> Thank-you card included</li>
+        <li><span class="check"></span> Polybag fully sealed</li>
+        <li><span class="check"></span> Label stuck — barcode scans in portal test</li>
+        <li><span class="check"></span> Pickup manifest / handover to courier logged</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

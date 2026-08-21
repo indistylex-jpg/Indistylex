@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indistylex — Packing Station Poster (A4)</title>
+  <link rel="stylesheet" href="print-common.css">
+  <style>
+    @page { size: A4 portrait; margin: 10mm; }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 12mm 14mm;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid var(--brand);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      color: var(--brand);
+      margin-top: 4px;
+    }
+
+    .header .sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 6px;
+      margin: 16px 0 20px;
+      flex-wrap: wrap;
+    }
+
+    .flow-step {
+      flex: 1;
+      min-width: 88px;
+      background: linear-gradient(180deg, var(--light) 0%, #fff 100%);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step .num {
+      width: 26px;
+      height: 26px;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 800;
+      font-size: 13px;
+      line-height: 26px;
+      margin: 0 auto 6px;
+    }
+
+    .flow-step .title {
+      font-weight: 800;
+      font-size: 11px;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .flow-step .hint {
+      font-size: 9px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .flow-arrow {
+      align-self: center;
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .step-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+    }
+
+    .step-card h3 {
+      font-size: 13px;
+      color: var(--brand);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-card h3 span {
+      background: var(--brand);
+      color: #fff;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .step-card ul {
+      list-style: none;
+      font-size: 11px;
+    }
+
+    .step-card li {
+      margin-bottom: 6px;
+      padding-left: 2px;
+    }
+
+    .materials {
+      margin-top: 14px;
+      border: 2px dashed var(--accent);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #EFF6FF;
+    }
+
+    .materials h3 {
+      font-size: 12px;
+      color: var(--brand);
+      margin-bottom: 8px;
+    }
+
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      font-size: 10px;
+    }
+
+    .materials-grid div {
+      background: #fff;
+      border-radius: 6px;
+      padding: 6px 8px;
+      border: 1px solid var(--light);
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .order-strip {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    .order-strip label { font-weight: 700; color: var(--brand); display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="print-bar no-print">
+    <button type="button" onclick="window.print()">Print poster (A4)</button>
+    <p>Laminate and hang at packing table. Flow: Polybag → Tissue → Thank-you card → Invoice → Shipping label.</p>
+  </div>
+
+  <div class="sheet">
+    <div class="header">
+      <div>
+        <div class="logo-mark">
+          <svg width="40" height="40" viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+              <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1E4D8C"/>
+                <stop offset="100%" stop-color="#2563EB"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="11" fill="url(#g)"/>
+            <path d="M22 14 L18 18 L14 16 L15.5 22 L15.5 32 L30.5 32 L30.5 22 L32 16 L28 18 L24 14 L22 17 Z" fill="#fff"/>
+          </svg>
+          <div>
+            <div class="word">INDISTYLEX</div>
+            <div class="tag">Packing station</div>
+          </div>
+        </div>
+        <h1>Order packing SOP</h1>
+        <div class="sub">Confirm → Pick → Pack → Ship → Update admin</div>
+      </div>
+      <div style="text-align:right;font-size:10px;color:var(--muted);">
+        <strong style="color:var(--brand);">Prayagraj warehouse</strong><br>
+        support@indistylex.com<br>
+        +91 63941 42176
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="num">1</div>
+        <div class="title">Polybag</div>
+        <div class="hint">Moisture-safe outer wrap</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="num">2</div>
+        <div class="title">Tissue paper</div>
+        <div class="hint">Fold neatly inside</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="num">3</div>
+        <div class="title">Thank-you card</div>
+        <div class="hint">Brand insert on top</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="num">4</div>
+        <div class="title">Invoice</div>
+        <div class="hint">GST slip inside bag</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="num">5</div>
+        <div class="title">Shipping label</div>
+        <div class="hint">Stick on polybag front</div>
+      </div>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <h3><span>1</span> Confirm & pick</h3>
+        <ul>
+          <li><span class="check"></span>Payment verified (prepaid / COD noted)</li>
+          <li><span class="check"></span>Match order ID to SKU & size</li>
+          <li><span class="check"></span>Inspect item — no defect / stain</li>
+        </ul>
+      </div>
+      <div class="step-card">
+        <h3><span>2</span> Wrap in tissue</h3>
+        <ul>
+          <li><span class="check"></span>Fold garment neatly (no creases on display side)</li>
+          <li><span class="check"></span>Wrap fully in tissue paper</li>
+          <li><span class="check"></span>Place thank-you card on top</li>
+        </ul>
+      </div>
+      <div class="step-card">
+        <h3><span>3</span> Seal polybag</h3>
+        <ul>
+          <li><span class="check"></span>Put wrapped item + invoice inside polybag</li>
+          <li><span class="check"></span>Peel & seal — no gaps at opening</li>
+          <li><span class="check"></span>Add branded sticker seal if available</li>
+        </ul>
+      </div>
+      <div class="step-card">
+        <h3><span>4</span> Label & handover</h3>
+        <ul>
+          <li><span class="check"></span>Print courier label from admin / Shiprocket</li>
+          <li><span class="check"></span>Stick label flat on front — barcode scannable</li>
+          <li><span class="check"></span>Mark shipped + send tracking to customer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="materials">
+      <h3>Materials at this station</h3>
+      <div class="materials-grid">
+        <div><strong>Poly mailer</strong><br>10×13″ (or box for bulk)</div>
+        <div><strong>Tissue paper</strong><br>1 sheet per order</div>
+        <div><strong>Thank-you card</strong><br>4×6″ insert</div>
+        <div><strong>Invoice</strong><br>GST A4 — fold once</div>
+        <div><strong>Shipping label</strong><br>From courier portal</div>
+        <div><strong>Branded seal</strong><br>2″ round sticker</div>
+        <div><strong>Packing tape</strong><br>For boxes only</div>
+        <div><strong>Weighing scale</strong><br>Match courier weight slab</div>
+      </div>
+    </div>
+
+    <div class="order-strip">
+      <div>
+        <label>Order ID</label>
+        <div class="fill-block">&nbsp;</div>
+      </div>
+      <div>
+        <label>Packed by</label>
+        <div class="fill-block">&nbsp;</div>
+      </div>
+      <div>
+        <label>Date / time</label>
+        <div class="fill-block">&nbsp;</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      7-day easy returns · GSTIN 09GVUPP6447P1Z3 · indistylex.com · Do not ship without invoice + scannable label
+    </div>
+  </div>
+</body>
+</html>

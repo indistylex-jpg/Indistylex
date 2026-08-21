@@ -12,12 +12,12 @@ class AppConstants {
 
   // Contact
   static const String phone = '+916394142176';
-  static const String email = 'indistylex@gmail.com';
+  static const String email = 'support@indistylex.com';
   static const String website = 'https://indistylex.com';
   static const String address = 'MIG 79, Dhoomanganj, Preetam Nagar, Prayagraj, UP 211011';
 
   // Social
-  static const String instagram = 'https://instagram.com/indistylex';
+  static const String instagram = 'https://www.instagram.com/indistylex_clothing';
   static const String facebook = 'https://facebook.com/indistylex';
 
   // Website pages

@@ -54,9 +54,9 @@ class _SiteFooterState extends State<SiteFooter> {
           const SizedBox(height: 8),
           Text(
             'Get 10% Off Your First Order',
-            style: GoogleFonts.playfairDisplay(
+            style: GoogleFonts.inter(
               fontSize: 22,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: AppColors.white,
             ),
             textAlign: TextAlign.center,
@@ -99,8 +99,8 @@ class _SiteFooterState extends State<SiteFooter> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
-                  foregroundColor: AppColors.primary,
-                  shape: const RoundedRectangleBorder(),
+                  foregroundColor: AppColors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 ),
                 child: Text('SUBSCRIBE', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1)),
@@ -119,10 +119,10 @@ class _SiteFooterState extends State<SiteFooter> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppLogo(monogramSize: 32, lightMode: false),
+          const AppLogo(height: 36, white: true),
           const SizedBox(height: 12),
           Text(
-            'Premium fashion for everyone.\nQuality fabrics, trendy designs.',
+            'Premium kids fashion for ages 0–18.\nQuality fabrics, trendy designs.',
             style: GoogleFonts.inter(fontSize: 12, color: AppColors.white.withOpacity(0.7), height: 1.6),
           ),
           const SizedBox(height: 16),

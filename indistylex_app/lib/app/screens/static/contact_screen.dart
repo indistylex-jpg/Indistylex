@@ -22,7 +22,7 @@ class ContactScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                Text('Contact Us', style: GoogleFonts.playfairDisplay(fontSize: 28, fontWeight: FontWeight.w600)),
+                Text('Contact Us', style: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary)),
                 const SizedBox(height: 8),
                 Text('We\'d love to hear from you.', style: GoogleFonts.inter(color: AppColors.muted)),
                 const SizedBox(height: 32),

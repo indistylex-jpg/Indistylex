@@ -25,13 +25,13 @@ class SecurityBlockedScreen extends StatelessWidget {
             children: [
               const Icon(Icons.security, size: 72, color: AppColors.accent),
               const SizedBox(height: 24),
-              const AppLogo(monogramSize: 40, lightMode: false),
+              const AppLogo(height: 40, white: true),
               const SizedBox(height: 32),
               Text(
                 'Security Alert',
-                style: GoogleFonts.playfairDisplay(
+                style: GoogleFonts.inter(
                   fontSize: 26,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.white,
                 ),
               ),

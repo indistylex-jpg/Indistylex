@@ -149,7 +149,7 @@ Free shipping above ₹999! 📦"
 [Show outfit 2 - 4s]: "This party dress — ₹1,099"  
 [Show outfit 3 - 4s]: "This casual set — ₹699"
 
-[End card - 3s]: "Shop link in bio! @indistylex"
+[End card - 3s]: "Shop link in bio! @indistylex_clothing"
 ```
 
 ### Script 3: Packing Orders ASMR (30s Reel)
@@ -163,7 +163,7 @@ Shot 4: Sealing package with brand sticker
 Shot 5: Stack of packages ready to ship
 
 [Text overlay]: "Your order is packed with love 💛"
-[End]: "@indistylex | Link in bio"
+[End]: "@indistylex_clothing | Link in bio"
 ```
 
 ---

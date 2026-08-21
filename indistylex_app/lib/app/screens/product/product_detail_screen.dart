@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/app_theme.dart';
 import '../../models/product.dart';
@@ -139,10 +140,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Name
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'PlayfairDisplay',
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -155,7 +156,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.accent,
                         ),
                       ),
                       if (product.isOnSale) ...[

@@ -1,5 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="4" fill="#1A1A1A"/>
-  <text x="16" y="22" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="15" font-weight="700" fill="#FFFFFF" letter-spacing="0.5">iX</text>
-  <rect x="8" y="25" width="16" height="1.2" rx="0.6" fill="#C8A962"/>
+  <defs>
+    <linearGradient id="favGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E4D8C"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#favGrad)"/>
+  <path d="M16 9 L13.5 11.5 L11 10 L12 14 L12 21 L20 21 L20 14 L21 10 L18.5 11.5 L16 9 L15 11 Z" fill="#FFFFFF"/>
+  <path d="M14.2 11.5 L16 13.2 L17.8 11.5" fill="none" stroke="#DBEAFE" stroke-width="0.9" stroke-linecap="round"/>
 </svg>

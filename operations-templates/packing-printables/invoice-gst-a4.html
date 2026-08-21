@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indistylex — GST Tax Invoice (A4)</title>
+  <link rel="stylesheet" href="print-common.css">
+  <style>
+    @page { size: A4 portrait; margin: 12mm; }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 10mm 12mm;
+      font-size: 11px;
+    }
+
+    .inv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--brand);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .inv-header h1 {
+      font-size: 20px;
+      color: var(--brand);
+      letter-spacing: 1px;
+    }
+
+    .inv-header .type {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .seller {
+      font-size: 10px;
+      line-height: 1.55;
+      max-width: 48%;
+    }
+
+    .seller strong { color: var(--brand); font-size: 13px; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .meta-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--bg);
+    }
+
+    .meta-box h3 {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--brand);
+      margin-bottom: 6px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 10px;
+    }
+
+    .meta-row label { color: var(--muted); font-weight: 600; }
+
+    table.items {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 10px;
+    }
+
+    table.items th {
+      background: var(--brand);
+      color: #fff;
+      padding: 6px 5px;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    table.items td {
+      border: 1px solid var(--border);
+      padding: 8px 5px;
+      vertical-align: top;
+    }
+
+    table.items tbody tr:nth-child(even) td { background: #fafafa; }
+
+    .totals {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .totals table {
+      width: 240px;
+      font-size: 10px;
+      border-collapse: collapse;
+    }
+
+    .totals td {
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .totals td:last-child { text-align: right; font-weight: 600; }
+
+    .totals tr.grand td {
+      background: var(--light);
+      font-weight: 800;
+      color: var(--brand);
+      font-size: 12px;
+      border: none;
+    }
+
+    .amount-words {
+      margin: 10px 0;
+      padding: 8px 10px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 10px;
+    }
+
+    .amount-words label { font-weight: 700; color: var(--brand); }
+
+    .terms {
+      margin-top: 12px;
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.5;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .terms h4 {
+      font-size: 10px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 24px;
+      font-size: 10px;
+    }
+
+    .signatures div { text-align: center; width: 40%; }
+    .signatures .line {
+      border-top: 1px solid var(--text);
+      margin-top: 36px;
+      padding-top: 4px;
+    }
+
+    .duplicate-note {
+      text-align: center;
+      font-size: 9px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-bar no-print">
+    <button type="button" onclick="window.print()">Print invoice</button>
+    <p>Fill order details (or type in browser), then print. Fold once and place inside polybag with the item.</p>
+  </div>
+
+  <div class="sheet">
+    <div class="inv-header">
+      <div>
+        <div class="type">Tax invoice</div>
+        <h1>INDISTYLEX</h1>
+        <div style="font-size:10px;color:var(--muted);">Premium Kids Fashion · indistylex.com</div>
+      </div>
+      <div class="seller">
+        <strong>Indistylex</strong><br>
+        MIG 79, Dhoomanganj, Preetam Nagar<br>
+        Prayagraj, Uttar Pradesh — 211011<br>
+        GSTIN: <strong>09GVUPP6447P1Z3</strong><br>
+        Email: support@indistylex.com · Ph: +91 63941 42176
+      </div>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-box">
+        <h3>Bill to (customer)</h3>
+        <div class="meta-row"><label>Name</label> <span class="fill-line" style="flex:1;margin-left:8px;">&nbsp;</span></div>
+        <div class="meta-row"><label>Phone</label> <span class="fill-line" style="flex:1;margin-left:8px;">&nbsp;</span></div>
+        <div class="meta-row"><label>Address</label></div>
+        <div class="fill-block" style="min-height:48px;margin-top:4px;">&nbsp;</div>
+        <div class="meta-row" style="margin-top:6px;"><label>State</label> <span class="fill-line">&nbsp;</span></div>
+        <div class="meta-row"><label>Place of supply</label> <span class="fill-line">&nbsp;</span></div>
+      </div>
+      <div class="meta-box">
+        <h3>Invoice details</h3>
+        <div class="meta-row"><label>Invoice no.</label> <span class="fill-line">IX-INV-</span></div>
+        <div class="meta-row"><label>Invoice date</label> <span class="fill-line">&nbsp;</span></div>
+        <div class="meta-row"><label>Order ID</label> <span class="fill-line">&nbsp;</span></div>
+        <div class="meta-row"><label>Order date</label> <span class="fill-line">&nbsp;</span></div>
+        <div class="meta-row"><label>Payment</label> <span class="fill-line">Prepaid / COD</span></div>
+        <div class="meta-row"><label>Channel</label> <span class="fill-line">Website / Amazon / Flipkart / B2B</span></div>
+      </div>
+    </div>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th style="width:4%;">#</th>
+          <th style="width:32%;">Description / SKU</th>
+          <th style="width:8%;">HSN</th>
+          <th style="width:6%;">Qty</th>
+          <th style="width:10%;">Rate (₹)</th>
+          <th style="width:8%;">Disc.</th>
+          <th style="width:8%;">Taxable</th>
+          <th style="width:6%;">GST %</th>
+          <th style="width:9%;">CGST</th>
+          <th style="width:9%;">SGST</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><span class="fill-line" style="width:100%;">&nbsp;</span></td>
+          <td>6204</td>
+          <td>1</td>
+          <td>&nbsp;</td>
+          <td>—</td>
+          <td>&nbsp;</td>
+          <td>5%</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <table>
+        <tr><td>Subtotal (taxable)</td><td>₹ </td></tr>
+        <tr><td>CGST</td><td>₹ </td></tr>
+        <tr><td>SGST</td><td>₹ </td></tr>
+        <tr><td>Shipping</td><td>₹ </td></tr>
+        <tr><td>Round off</td><td>₹ </td></tr>
+        <tr class="grand"><td>Grand total</td><td>₹ </td></tr>
+      </table>
+    </div>
+
+    <div class="amount-words">
+      <label>Amount in words:</label>
+      <span class="fill-line" style="width:85%;">&nbsp;</span>
+    </div>
+
+    <div class="terms">
+      <h4>Return policy (summary)</h4>
+      7-day easy returns for unused items in original packaging. Contact support@indistylex.com or WhatsApp +91 63941 42176 before initiating a return.
+      For inter-state supply, IGST applies instead of CGST+SGST. This is a computer-generated invoice.
+    </div>
+
+    <div class="signatures">
+      <div>
+        <div class="line">Customer signature</div>
+      </div>
+      <div>
+        <div class="line">For Indistylex — Authorised signatory</div>
+      </div>
+    </div>
+
+    <div class="duplicate-note">Customer copy — place inside package · Office copy — retain for records</div>
+  </div>
+</body>
+</html>

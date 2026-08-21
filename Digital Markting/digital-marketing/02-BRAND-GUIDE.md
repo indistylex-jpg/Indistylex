@@ -1,101 +1,116 @@
 # 02 — Brand Guide
 
-## Brand Identity
-
-| Element          | Value                                          |
-|------------------|------------------------------------------------|
-| **Name**         | Indistylex                                     |
-| **Tagline**      | "Style That Speaks, Quality That Lasts"        |
-| **Logo Mark**    | iX (gold square with black text)               |
-| **Domain**       | indistylex.com                                 |
+> **Source of truth:** Website (`Indistylex/app/static/css/style.css`, `Indistylex/app/static/images/logo.svg`) · Flutter app · Physical shop labels (`Indistylex/docs/shop-setup/SHOP-SETUP-GUIDE.md` §3.2)  
+> **Last updated:** August 2026 — replaces old black/gold identity
 
 ---
 
-## Brand Colors
+## Brand identity
 
-| Color         | Hex       | Usage                              |
-|---------------|-----------|-------------------------------------|
-| Black         | `#1a1a1a` | Primary text, buttons, headers      |
-| Gold/Accent   | `#C9A94E` | Highlights, CTAs, premium feel      |
-| White         | `#FFFFFF` | Backgrounds, clean space            |
-| Light Gray    | `#F8F8F8` | Section backgrounds                 |
-| Soft Red      | `#E53E3E` | Sale badges, urgency                |
+| Element | Value |
+|---------|--------|
+| **Name** | Indistylex |
+| **Category line** | KIDS FASHION (under logo, letter-spaced) |
+| **Tagline** | Style That Speaks, Quality That Lasts |
+| **Logo** | Kids tee icon on **blue gradient tile** + wordmark **INDISTYLEX** + blue underline bar |
+| **Domain** | indistylex.com |
+| **Email** | support@indistylex.com |
+| **Instagram** | [@indistylex_clothing](https://www.instagram.com/indistylex_clothing) |
+| **WhatsApp** | +91 63941 42176 |
+
+### Logo usage
+
+| Context | Treatment |
+|---------|-----------|
+| Website navbar & footer | Full `logo.svg` wordmark |
+| Dark / photo backgrounds | `logo-white.svg` |
+| App icon, favicon, social avatar | `logo-icon.svg` / `favicon-192x192.png` |
+| **Don’t** | Old gold “iX” square, black/gold lockups |
+
+---
+
+## Brand colors
+
+Aligned with **indistylex.com** — trustworthy blue, clean white, soft sky backgrounds.
+
+### Core palette
+
+| Name | Hex | Usage |
+|------|-----|--------|
+| **Primary blue** | `#1E4D8C` | Headings, body text, wordmark |
+| **Accent blue** | `#2563EB` | Buttons, CTAs, link hover |
+| **Accent hover** | `#1D4ED8` | Button hover |
+| **Sky light** | `#DBEAFE` | Promo ticker bar |
+| **Soft blue bg** | `#EFF6FF` | Section tints |
+| **Card blue tint** | `#EEF4FC` | Product cards |
+| **Page background** | `#F8FAFC` | Alternate sections |
+| **White** | `#FFFFFF` | Header, cards, hang tags |
+| **Border** | `#E2E8F0` | Dividers |
+| **Muted text** | `#64748B` | Subtitles, KIDS FASHION line |
+
+### Functional
+
+| Hex | Usage |
+|-----|--------|
+| `#E85D04` | Optional urgency |
+| `#E53935` | Sale badges |
+| `#43A047` | Success states |
+
+**Gradient:** `#1E4D8C` → `#2563EB` → `#3B82F6` (logo, heroes, shop flex)
+
+**Don’t use** old gold `#C9A94E` or black `#1a1a1a` as primary brand colors.
 
 ---
 
 ## Typography
 
-- **Headings**: Playfair Display (serif, elegant)
-- **Body**: Inter (clean, modern, readable)
+- **Inter** for headings and body (600–800 / 400–500)
+- Logo: **INDISTYLEX** Inter 800; **KIDS FASHION** Inter 700 muted
 
 ---
 
-## Brand Voice
+## Physical shop & labelling
 
-### Tone: Warm, Confident, Aspirational
+Same blues online and in-store. See **`Indistylex/docs/shop-setup/SHOP-SETUP-GUIDE.md`**
 
-| DO ✅                              | DON'T ❌                           |
-|------------------------------------|------------------------------------|
-| "Crafted for your little one"      | "Buy cheap clothes here"           |
-| "Premium comfort meets style"      | "Best quality guaranteed!!!"       |
-| "Designed for active kids"         | "Your kid will look amazing"       |
-| "Made with love, worn with pride"  | "Order now before stock runs out!" |
-
-### Writing Guidelines:
-- Use **short sentences**. Parents are busy.
-- Focus on **comfort + style** together.
-- Mention **age-appropriateness** — parents trust this.
-- Use **"your little one"**, **"your child"** — personal tone.
-- Never use ALL CAPS except for sale badges.
+| Item | Spec |
+|------|------|
+| Entrance flex | Logo + “Kids Wear” — `#1E4D8C` on white or reverse |
+| Hang tags | White/cream; brand `#1E4D8C`; bar `#2563EB` |
+| Woven labels | Navy `#1E4D8C` + white |
+| Carry bags | White + blue logo print |
 
 ---
 
-## Brand Hashtags
+## Brand voice
 
-### Primary (use on every post):
-```
-#Indistylex #IndiStyleKids #KidsFashionIndia
-```
-
-### Secondary (rotate):
-```
-#KidsOfInstagram #MomApproved #LittleFashionista
-#IndianKidsFashion #ToddlerStyle #BabyFashion
-#KidsWear #ChildrensFashion #MomAndBaby
-#EthnicKidsWear #KidsPartyWear #CuteKidsClothes
-```
-
-### Campaign-specific:
-```
-#IndistylexSale #FestiveWithIndistylex
-#SummerWithIndistylex #IndistylexNewArrivals
-```
+Warm, confident, trustworthy. Short sentences; comfort + style; age bands; **indistylex.com** + **@indistylex_clothing**.
 
 ---
 
-## Photography Style
+## Hashtags
 
-### Product Photos:
-- **Background**: Clean white or soft pastel
-- **Lighting**: Natural, soft, no harsh shadows
-- **Angle**: Front flat-lay OR on-model (real kids, diverse)
-- **Props**: Minimal — wooden toys, flowers, soft fabrics
-
-### Lifestyle Photos:
-- Kids playing, laughing, in natural settings
-- Parks, home, gardens — relatable Indian settings
-- Show the fabric quality (close-up texture shots)
-
-### Social Media:
-- Bright, warm tones
-- Consistent filter/preset (warm + slightly desaturated)
-- Text overlays: Gold accent color on dark overlay
+Primary: `#Indistylex #indistylex_clothing #KidsFashionIndia`
 
 ---
 
-## Content Pillars (4 categories, rotate)
+## Photography & social
 
-1. **Product Showcase** (40%) — New arrivals, collections, styling tips
-2. **Parenting Relatability** (25%) — Memes, relatable mom moments, quotes
-3. **Behind the Scenes** (20%) — Fabric sourcing, packing orders, team
-4. **User Generated Content** (15%) — Customer photos, reviews, unboxing
+- Backgrounds: white or `#F8FAFC` / `#EFF6FF`
+- Overlays: blue `#1E4D8C` / `#2563EB` — not gold
+- CTA pills: `#2563EB` + white text
+
+---
+
+## Designer quick ref
+
+```
+Primary #1E4D8C · Accent #2563EB · Bg #F8FAFC · Font Inter
+Instagram @indistylex_clothing · indistylex.com
+```
+
+Full detail: **`Indistylex/digital-marketing/02-BRAND-GUIDE.md`**
+
+---
+
+*August 2026*

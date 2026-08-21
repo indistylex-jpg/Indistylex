@@ -12,6 +12,11 @@
 | **`Indistylex-30-Day-Team-Plan.xlsx`** | 30-day day-by-day plan for Owner + Manager + Assistant (Allahabad shop) |
 | **[30-DAY-TEAM-OPERATIONS-GUIDE.md](30-DAY-TEAM-OPERATIONS-GUIDE.md)** | How to use both files + WhatsApp groups + weekly reviews |
 | **[WHATSAPP-GROUP-SETUP.md](WHATSAPP-GROUP-SETUP.md)** | Copy-paste WhatsApp group descriptions + Day 1 messages |
+| **[CATEGORY-CATALOG-0-18.md](CATEGORY-CATALOG-0-18.md)** | Full category list 0–18Y for Admin UI + Amazon/Flipkart |
+| **[COUPON-CODES-GUIDE.md](COUPON-CODES-GUIDE.md)** | Website discount codes — Admin → Coupons, campaigns, examples |
+| **[GST-MONTHLY-FILING-GUIDE.md](GST-MONTHLY-FILING-GUIDE.md)** | GST & tax awareness — GSTR-1, GSTR-3B, ITC, CA workflow, monthly checklist |
+| **[BUSINESS-BANKING-MONEY-GUIDE.md](BUSINESS-BANKING-MONEY-GUIDE.md)** | Business current account — open, connect Razorpay/Amazon, money handling |
+| **[packing-printables/](packing-printables/)** | Print pack: poster, thank-you cards, GST invoice, shipping label guide |
 
 ---
 

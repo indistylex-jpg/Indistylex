@@ -24,16 +24,17 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.indistylex.app"
-    compileSdk 35
-    ndkVersion flutter.ndkVersion
+    compileSdk 36
+    ndkVersion "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -43,7 +44,7 @@ android {
     defaultConfig {
         applicationId "com.indistylex.app"
         minSdkVersion 21
-        targetSdkVersion flutter.targetSdkVersion
+        targetSdk 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -61,4 +62,6 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+}

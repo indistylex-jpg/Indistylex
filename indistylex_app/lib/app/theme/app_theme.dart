@@ -1,30 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Brand colors aligned with indistylex.com (style.css).
 class AppColors {
-  static const Color primary = Color(0xFF1A1A1A);
-  static const Color accent = Color(0xFFC8A962);
+  static const Color primary = Color(0xFF1E4D8C);
+  static const Color accent = Color(0xFF2563EB);
+  static const Color accentHover = Color(0xFF1D4ED8);
+  static const Color accentSoft = Color(0xFFEFF6FF);
+  static const Color accentLight = Color(0xFFDBEAFE);
+  static const Color accentWarm = Color(0xFFE85D04);
   static const Color white = Color(0xFFFFFFFF);
-  static const Color background = Color(0xFFF8F8F8);
+  static const Color background = Color(0xFFF8FAFC);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color muted = Color(0xFF777777);
-  static const Color lightGrey = Color(0xFFE5E5E5);
+  static const Color cardBg = Color(0xFFEEF4FC);
+  static const Color muted = Color(0xFF64748B);
+  static const Color lightGrey = Color(0xFFE2E8F0);
   static const Color error = Color(0xFFE53935);
   static const Color success = Color(0xFF43A047);
-  static const Color cardShadow = Color(0x0D000000);
+  static const Color cardShadow = Color(0x0D1E4D8C);
 }
 
 class AppTheme {
+  static TextStyle _inter({
+    required double size,
+    FontWeight weight = FontWeight.w400,
+    Color color = AppColors.primary,
+    double? letterSpacing,
+    double? height,
+  }) {
+    return GoogleFonts.inter(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+    );
+  }
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.accent,
         surface: AppColors.surface,
         error: AppColors.error,
         onPrimary: AppColors.white,
-        onSecondary: AppColors.primary,
+        onSecondary: AppColors.white,
         onSurface: AppColors.primary,
       ),
       scaffoldBackgroundColor: AppColors.background,
@@ -33,68 +55,26 @@ class AppTheme {
         foregroundColor: AppColors.primary,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.playfairDisplay(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
+        titleTextStyle: _inter(size: 18, weight: FontWeight.w700),
       ),
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.playfairDisplay(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
-        ),
-        displayMedium: GoogleFonts.playfairDisplay(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
-        headlineMedium: GoogleFonts.playfairDisplay(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
-        titleMedium: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: AppColors.primary,
-        ),
-        bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
-          color: AppColors.primary,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: 14,
-          color: AppColors.primary,
-        ),
-        bodySmall: GoogleFonts.inter(
-          fontSize: 12,
-          color: AppColors.muted,
-        ),
-        labelLarge: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.white,
-        ),
+        displayLarge: _inter(size: 32, weight: FontWeight.w800),
+        displayMedium: _inter(size: 24, weight: FontWeight.w700),
+        headlineMedium: _inter(size: 20, weight: FontWeight.w700),
+        titleLarge: _inter(size: 18, weight: FontWeight.w600),
+        titleMedium: _inter(size: 16, weight: FontWeight.w600),
+        bodyLarge: _inter(size: 16),
+        bodyMedium: _inter(size: 14),
+        bodySmall: _inter(size: 12, color: AppColors.muted),
+        labelLarge: _inter(size: 14, weight: FontWeight.w600, color: AppColors.white),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.accent,
           foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          textStyle: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          textStyle: _inter(size: 14, weight: FontWeight.w700, color: AppColors.white),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -102,9 +82,7 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.primary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -123,15 +101,13 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.accent, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        hintStyle: GoogleFonts.inter(color: AppColors.muted, fontSize: 14),
+        hintStyle: _inter(size: 14, color: AppColors.muted),
       ),
       cardTheme: CardThemeData(
         color: AppColors.white,
         elevation: 2,
         shadowColor: AppColors.cardShadow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.white,
@@ -143,14 +119,5 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme {
-    return lightTheme.copyWith(
-      scaffoldBackgroundColor: AppColors.primary,
-      colorScheme: ColorScheme.dark(
-        primary: AppColors.accent,
-        secondary: AppColors.accent,
-        surface: const Color(0xFF2A2A2A),
-      ),
-    );
-  }
+  static ThemeData get darkTheme => lightTheme;
 }

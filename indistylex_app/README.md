@@ -1,46 +1,44 @@
-# Indistylex Mobile App
+# Indistylex — Flutter Mobile App
 
-Premium Kids Fashion - E-commerce mobile app built with Flutter.
+Official Android & iOS app for [indistylex.com](https://indistylex.com).
 
-## Quick Start
+## Brand (matches website)
+
+| Item | Value |
+|------|-------|
+| Primary | `#1E4D8C` |
+| Accent | `#2563EB` |
+| Font | Inter |
+| Logo | Same SVG as website (`assets/images/logo.svg`) |
+| App icon | Kids tee mark on blue (`assets/images/app_icon.png`) |
+
+## Quick start
 
 ```bash
-# Install dependencies
 flutter pub get
-
-# Run on device/emulator
+dart run flutter_launcher_icons
 flutter run
+```
 
-# Build APK
+## Build release APK
+
+```bash
+bash build_apk.sh
+# or
 flutter build apk --release
 ```
 
-## Features
-- Browse products by category
-- Product detail with sizes, colors, reviews
-- Shopping cart & checkout
-- Razorpay payment integration
-- Wishlist
-- Order tracking
-- User authentication (email + Google)
-- Push notifications
-- Search with filters
+Output: `build/app/outputs/flutter-apk/app-release.apk`
 
-## Tech Stack
-- Flutter 3.24+
-- Provider (state management)
-- HTTP/Dio (networking)
-- Cached Network Image
-- Razorpay Flutter
-- Firebase (push notifications)
-- Flutter Secure Storage
+## Sync logo/icons from website
 
-## Brand Colors
-- Primary: `#1A1A1A` (Black)
-- Accent: `#C8A962` (Gold)
-- Fonts: Playfair Display + Inter
+After website brand updates:
 
-## Backend
-Connects to Flask API at `https://indistylex.com/api/`
+```bash
+bash scripts/sync_brand_from_website.sh
+dart run flutter_launcher_icons
+```
 
-See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed instructions.
+## API
+
+Base URL: `https://indistylex.com/api/v1` (see `lib/app/constants/api_constants.dart`)

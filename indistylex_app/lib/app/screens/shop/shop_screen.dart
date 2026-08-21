@@ -118,7 +118,7 @@ class _ShopScreenState extends State<ShopScreen> {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          Text('SHOP', style: GoogleFonts.playfairDisplay(fontSize: 22, fontWeight: FontWeight.w600)),
+          Text('SHOP', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.primary)),
           const Spacer(),
           IconButton(icon: const Icon(Icons.tune, size: 20), onPressed: _showFilterSheet),
           IconButton(icon: const Icon(Icons.sort, size: 20), onPressed: _showSortSheet),
@@ -168,7 +168,7 @@ class _ShopScreenState extends State<ShopScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Sort By', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.w600)),
+            child: Text('Sort By', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700)),
           ),
           _sortTile('newest', 'Newest First'),
           _sortTile('price_low', 'Price: Low to High'),
@@ -219,7 +219,7 @@ class _FilterSheetState extends State<_FilterSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Filters', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.w600)),
+          Text('Filters', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 24),
           const Text('Price Range', style: TextStyle(fontWeight: FontWeight.w500)),
           RangeSlider(

@@ -264,7 +264,7 @@ Then verify:
 | Tagline | Style That Speaks, Quality That Lasts |
 | GSTIN | 09GVUPP6447P1Z3 |
 | Phone | +91 63941 42176 |
-| Support email | support@indistylex.com (update from .in) |
+| Support email | support@indistylex.com |
 
 ---
 

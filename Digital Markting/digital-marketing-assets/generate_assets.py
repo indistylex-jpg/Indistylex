@@ -1,683 +1,560 @@
 """
-Digital Marketing Asset Generator for Indistylex
-Generates all social media images: logos, covers, banners, and profile pictures.
-Brand Colors: Primary #1A1A1A (Black), Accent #C8A962 (Gold), White #FFFFFF
-Design: Ultra-clean luxury — black, white, gold, minimal
+Indistylex Brand Asset Generator v2
+Generates logo, icons, covers, banners for website + all social platforms.
+Brand: Primary #1E4D8C | Accent #2563EB | Light #DBEAFE | BG #EFF6FF
+Run: python generate_assets.py
 """
 
 import os
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import math
+from PIL import Image, ImageDraw, ImageFont
 
-# Brand Colors (matching website)
-PRIMARY = (26, 26, 26)        # #1A1A1A Black
-SECONDARY = (107, 114, 128)   # #6B7280 Muted gray
-ACCENT = (200, 169, 98)       # #C8A962 Gold
+PRIMARY = (30, 77, 140)
+PRIMARY_DARK = (15, 45, 90)
+ACCENT = (37, 99, 235)
+ACCENT_BRIGHT = (59, 130, 246)
+ACCENT_LIGHT = (219, 234, 254)
 WHITE = (255, 255, 255)
-DARK = (26, 26, 26)           # #1A1A1A Black
-LIGHT_BG = (249, 249, 249)    # #F9F9F9 Off-white
+SLATE = (100, 116, 139)
+LIGHT_BG = (239, 246, 255)
 
-# Output directory
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
+SITE_BRAND_DIR = os.path.join(
+    os.path.dirname(OUTPUT_DIR), '..', 'Indistylex', 'app', 'static', 'images', 'brand'
+)
+SITE_BRAND_DIR = os.path.normpath(SITE_BRAND_DIR)
+
+TAGLINE = 'Premium Kids Fashion'
+WEBSITE = 'indistylex.com'
+FEATURES = ['Ages 0–18 Years', 'Free Shipping ₹999+', 'Easy Returns & COD']
 
 
 def get_font(size, bold=False):
-    """Try to get a good font, fall back to default."""
-    font_paths = [
-        "C:/Windows/Fonts/georgiabd.ttf" if bold else "C:/Windows/Fonts/georgia.ttf",
+    paths = [
+        f"/usr/share/fonts/truetype/dejavu/DejaVuSans{'-Bold' if bold else ''}.ttf",
+        f"/usr/share/fonts/truetype/liberation/LiberationSans-{'Bold' if bold else 'Regular'}.ttf",
         "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
-        "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
     ]
-    for path in font_paths:
-        if os.path.exists(path):
-            return ImageFont.truetype(path, size)
+    for p in paths:
+        if os.path.exists(p):
+            return ImageFont.truetype(p, size)
     return ImageFont.load_default()
 
 
-def create_gradient(width, height, color1, color2, direction='horizontal'):
-    """Create a gradient image."""
-    img = Image.new('RGB', (width, height))
-    pixels = img.load()
-    for x in range(width):
-        for y in range(height):
-            if direction == 'horizontal':
-                ratio = x / width
-            elif direction == 'vertical':
-                ratio = y / height
-            else:  # diagonal
-                ratio = (x + y) / (width + height)
-            r = int(color1[0] * (1 - ratio) + color2[0] * ratio)
-            g = int(color1[1] * (1 - ratio) + color2[1] * ratio)
-            b = int(color1[2] * (1 - ratio) + color2[2] * ratio)
-            pixels[x, y] = (r, g, b)
+def lerp(a, b, t):
+    return int(a * (1 - t) + b * t)
+
+
+def gradient_image(w, h, c1, c2, c3=None, direction='diag'):
+    img = Image.new('RGB', (w, h))
+    px = img.load()
+    for y in range(h):
+        for x in range(w):
+            if direction == 'diag':
+                t = (x / max(w - 1, 1) + y / max(h - 1, 1)) / 2
+            elif direction == 'h':
+                t = x / max(w - 1, 1)
+            else:
+                t = y / max(h - 1, 1)
+            if c3 and t > 0.5:
+                t2 = (t - 0.5) * 2
+                r = lerp(c2[0], c3[0], t2)
+                g = lerp(c2[1], c3[1], t2)
+                b = lerp(c2[2], c3[2], t2)
+            else:
+                t2 = t * 2 if c3 else t
+                r = lerp(c1[0], c2[0], min(t2, 1))
+                g = lerp(c1[1], c2[1], min(t2, 1))
+                b = lerp(c1[2], c2[2], min(t2, 1))
+            px[x, y] = (r, g, b)
     return img
 
 
-def draw_logo_mark(draw, x, y, size):
-    """Draw the iX logo mark — black square with gold iX."""
-    # Rounded rectangle background
-    rect_size = size
-    draw.rounded_rectangle(
-        [x, y, x + rect_size, y + rect_size],
-        radius=size // 5,
-        fill=PRIMARY
+def draw_soft_circles(draw, w, h):
+    """Decorative background blobs."""
+    blobs = [
+        (w * 0.85, h * 0.15, 120, ACCENT_BRIGHT, 25),
+        (w * 0.1, h * 0.75, 90, ACCENT, 18),
+        (w * 0.7, h * 0.8, 70, ACCENT_LIGHT, 12),
+    ]
+    for cx, cy, r, color, alpha in blobs:
+        for i in range(r, 0, -2):
+            a = int(alpha * (i / r))
+            c = tuple(lerp(color[j], PRIMARY[j], 0.3) for j in range(3))
+            draw.ellipse([cx - i, cy - i, cx + i, cy + i], fill=c + (a,) if False else c)
+
+
+def draw_shirt_icon(draw, cx, cy, size):
+    """Minimal kids tee silhouette for the brand mark."""
+    s = size * 0.36
+    body = [
+        (cx - s * 0.55, cy - s * 0.15),
+        (cx - s * 0.95, cy - s * 0.75),
+        (cx - s * 0.35, cy - s * 1.05),
+        (cx, cy - s * 0.55),
+        (cx + s * 0.35, cy - s * 1.05),
+        (cx + s * 0.95, cy - s * 0.75),
+        (cx + s * 0.55, cy - s * 0.15),
+        (cx + s * 0.55, cy + s * 1.05),
+        (cx - s * 0.55, cy + s * 1.05),
+    ]
+    draw.polygon(body, fill=WHITE)
+    draw.line(
+        [(cx - s * 0.28, cy - s * 0.35), (cx, cy - s * 0.05), (cx + s * 0.28, cy - s * 0.35)],
+        fill=ACCENT_LIGHT,
+        width=max(2, int(size * 0.04)),
     )
-    # "iX" text in gold
-    font_size = int(size * 0.55)
-    font = get_font(font_size, bold=True)
-    text = "iX"
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    tx = x + (rect_size - tw) // 2
-    ty = y + (rect_size - th) // 2 - size // 10
-    draw.text((tx, ty), text, fill=ACCENT, font=font)
-    # Gold underline
-    line_y = y + rect_size - size // 6
-    line_margin = size // 5
-    draw.line([(x + line_margin, line_y), (x + rect_size - line_margin, line_y)], fill=ACCENT, width=max(2, size // 40))
 
 
-def draw_wordmark(draw, x, y, font_size, color=PRIMARY):
-    """Draw 'Indistylex' text."""
-    font = get_font(font_size, bold=True)
-    draw.text((x, y), "Indistylex", fill=color, font=font)
+def draw_logo_mark(draw, x, y, size, with_shadow=False):
+    """Gradient rounded-square kids tee mark."""
+    r = size // 4
+    if with_shadow:
+        draw.rounded_rectangle(
+            [x + 3, y + 4, x + size + 3, y + size + 4],
+            radius=r, fill=(15, 45, 90)
+        )
+    steps = 8
+    for i in range(steps):
+        t = i / (steps - 1)
+        c = (lerp(PRIMARY[0], ACCENT_BRIGHT[0], t),
+             lerp(PRIMARY[1], ACCENT_BRIGHT[1], t),
+             lerp(PRIMARY[2], ACCENT_BRIGHT[2], t))
+        inset = i * 2
+        if inset < size // 2:
+            draw.rounded_rectangle(
+                [x + inset // 2, y + inset // 2,
+                 x + size - inset // 2, y + size - inset // 2],
+                radius=max(r - inset // 4, 4), fill=c
+            )
+    draw.rounded_rectangle([x, y, x + size, y + size], radius=r, outline=ACCENT_LIGHT, width=max(1, size // 40))
+    draw_shirt_icon(draw, x + size // 2, y + size // 2 + size // 16, size)
 
 
-# ============================================================
-# 1. LOGO - Square Profile Picture (720x720)
-# ============================================================
+def draw_brand_row(draw, x, y, mark_size, wordmark_size, light=False):
+    """Icon + Indistylex wordmark."""
+    draw_logo_mark(draw, x, y, mark_size, with_shadow=not light)
+    wx = x + mark_size + mark_size // 4
+    color = WHITE if light else PRIMARY
+    sub_color = ACCENT_LIGHT if light else ACCENT
+    tag_color = ACCENT_LIGHT if light else SLATE
+
+    font = get_font(wordmark_size, bold=True)
+    draw.text((wx, y + mark_size // 8), 'INDISTYLEX', fill=color, font=font)
+    bbox = draw.textbbox((wx, y), 'INDISTYLEX', font=font)
+    draw.rounded_rectangle([wx, bbox[3] + 2, wx + wordmark_size * 2.2, bbox[3] + 6], radius=2, fill=sub_color)
+    font_tag = get_font(max(12, wordmark_size // 3))
+    draw.text((wx, bbox[3] + 10), TAGLINE.upper(), fill=tag_color, font=font_tag)
+
+
+def brand_background(w, h, style='cover'):
+    img = gradient_image(w, h, PRIMARY_DARK, PRIMARY, ACCENT, 'diag')
+    draw = ImageDraw.Draw(img)
+    # Subtle grid
+    for i in range(0, w + h, 70):
+        draw.line([(i, 0), (i - h, h)], fill=(255, 255, 255), width=1)
+    # Top/bottom accent bars
+    draw.rectangle([0, 0, w, 5], fill=ACCENT)
+    draw.rectangle([0, h - 5, w, h], fill=ACCENT_BRIGHT)
+    if style == 'cover':
+        draw.ellipse([w - 200, -60, w + 60, 200], fill=(37, 99, 235))
+        draw.ellipse([-80, h - 180, 180, h + 40], fill=(30, 77, 140))
+    return img, draw
+
+
+def save(name, img, also_site=True):
+    path = os.path.join(OUTPUT_DIR, name)
+    if img.mode == 'RGBA':
+        img.save(path, 'PNG', optimize=True)
+    else:
+        img.save(path, 'PNG', quality=95, optimize=True)
+    print(f'  ✓ {path}')
+    if also_site and os.path.isdir(os.path.dirname(SITE_BRAND_DIR)):
+        os.makedirs(SITE_BRAND_DIR, exist_ok=True)
+        site_path = os.path.join(SITE_BRAND_DIR, name)
+        img.save(site_path, 'PNG', quality=95 if img.mode != 'RGBA' else None, optimize=True)
+    return path
+
+
+# ── LOGOS & ICONS ──────────────────────────────────────────────────
+
 def generate_profile_logo():
-    """720x720 square logo for Google Business, Meta profile."""
+    """720×720 — Google Business, Meta page profile."""
     size = 720
     img = Image.new('RGB', (size, size), WHITE)
     draw = ImageDraw.Draw(img)
-
-    # Draw large logo mark centered
-    mark_size = 240
-    mark_x = (size - mark_size) // 2
-    mark_y = size // 4 - 20
-
-    draw_logo_mark(draw, mark_x, mark_y, mark_size)
-
-    # Wordmark below
-    font = get_font(72, bold=True)
-    text = "Indistylex"
+    # Soft bg circle
+    draw.ellipse([40, 40, size - 40, size - 40], fill=LIGHT_BG)
+    draw.ellipse([60, 60, size - 60, size - 60], outline=ACCENT_LIGHT, width=3)
+    draw_logo_mark(draw, (size - 260) // 2, 160, 260)
+    font = get_font(64, bold=True)
+    text = 'Indistylex'
     bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    tx = (size - tw) // 2
-    ty = mark_y + mark_size + 50
-    draw.text((tx, ty), text, fill=PRIMARY, font=font)
+    tx = (size - (bbox[2] - bbox[0])) // 2
+    draw.text((tx, 450), text, fill=PRIMARY, font=font)
+    draw.line([(size // 2 - 90, 530), (size // 2 + 90, 530)], fill=ACCENT, width=4)
+    font_t = get_font(24)
+    tag = TAGLINE
+    bbox = draw.textbbox((0, 0), tag, font=font_t)
+    draw.text(((size - (bbox[2] - bbox[0])) // 2, 548), tag, fill=SLATE, font=font_t)
+    font_u = get_font(22, bold=True)
+    draw.text(((size - 180) // 2, 600), WEBSITE, fill=ACCENT, font=font_u)
+    save('logo-720x720-profile.png', img)
 
-    # Gold accent line under wordmark
-    line_w = 80
-    line_y = ty + 85
-    draw.line([(size // 2 - line_w, line_y), (size // 2 + line_w, line_y)], fill=ACCENT, width=3)
 
-    # Tagline
-    font_tag = get_font(26)
-    tagline = "Premium Kids Fashion"
-    bbox = draw.textbbox((0, 0), tagline, font=font_tag)
-    tw = bbox[2] - bbox[0]
-    tx = (size - tw) // 2
-    ty2 = line_y + 25
-    draw.text((tx, ty2), tagline, fill=SECONDARY, font=font_tag)
-
-    path = os.path.join(OUTPUT_DIR, "logo-720x720-profile.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-    return img
-
-
-# ============================================================
-# 2. GOOGLE BUSINESS COVER (1080x608)
-# ============================================================
-def generate_google_cover():
-    """1080x608 cover for Google Business Profile."""
-    width, height = 1080, 608
-    img = Image.new('RGB', (width, height), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Subtle diagonal gold lines as texture
-    for i in range(0, width + height, 80):
-        draw.line([(i, 0), (i - height, height)], fill=(40, 40, 40), width=1)
-
-    # Gold accent bar at top
-    draw.rectangle([0, 0, width, 4], fill=ACCENT)
-
-    # Logo mark top-left
-    draw_logo_mark(draw, 60, 50, 80)
-
-    # Main headline
-    font_main = get_font(52, bold=True)
-    draw.text((60, 190), "Premium Kids Fashion", fill=WHITE, font=font_main)
-
-    # Gold accent line
-    draw.line([(60, 260), (300, 260)], fill=ACCENT, width=3)
-
-    # Sub headline
-    font_sub = get_font(30)
-    draw.text((60, 280), "Style That Speaks, Quality That Lasts", fill=ACCENT, font=font_sub)
-
-    # Features
-    font_feat = get_font(22)
-    features = ["Ages 0-14 Years", "Free Shipping Pan-India", "Easy Returns & COD"]
-    for i, feat in enumerate(features):
-        fy = 350 + i * 40
-        draw.text((80, fy), f"\u2022  {feat}", fill=WHITE, font=font_feat)
-
-    # Website in gold
-    font_url = get_font(28, bold=True)
-    draw.text((60, 520), "indistylex.com", fill=ACCENT, font=font_url)
-
-    # Gold accent bar at bottom
-    draw.rectangle([0, height - 4, width, height], fill=ACCENT)
-
-    path = os.path.join(OUTPUT_DIR, "google-cover-1080x608.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 3. FACEBOOK COVER (820x312)
-# ============================================================
-def generate_facebook_cover():
-    """820x312 cover for Facebook page."""
-    width, height = 820, 312
-    img = Image.new('RGB', (width, height), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Gold top line
-    draw.rectangle([0, 0, width, 3], fill=ACCENT)
-
-    # Main text
-    font_main = get_font(38, bold=True)
-    draw.text((40, 50), "Premium Kids Fashion", fill=WHITE, font=font_main)
-
-    # Gold line
-    draw.line([(40, 105), (250, 105)], fill=ACCENT, width=2)
-
-    # Tagline
-    font_tag = get_font(22)
-    draw.text((40, 120), "Style That Speaks, Quality That Lasts", fill=ACCENT, font=font_tag)
-
-    # Features row
-    font_feat = get_font(16)
-    draw.text((40, 180), "Boys & Girls (0-14 yrs)  |  Free Shipping  |  COD Available", fill=WHITE, font=font_feat)
-
-    # Website
-    font_url = get_font(20, bold=True)
-    draw.text((40, 255), "indistylex.com", fill=ACCENT, font=font_url)
-
-    # Right side — elegant gold frame
-    frame_x = width - 180
-    draw.rounded_rectangle([frame_x, 40, width - 40, height - 40], radius=8, outline=ACCENT, width=2)
-    font_ix = get_font(48, bold=True)
-    draw.text((frame_x + 38, 100), "iX", fill=ACCENT, font=font_ix)
-    font_sm = get_font(14)
-    draw.text((frame_x + 25, 180), "Since 2024", fill=SECONDARY, font=font_sm)
-
-    # Gold bottom line
-    draw.rectangle([0, height - 3, width, height], fill=ACCENT)
-
-    path = os.path.join(OUTPUT_DIR, "facebook-cover-820x312.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 4. INSTAGRAM PROFILE (400x400)
-# ============================================================
-def generate_instagram_profile():
-    """400x400 square for Instagram profile."""
-    size = 400
-    img = Image.new('RGB', (size, size), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Gold border circle
-    margin = 15
-    draw.ellipse([margin, margin, size - margin, size - margin], outline=ACCENT, width=3)
-
-    # iX logo in center
-    font = get_font(100, bold=True)
-    text = "iX"
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    tx = (size - tw) // 2
-    ty = (size - th) // 2 - 20
-    draw.text((tx, ty), text, fill=ACCENT, font=font)
-
-    # Gold underline
-    draw.line([(size // 2 - 40, ty + th + 5), (size // 2 + 40, ty + th + 5)], fill=ACCENT, width=2)
-
-    path = os.path.join(OUTPUT_DIR, "instagram-profile-400x400.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 5. INSTAGRAM STORY TEMPLATE (1080x1920)
-# ============================================================
-def generate_instagram_story():
-    """1080x1920 story template."""
-    width, height = 1080, 1920
-    img = Image.new('RGB', (width, height), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Subtle texture lines
-    for i in range(0, width + height, 60):
-        draw.line([(i, 0), (i - height, height)], fill=(35, 35, 35), width=1)
-
-    # Gold top border
-    draw.rectangle([0, 0, width, 4], fill=ACCENT)
-
-    # Top logo
-    draw_logo_mark(draw, 40, 60, 70)
-    font_brand = get_font(28, bold=True)
-    draw.text((130, 78), "Indistylex", fill=WHITE, font=font_brand)
-
-    # Center content area (placeholder box)
-    box_y = 400
-    box_h = 800
-    draw.rounded_rectangle(
-        [60, box_y, width - 60, box_y + box_h],
-        radius=12,
-        fill=(35, 35, 35),
-        outline=ACCENT,
-        width=2
-    )
-
-    # "YOUR PRODUCT HERE" placeholder
-    font_ph = get_font(32)
-    text = "[ Product Image Here ]"
-    bbox = draw.textbbox((0, 0), text, font=font_ph)
-    tw = bbox[2] - bbox[0]
-    tx = (width - tw) // 2
-    ty = box_y + box_h // 2 - 20
-    draw.text((tx, ty), text, fill=SECONDARY, font=font_ph)
-
-    # Bottom CTA
-    cta_y = 1400
-    font_cta = get_font(36, bold=True)
-    draw.text((60, cta_y), "NEW ARRIVAL", fill=ACCENT, font=font_cta)
-
-    font_price = get_font(48, bold=True)
-    draw.text((60, cta_y + 60), "Starting \u20b9499", fill=WHITE, font=font_price)
-
-    font_swipe = get_font(24)
-    draw.text((60, cta_y + 130), "Swipe Up to Shop", fill=SECONDARY, font=font_swipe)
-
-    # Gold line separator
-    draw.line([(60, cta_y - 20), (width - 60, cta_y - 20)], fill=ACCENT, width=1)
-
-    # Bottom website
-    font_url = get_font(20)
-    draw.text((60, height - 80), "indistylex.com", fill=ACCENT, font=font_url)
-
-    # Gold bottom border
-    draw.rectangle([0, height - 4, width, height], fill=ACCENT)
-
-    path = os.path.join(OUTPUT_DIR, "instagram-story-1080x1920.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 6. WHATSAPP BUSINESS PROFILE (640x640)
-# ============================================================
-def generate_whatsapp_profile():
-    """640x640 for WhatsApp Business profile."""
-    size = 640
-    img = Image.new('RGB', (size, size), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Gold border
-    draw.rounded_rectangle([10, 10, size - 10, size - 10], radius=20, outline=ACCENT, width=3)
-
-    # Logo mark centered
-    mark_size = 180
-    mark_x = (size - mark_size) // 2
-    mark_y = size // 3 - 50
-    draw_logo_mark(draw, mark_x, mark_y, mark_size)
-
-    # Brand name
-    font = get_font(48, bold=True)
-    text = "Indistylex"
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    tx = (size - tw) // 2
-    ty = mark_y + mark_size + 40
-    draw.text((tx, ty), text, fill=WHITE, font=font)
-
-    # Gold line
-    draw.line([(size // 2 - 60, ty + 60), (size // 2 + 60, ty + 60)], fill=ACCENT, width=2)
-
-    # Tagline
-    font_tag = get_font(20)
-    tagline = "Premium Kids Fashion"
-    bbox = draw.textbbox((0, 0), tagline, font=font_tag)
-    tw = bbox[2] - bbox[0]
-    tx = (size - tw) // 2
-    draw.text((tx, ty + 75), tagline, fill=ACCENT, font=font_tag)
-
-    path = os.path.join(OUTPUT_DIR, "whatsapp-profile-640x640.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 7. YOUTUBE BANNER (2560x1440)
-# ============================================================
-def generate_youtube_banner():
-    """2560x1440 YouTube channel art (safe area: 1546x423 center)."""
-    width, height = 2560, 1440
-    img = Image.new('RGB', (width, height), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Subtle texture
-    for i in range(0, width + height, 100):
-        draw.line([(i, 0), (i - height, height)], fill=(35, 35, 35), width=1)
-
-    # Safe area guide (center 1546x423)
-    safe_x = (width - 1546) // 2
-    safe_y = (height - 423) // 2
-
-    # Gold accent lines
-    draw.rectangle([0, safe_y - 2, width, safe_y], fill=ACCENT)
-    draw.rectangle([0, safe_y + 423, width, safe_y + 425], fill=ACCENT)
-
-    # Logo mark
-    draw_logo_mark(draw, safe_x + 50, safe_y + 80, 100)
-
-    # Brand name
-    font_brand = get_font(68, bold=True)
-    draw.text((safe_x + 180, safe_y + 100), "Indistylex", fill=WHITE, font=font_brand)
-
-    # Gold underline
-    draw.line([(safe_x + 180, safe_y + 180), (safe_x + 450, safe_y + 180)], fill=ACCENT, width=3)
-
-    # Tagline
-    font_tag = get_font(28)
-    draw.text((safe_x + 180, safe_y + 195), "Premium Kids Fashion | Ages 0-14", fill=ACCENT, font=font_tag)
-
-    # Right side features
-    font_feat = get_font(22)
-    features = ["Free Shipping", "Easy Returns", "COD Available"]
-    for i, feat in enumerate(features):
-        fx = safe_x + 1100
-        fy = safe_y + 120 + i * 50
-        draw.rounded_rectangle([fx, fy, fx + 220, fy + 38], radius=19, outline=ACCENT, width=2)
-        draw.text((fx + 20, fy + 7), feat, fill=ACCENT, font=font_feat)
-
-    path = os.path.join(OUTPUT_DIR, "youtube-banner-2560x1440.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 8. EMAIL HEADER (600x200)
-# ============================================================
-def generate_email_header():
-    """600x200 email newsletter header."""
-    width, height = 600, 200
-    img = Image.new('RGB', (width, height), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Gold top line
-    draw.rectangle([0, 0, width, 3], fill=ACCENT)
-
-    # Logo mark
-    draw_logo_mark(draw, 30, 50, 90)
-
-    # Brand
-    font_brand = get_font(36, bold=True)
-    draw.text((140, 60), "Indistylex", fill=WHITE, font=font_brand)
-
-    # Tagline
-    font_tag = get_font(16)
-    draw.text((140, 105), "Premium Kids Fashion | indistylex.com", fill=ACCENT, font=font_tag)
-
-    # Gold bottom line
-    draw.rectangle([0, height - 3, width, height], fill=ACCENT)
-
-    path = os.path.join(OUTPUT_DIR, "email-header-600x200.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 9. FAVICON (192x192 for web)
-# ============================================================
-def generate_favicon():
-    """192x192 PNG favicon."""
-    size = 192
-    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-
-    # Rounded square
-    draw.rounded_rectangle([8, 8, size - 8, size - 8], radius=30, fill=PRIMARY)
-
-    # iX
-    font = get_font(80, bold=True)
-    text = "iX"
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    tx = (size - tw) // 2
-    ty = (size - th) // 2 - 10
-    draw.text((tx, ty), text, fill=ACCENT, font=font)
-
-    path = os.path.join(OUTPUT_DIR, "favicon-192x192.png")
-    img.save(path, "PNG")
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 10. AD CREATIVE TEMPLATE - SQUARE (1080x1080)
-# ============================================================
-def generate_ad_square():
-    """1080x1080 square ad template for Meta/Instagram feed ads."""
-    size = 1080
-    img = Image.new('RGB', (size, size), WHITE)
-    draw = ImageDraw.Draw(img)
-
-    # Top bar black with gold accents
-    bar_height = 100
-    draw.rectangle([0, 0, size, bar_height], fill=PRIMARY)
-    draw.rectangle([0, bar_height - 3, size, bar_height], fill=ACCENT)
-
-    # Logo on top bar
-    draw_logo_mark(draw, 30, 15, 70)
-    font_brand = get_font(28, bold=True)
-    draw.text((120, 38), "Indistylex", fill=WHITE, font=font_brand)
-
-    # Product placeholder area
-    product_y = 130
-    product_h = 600
-    draw.rounded_rectangle(
-        [60, product_y, size - 60, product_y + product_h],
-        radius=8,
-        fill=LIGHT_BG,
-        outline=(200, 200, 200),
-        width=1
-    )
-    font_ph = get_font(28)
-    text = "[ Product Image Here ]"
-    bbox = draw.textbbox((0, 0), text, font=font_ph)
-    tw = bbox[2] - bbox[0]
-    draw.text(((size - tw) // 2, product_y + product_h // 2 - 14), text, fill=SECONDARY, font=font_ph)
-
-    # Bottom section
-    bottom_y = 770
-    font_name = get_font(32, bold=True)
-    draw.text((60, bottom_y), "Product Name Here", fill=PRIMARY, font=font_name)
-
-    font_price = get_font(38, bold=True)
-    draw.text((60, bottom_y + 50), "\u20b9499", fill=PRIMARY, font=font_price)
-
-    font_old = get_font(26)
-    draw.text((190, bottom_y + 56), "\u20b9999", fill=SECONDARY, font=font_old)
-    # Strikethrough
-    bbox_old = draw.textbbox((190, bottom_y + 56), "\u20b9999", font=font_old)
-    draw.line([(190, bottom_y + 72), (bbox_old[2], bottom_y + 72)], fill=SECONDARY, width=2)
-
-    # CTA Button — black with gold text
-    btn_y = bottom_y + 120
-    draw.rounded_rectangle([60, btn_y, 320, btn_y + 55], radius=4, fill=PRIMARY)
-    font_btn = get_font(20, bold=True)
-    draw.text((100, btn_y + 15), "SHOP NOW", fill=ACCENT, font=font_btn)
-
-    # Offer badge in gold
-    draw.rounded_rectangle([size - 200, bottom_y, size - 60, bottom_y + 40], radius=4, fill=ACCENT)
-    font_badge = get_font(18, bold=True)
-    draw.text((size - 185, bottom_y + 9), "50% OFF", fill=PRIMARY, font=font_badge)
-
-    # Bottom gold line
-    draw.rectangle([0, size - 4, size, size], fill=ACCENT)
-
-    path = os.path.join(OUTPUT_DIR, "ad-square-1080x1080.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 11. SALE BANNER (1200x628) - Facebook/Google Ads
-# ============================================================
-def generate_sale_banner():
-    """1200x628 landscape ad for Facebook feed / Google Display."""
-    width, height = 1200, 628
-    img = Image.new('RGB', (width, height), PRIMARY)
-    draw = ImageDraw.Draw(img)
-
-    # Subtle diagonal texture
-    for i in range(0, width + height, 80):
-        draw.line([(i, 0), (i - height, height)], fill=(35, 35, 35), width=1)
-
-    # Gold top/bottom borders
-    draw.rectangle([0, 0, width, 4], fill=ACCENT)
-    draw.rectangle([0, height - 4, width, height], fill=ACCENT)
-
-    # Left side content
-    font_sale = get_font(60, bold=True)
-    draw.text((60, 80), "MEGA SALE", fill=ACCENT, font=font_sale)
-
-    font_off = get_font(100, bold=True)
-    draw.text((60, 160), "50% OFF", fill=WHITE, font=font_off)
-
-    # Gold separator line
-    draw.line([(60, 290), (350, 290)], fill=ACCENT, width=2)
-
-    font_sub = get_font(28)
-    draw.text((60, 310), "On All Kids Fashion", fill=WHITE, font=font_sub)
-    draw.text((60, 350), "Boys & Girls | Ages 0-14", fill=SECONDARY, font=font_sub)
-
-    # CTA — gold outline button
-    cta_y = 430
-    draw.rounded_rectangle([60, cta_y, 320, cta_y + 60], radius=4, outline=ACCENT, width=2)
-    font_cta = get_font(24, bold=True)
-    draw.text((105, cta_y + 16), "SHOP NOW", fill=ACCENT, font=font_cta)
-
-    # Website
-    font_url = get_font(20)
-    draw.text((60, height - 55), "indistylex.com", fill=ACCENT, font=font_url)
-
-    # Right side — elegant gold frame
-    frame_x = width - 320
-    draw.rounded_rectangle([frame_x, 80, width - 60, height - 80], radius=8, outline=ACCENT, width=2)
-    font_ix = get_font(80, bold=True)
-    draw.text((frame_x + 70, 220), "iX", fill=ACCENT, font=font_ix)
-    font_est = get_font(18)
-    draw.text((frame_x + 60, 330), "Premium Fashion", fill=SECONDARY, font=font_est)
-
-    # Offer validity
-    font_valid = get_font(18)
-    draw.text((width - 260, height - 55), "Limited Time Offer", fill=SECONDARY, font=font_valid)
-
-    path = os.path.join(OUTPUT_DIR, "sale-banner-1200x628.png")
-    img.save(path, "PNG", quality=95)
-    print(f"✓ Created: {path}")
-
-
-# ============================================================
-# 12. LOGO TRANSPARENT (500x500 with transparency)
-# ============================================================
 def generate_logo_transparent():
-    """500x500 logo with transparent background."""
+    """500×500 transparent — overlays, WhatsApp stickers."""
     size = 500
     img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-
-    # Logo mark
-    mark_size = 150
-    mark_x = (size - mark_size) // 2
-    mark_y = 80
-    draw.rounded_rectangle(
-        [mark_x, mark_y, mark_x + mark_size, mark_y + mark_size],
-        radius=mark_size // 5,
-        fill=PRIMARY + (255,)
-    )
-    font_ix = get_font(int(mark_size * 0.55), bold=True)
-    text = "iX"
-    bbox = draw.textbbox((0, 0), text, font=font_ix)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    tx = mark_x + (mark_size - tw) // 2
-    ty = mark_y + (mark_size - th) // 2 - mark_size // 10
-    draw.text((tx, ty), text, fill=ACCENT + (255,), font=font_ix)
-    # Gold underline in mark
-    line_y = mark_y + mark_size - mark_size // 6
-    draw.line([(mark_x + mark_size // 5, line_y), (mark_x + mark_size - mark_size // 5, line_y)], fill=ACCENT + (255,), width=2)
-
-    # Wordmark
-    font_brand = get_font(48, bold=True)
-    text = "Indistylex"
-    bbox = draw.textbbox((0, 0), text, font=font_brand)
-    tw = bbox[2] - bbox[0]
-    tx = (size - tw) // 2
-    ty = mark_y + mark_size + 35
-    draw.text((tx, ty), text, fill=PRIMARY + (255,), font=font_brand)
-
-    # Gold accent line
-    draw.line([(size // 2 - 50, ty + 58), (size // 2 + 50, ty + 58)], fill=ACCENT + (255,), width=2)
-
-    # Tagline
-    font_tag = get_font(18)
-    tagline = "Premium Kids Fashion"
-    bbox = draw.textbbox((0, 0), tagline, font=font_tag)
-    tw = bbox[2] - bbox[0]
-    tx = (size - tw) // 2
-    draw.text((tx, ty + 70), tagline, fill=SECONDARY + (255,), font=font_tag)
-
-    path = os.path.join(OUTPUT_DIR, "logo-transparent-500x500.png")
-    img.save(path, "PNG")
-    print(f"✓ Created: {path}")
+    draw_logo_mark(draw, 175, 80, 150)
+    font = get_font(46, bold=True)
+    text = 'Indistylex'
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tx = (size - (bbox[2] - bbox[0])) // 2
+    draw.text((tx, 260), text, fill=PRIMARY + (255,), font=font)
+    draw.line([(size // 2 - 55, 320), (size // 2 + 55, 320)], fill=ACCENT + (255,), width=3)
+    font_t = get_font(18)
+    tag = TAGLINE
+    bbox = draw.textbbox((0, 0), tag, font=font_t)
+    draw.text(((size - (bbox[2] - bbox[0])) // 2, 335), tag, fill=SLATE + (255,), font=font_t)
+    save('logo-transparent-500x500.png', img)
 
 
-# ============================================================
-# RUN ALL
-# ============================================================
-if __name__ == "__main__":
-    print("=" * 50)
-    print("  INDISTYLEX - Digital Marketing Asset Generator")
-    print("=" * 50)
-    print()
+def generate_logo_horizontal():
+    """800×200 — email signatures, invoices."""
+    w, h = 800, 200
+    img = Image.new('RGB', (w, h), WHITE)
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle([0, 0, w, h], radius=0, fill=LIGHT_BG)
+    draw_brand_row(draw, 30, 40, 100, 52, light=False)
+    save('logo-horizontal-800x200.png', img)
 
+
+def generate_favicon_png(size, name):
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    pad = max(2, size // 16)
+    mark = size - pad * 2
+    draw_logo_mark(draw, pad, pad, mark)
+    save(name, img)
+
+
+def generate_apple_touch_icon():
+    size = 180
+    img = Image.new('RGB', (size, size), LIGHT_BG)
+    draw = ImageDraw.Draw(img)
+    draw_logo_mark(draw, 30, 30, 120)
+    save('apple-touch-icon-180x180.png', img)
+
+
+def generate_site_manifest():
+    manifest = """{
+  "name": "Indistylex",
+  "short_name": "Indistylex",
+  "description": "Premium kids fashion — ages 0–18",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EFF6FF",
+  "theme_color": "#1E4D8C",
+  "icons": [
+    {
+      "src": "/static/images/brand/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/brand/apple-touch-icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
+"""
+    path = os.path.join(SITE_BRAND_DIR, 'site.webmanifest')
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(manifest)
+    print(f'  ✓ {path}')
+
+
+# ── SOCIAL COVERS ──────────────────────────────────────────────────
+
+def generate_facebook_cover():
+    w, h = 820, 312
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 40, 60, 70, 32, light=True)
+    font = get_font(20)
+    draw.text((40, 175), '  |  '.join(FEATURES[:3]), fill=ACCENT_LIGHT, font=font)
+    font_u = get_font(22, bold=True)
+    draw.text((40, 240), WEBSITE, fill=WHITE, font=font_u)
+    # Right badge
+    bx = w - 150
+    draw.rounded_rectangle([bx, 70, w - 40, h - 70], radius=12, outline=ACCENT_LIGHT, width=2)
+    font_ix = get_font(52, bold=True)
+    draw.text((bx + 35, 110), 'iX', fill=WHITE, font=font_ix)
+    save('facebook-cover-820x312.png', img)
+
+
+def generate_google_cover():
+    w, h = 1080, 608
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 60, 50, 90, 40, light=True)
+    font = get_font(44, bold=True)
+    draw.text((60, 200), TAGLINE, fill=WHITE, font=font)
+    draw.line([(60, 265), (340, 265)], fill=ACCENT_LIGHT, width=3)
+    font_s = get_font(26)
+    draw.text((60, 285), 'Style That Speaks · Quality That Lasts', fill=ACCENT_LIGHT, font=font_s)
+    for i, feat in enumerate(FEATURES):
+        draw.text((80, 360 + i * 42), f'✦  {feat}', fill=WHITE, font=get_font(22))
+    draw.text((60, 530), WEBSITE, fill=ACCENT_LIGHT, font=get_font(30, bold=True))
+    save('google-cover-1080x608.png', img)
+
+
+def generate_linkedin_cover():
+    w, h = 1584, 396
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 80, 80, 80, 36, light=True)
+    font = get_font(36, bold=True)
+    draw.text((80, 220), f'{TAGLINE}  ·  Boys & Girls 0–18', fill=WHITE, font=font)
+    draw.text((80, 290), WEBSITE, fill=ACCENT_LIGHT, font=get_font(24, bold=True))
+    save('linkedin-cover-1584x396.png', img)
+
+
+def generate_twitter_header():
+    w, h = 1500, 500
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 80, 120, 100, 44, light=True)
+    font = get_font(32)
+    draw.text((80, 320), '  ·  '.join(FEATURES), fill=ACCENT_LIGHT, font=font)
+    save('twitter-header-1500x500.png', img)
+
+
+def generate_youtube_banner():
+    w, h = 2560, 1440
+    img, draw = brand_background(w, h)
+    sx, sy = (w - 1546) // 2, (h - 423) // 2
+    draw.rectangle([0, sy - 3, w, sy], fill=ACCENT)
+    draw.rectangle([0, sy + 423, w, sy + 426], fill=ACCENT_BRIGHT)
+    draw_brand_row(draw, sx + 60, sy + 70, 110, 48, light=True)
+    font = get_font(26)
+    draw.text((sx + 60, sy + 280), f'{TAGLINE}  |  {WEBSITE}', fill=ACCENT_LIGHT, font=font)
+    for i, feat in enumerate(FEATURES):
+        fx, fy = sx + 1100, sy + 100 + i * 55
+        draw.rounded_rectangle([fx, fy, fx + 260, fy + 42], radius=21, outline=ACCENT_LIGHT, width=2)
+        draw.text((fx + 18, fy + 8), feat, fill=WHITE, font=get_font(20))
+    save('youtube-banner-2560x1440.png', img)
+
+
+def generate_instagram_profile():
+    size = 400
+    img = gradient_image(size, size, PRIMARY, ACCENT, ACCENT_BRIGHT, 'diag')
+    draw = ImageDraw.Draw(img)
+    draw.ellipse([20, 20, size - 20, size - 20], outline=WHITE, width=4)
+    draw.ellipse([35, 35, size - 35, size - 35], outline=ACCENT_LIGHT, width=2)
+    draw_logo_mark(draw, 100, 90, 200)
+    save('instagram-profile-400x400.png', img)
+
+
+def generate_whatsapp_profile():
+    size = 640
+    img = gradient_image(size, size, PRIMARY_DARK, PRIMARY, ACCENT, 'diag')
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle([15, 15, size - 15, size - 15], radius=24, outline=ACCENT_LIGHT, width=3)
+    draw_logo_mark(draw, (size - 220) // 2, 120, 220)
+    font = get_font(46, bold=True)
+    text = 'Indistylex'
+    bbox = draw.textbbox((0, 0), text, font=font)
+    draw.text(((size - (bbox[2] - bbox[0])) // 2, 370), text, fill=WHITE, font=font)
+    draw.line([(size // 2 - 70, 435), (size // 2 + 70, 435)], fill=ACCENT_LIGHT, width=2)
+    font_t = get_font(20)
+    tag = TAGLINE
+    bbox = draw.textbbox((0, 0), tag, font=font_t)
+    draw.text(((size - (bbox[2] - bbox[0])) // 2, 455), tag, fill=ACCENT_LIGHT, font=font_t)
+    save('whatsapp-profile-640x640.png', img)
+
+
+def generate_pinterest_pin():
+    w, h = 1000, 1500
+    img, draw = brand_background(w, h, 'cover')
+    draw_brand_row(draw, 60, 60, 80, 36, light=True)
+    draw.rounded_rectangle([60, 280, w - 60, 900], radius=16, fill=(24, 58, 108), outline=ACCENT_LIGHT, width=2)
+    font = get_font(28)
+    draw.text((120, 560), '[ Product Photo Here ]', fill=SLATE, font=font)
+    draw.text((60, 960), 'NEW ARRIVAL', fill=ACCENT_LIGHT, font=get_font(40, bold=True))
+    draw.text((60, 1030), 'Starting ₹499', fill=WHITE, font=get_font(52, bold=True))
+    draw.text((60, 1120), f'Shop at {WEBSITE}', fill=ACCENT_LIGHT, font=get_font(24))
+    save('pinterest-pin-1000x1500.png', img)
+
+
+# ── WEBSITE & ADS ──────────────────────────────────────────────────
+
+def generate_website_banner():
+    """1920×600 homepage / hero marketing banner."""
+    w, h = 1920, 600
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 100, 120, 120, 56, light=True)
+    font = get_font(56, bold=True)
+    draw.text((100, 300), TAGLINE, fill=WHITE, font=font)
+    font_s = get_font(28)
+    draw.text((100, 380), 'Boys & Girls · Newborn to Teens · Pan-India Delivery', fill=ACCENT_LIGHT, font=font_s)
+    draw.rounded_rectangle([100, 460, 340, 530], radius=8, fill=ACCENT)
+    draw.text((145, 478), 'SHOP NOW', fill=WHITE, font=get_font(26, bold=True))
+    draw.text((360, 490), WEBSITE, fill=WHITE, font=get_font(24, bold=True))
+    save('website-banner-1920x600.png', img)
+
+
+def generate_og_share():
+    """1200×630 Open Graph / WhatsApp link preview."""
+    w, h = 1200, 630
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 80, 160, 110, 50, light=True)
+    font = get_font(48, bold=True)
+    draw.text((80, 340), TAGLINE, fill=WHITE, font=font)
+    draw.text((80, 420), 'Free Shipping · Easy Returns · COD Available', fill=ACCENT_LIGHT, font=get_font(26))
+    draw.text((80, 530), WEBSITE, fill=WHITE, font=get_font(32, bold=True))
+    save('og-share-1200x630.png', img)
+
+
+def generate_email_header():
+    w, h = 600, 200
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 24, 40, 70, 28, light=True)
+    save('email-header-600x200.png', img)
+
+
+def generate_instagram_story():
+    w, h = 1080, 1920
+    img, draw = brand_background(w, h)
+    draw_brand_row(draw, 40, 50, 65, 26, light=True)
+    draw.rounded_rectangle([50, 350, w - 50, 1150], radius=16, fill=(20, 50, 95), outline=ACCENT_LIGHT, width=2)
+    draw.text((200, 720), '[ Product Image ]', fill=SLATE, font=get_font(32))
+    draw.text((50, 1250), 'NEW ARRIVAL', fill=ACCENT_LIGHT, font=get_font(40, bold=True))
+    draw.text((50, 1320), 'Starting ₹499', fill=WHITE, font=get_font(56, bold=True))
+    draw.text((50, 1410), f'Shop · {WEBSITE}', fill=ACCENT_LIGHT, font=get_font(26))
+    save('instagram-story-1080x1920.png', img)
+
+
+def generate_ad_square():
+    size = 1080
+    img = Image.new('RGB', (size, size), WHITE)
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([0, 0, size, 110], fill=PRIMARY)
+    draw.rectangle([0, 107, size, 110], fill=ACCENT)
+    draw_logo_mark(draw, 28, 18, 74)
+    draw.text((120, 42), 'Indistylex', fill=WHITE, font=get_font(30, bold=True))
+    draw.rounded_rectangle([50, 140, size - 50, 760], radius=12, fill=LIGHT_BG, outline=ACCENT_LIGHT, width=1)
+    draw.text((280, 430), '[ Product Image Here ]', fill=SLATE, font=get_font(28))
+    draw.text((60, 810), 'Product Name', fill=PRIMARY, font=get_font(34, bold=True))
+    draw.text((60, 870), '₹499', fill=PRIMARY, font=get_font(42, bold=True))
+    draw.text((190, 878), '₹999', fill=SLATE, font=get_font(28))
+    draw.line([(190, 895), (280, 895)], fill=SLATE, width=2)
+    draw.rounded_rectangle([60, 960, 300, 1020], radius=8, fill=ACCENT)
+    draw.text((95, 975), 'SHOP NOW', fill=WHITE, font=get_font(22, bold=True))
+    draw.rounded_rectangle([size - 200, 810, size - 60, 860], radius=6, fill=PRIMARY)
+    draw.text((size - 178, 822), '50% OFF', fill=WHITE, font=get_font(20, bold=True))
+    save('ad-square-1080x1080.png', img)
+
+
+def generate_sale_banner():
+    w, h = 1200, 628
+    img, draw = brand_background(w, h)
+    draw.text((60, 70), 'MEGA SALE', fill=ACCENT_LIGHT, font=get_font(52, bold=True))
+    draw.text((60, 150), '50% OFF', fill=WHITE, font=get_font(96, bold=True))
+    draw.line([(60, 280), (360, 280)], fill=ACCENT_LIGHT, width=3)
+    draw.text((60, 300), 'On All Kids Fashion', fill=WHITE, font=get_font(30))
+    draw.text((60, 345), 'Boys & Girls · Ages 0–18', fill=ACCENT_LIGHT, font=get_font(24))
+    draw.rounded_rectangle([60, 420, 310, 490], radius=8, outline=WHITE, width=2)
+    draw.text((105, 440), 'SHOP NOW', fill=WHITE, font=get_font(24, bold=True))
+    draw.text((60, h - 60), WEBSITE, fill=ACCENT_LIGHT, font=get_font(22, bold=True))
+    draw.rounded_rectangle([w - 300, 80, w - 60, h - 80], radius=12, outline=ACCENT_LIGHT, width=2)
+    draw_logo_mark(draw, w - 250, 180, 140)
+    save('sale-banner-1200x628.png', img)
+
+
+def generate_readme():
+    lines = [
+        '# Indistylex Brand Assets',
+        '',
+        'Generated by `generate_assets.py`. Brand colors: `#1E4D8C` · `#2563EB` · `#DBEAFE`',
+        '',
+        '## Logos & Icons',
+        '| File | Size | Use for |',
+        '|------|------|---------|',
+        '| logo-720x720-profile.png | 720×720 | Google Business, Facebook page photo |',
+        '| logo-transparent-500x500.png | 500×500 | Overlays, presentations |',
+        '| logo-horizontal-800x200.png | 800×200 | Email signature, invoices |',
+        '| favicon-192x192.png | 192×192 | PWA, Android |',
+        '| favicon-32x32.png | 32×32 | Browser tab |',
+        '| apple-touch-icon-180x180.png | 180×180 | iPhone home screen |',
+        '',
+        '## Social Covers',
+        '| File | Platform |',
+        '|------|----------|',
+        '| facebook-cover-820x312.png | Facebook page cover |',
+        '| google-cover-1080x608.png | Google Business cover |',
+        '| instagram-profile-400x400.png | Instagram profile photo |',
+        '| whatsapp-profile-640x640.png | WhatsApp Business profile |',
+        '| youtube-banner-2560x1440.png | YouTube channel art |',
+        '| linkedin-cover-1584x396.png | LinkedIn company page |',
+        '| twitter-header-1500x500.png | X (Twitter) header |',
+        '| pinterest-pin-1000x1500.png | Pinterest pin template |',
+        '',
+        '## Website & Ads',
+        '| File | Use for |',
+        '|------|---------|',
+        '| website-banner-1920x600.png | Homepage hero, ads |',
+        '| og-share-1200x630.png | WhatsApp/FB link preview |',
+        '| email-header-600x200.png | Email newsletters |',
+        '| instagram-story-1080x1920.png | Instagram/Facebook stories |',
+        '| ad-square-1080x1080.png | Meta/Instagram feed ads |',
+        '| sale-banner-1200x628.png | Facebook/Google display ads |',
+        '',
+        'Website SVG logos: `Indistylex/app/static/images/logo.svg`, `favicon.svg`, `logo-white.svg`',
+    ]
+    path = os.path.join(OUTPUT_DIR, 'ASSETS-README.md')
+    with open(path, 'w') as f:
+        f.write('\n'.join(lines))
+    print(f'  ✓ {path}')
+
+
+if __name__ == '__main__':
+    print('=' * 56)
+    print('  INDISTYLEX Brand Asset Generator v2')
+    print('=' * 56)
+    print(f'\nOutput: {OUTPUT_DIR}')
+    print(f'Site copy: {SITE_BRAND_DIR}\n')
+
+    print('Logos & Icons:')
     generate_profile_logo()
-    generate_google_cover()
+    generate_logo_transparent()
+    generate_logo_horizontal()
+    generate_favicon_png(192, 'favicon-192x192.png')
+    generate_favicon_png(32, 'favicon-32x32.png')
+    generate_favicon_png(16, 'favicon-16x16.png')
+    generate_apple_touch_icon()
+    generate_site_manifest()
+
+    print('\nSocial Covers:')
     generate_facebook_cover()
-    generate_instagram_profile()
-    generate_instagram_story()
-    generate_whatsapp_profile()
+    generate_google_cover()
+    generate_linkedin_cover()
+    generate_twitter_header()
     generate_youtube_banner()
+    generate_instagram_profile()
+    generate_whatsapp_profile()
+    generate_pinterest_pin()
+
+    print('\nWebsite & Ads:')
+    generate_website_banner()
+    generate_og_share()
     generate_email_header()
-    generate_favicon()
+    generate_instagram_story()
     generate_ad_square()
     generate_sale_banner()
-    generate_logo_transparent()
 
-    print()
-    print("=" * 50)
-    print("  ALL ASSETS GENERATED SUCCESSFULLY! ✓")
-    print("=" * 50)
-    print()
-    print("Files saved to:", OUTPUT_DIR)
+    print('\nDocumentation:')
+    generate_readme()
+
+    print('\n' + '=' * 56)
+    print('  ALL 20 ASSETS GENERATED ✓')
+    print('=' * 56)

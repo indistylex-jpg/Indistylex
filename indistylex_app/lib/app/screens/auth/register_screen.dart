@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/app_logo.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -64,14 +66,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              const Center(
+              const Center(child: AppLogo(height: 44)),
+              const SizedBox(height: 24),
+              Center(
                 child: Text(
                   'Create Account',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'PlayfairDisplay',
-                  ),
+                  style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w800),
                 ),
               ),
               const SizedBox(height: 8),

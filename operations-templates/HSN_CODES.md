@@ -108,6 +108,7 @@ IX-SHT-002-5-6Y-BLU   Boys Cotton Half Shirt         6205    2   ₹399    5%   
 | `Indistylex-Business-Tracker.xlsx` | Master Excel — all tabs |
 | `README.md` | How to use the workbook |
 | `../BUSINESS_OPERATIONS_PLAYBOOK.md` §10.3 | GST quick reference |
+| `GST-MONTHLY-FILING-GUIDE.md` | Full monthly filing guide (GSTR-1, GSTR-3B) |
 
 ---
 

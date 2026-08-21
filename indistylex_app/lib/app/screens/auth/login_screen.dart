@@ -84,11 +84,11 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              const Center(child: AppLogo(monogramSize: 48)),
+              const Center(child: AppLogo(height: 44)),
               const SizedBox(height: 24),
               Center(
                 child: Text('Welcome Back',
-                    style: GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.w600)),
+                    style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w700)),
               ),
               const SizedBox(height: 8),
               Center(

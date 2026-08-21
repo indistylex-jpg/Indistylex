@@ -23,7 +23,7 @@ class AppDrawer extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(20),
-              child: const AppLogo(monogramSize: 36),
+              child: const AppLogo(height: 38),
             ),
             const Divider(height: 1),
             Expanded(

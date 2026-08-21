@@ -37,9 +37,9 @@ class SectionHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.playfairDisplay(
+                style: GoogleFonts.inter(
                   fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 1,
                   color: AppColors.primary,
                 ),

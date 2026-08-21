@@ -14,7 +14,7 @@
 ## Instagram Strategy
 
 ### Profile Setup:
-- **Username**: @indistylex
+- **Username**: @indistylex_clothing
 - **Name**: Indistylex | Kids Fashion
 - **Bio**:
 ```

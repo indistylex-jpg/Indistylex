@@ -135,7 +135,7 @@ Set up these shortcuts (type `/keyword` to use):
 | `/cod` | `💰 Yes! Cash on Delivery available across India.\n\n• ₹50 COD charge applies\n• Prepaid orders get 10% extra discount!\n• UPI/Card/Net Banking accepted for prepaid\n\nWould you like to order?` |
 | `/track` | `📦 To track your order:\n\n1. Share your Order ID or registered email\n2. Or check status at: indistylex.com/orders\n3. Tracking link was sent to your email/phone when shipped\n\nPlease share your order details and I'll check for you!` |
 | `/offer` | `🏷️ Current Offers:\n\n• WELCOME10 - 10% off first order\n• FREE shipping on all prepaid orders\n• Buy 2 Get 10% off\n• Buy 3 Get 15% off\n\n🛍️ Shop: indistylex.com` |
-| `/thank` | `Thank you for shopping with Indistylex! 🙏✨\n\nWe hope your little one loves their new outfit. If you're happy with your purchase, we'd love a review!\n\n⭐ Google Review: [link]\n📸 Share a photo & tag @indistylex — we feature cute customers!\n\nSee you again soon! 💕` |
+| `/thank` | `Thank you for shopping with Indistylex! 🙏✨\n\nWe hope your little one loves their new outfit. If you're happy with your purchase, we'd love a review!\n\n⭐ Google Review: [link]\n📸 Share a photo & tag @indistylex_clothing — we feature cute customers!\n\nSee you again soon! 💕` |
 
 ---
 

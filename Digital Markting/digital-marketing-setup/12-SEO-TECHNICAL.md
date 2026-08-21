@@ -154,7 +154,7 @@ In product detail template:
   "logo": "https://indistylex.com/static/images/logo.png",
   "description": "Premium kids clothing brand in India",
   "sameAs": [
-    "https://www.instagram.com/indistylex",
+    "https://www.instagram.com/indistylex_clothing",
     "https://www.facebook.com/indistylex"
   ],
   "contactPoint": {
