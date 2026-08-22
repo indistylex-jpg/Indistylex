@@ -129,7 +129,7 @@ def create_app(config_name=None):
         from app.models.cart import Cart
         from app.models.product import Category
         from flask_login import current_user
-        from flask import session
+        from flask import session, request
 
         # Get cart count
         cart_count = 0
@@ -193,6 +193,11 @@ def create_app(config_name=None):
             if link['endpoint'] == 'shop.listing' or link['kwargs']['slug'] in categories_by_slug
         ]
 
+        admin_notifications = None
+        if request.endpoint and request.endpoint.startswith('admin.'):
+            from app.services.admin_notification_service import get_admin_header_notifications
+            admin_notifications = get_admin_header_notifications()
+
         return {
             'cart_count': cart_count,
             'nav_categories': nav_display_categories(active_categories),
@@ -212,6 +217,7 @@ def create_app(config_name=None):
                 'pinterest': app.config.get('SOCIAL_PINTEREST'),
                 'whatsapp': app.config.get('SOCIAL_WHATSAPP'),
             },
+            'admin_notifications': admin_notifications,
         }
 
     @app.template_global()

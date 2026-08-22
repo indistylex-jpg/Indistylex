@@ -12,7 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="{{ static_v('images/favicon.svg') }}">
   <meta name="theme-color" content="#1E4D8C">
-  <link href="{{ url_for('static', filename='css/admin.css') }}?v=8" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/admin.css') }}?v=9" rel="stylesheet">
   {% block extra_css %}{% endblock %}
 </head>
 <body class="admin-body">
@@ -109,14 +109,66 @@
         </div>
       </div>
       <div class="topbar-right">
-        <button class="topbar-icon-btn" title="Notifications">
-          <i class="bi bi-bell"></i>
-          <span class="icon-badge">3</span>
-        </button>
-        <button class="topbar-icon-btn" title="Store">
-          <i class="bi bi-handbag"></i>
-          <span class="icon-badge">5</span>
-        </button>
+        {% set notes = admin_notifications or {} %}
+        <div class="dropdown">
+          <button class="topbar-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                  title="Store alerts" id="adminAlertsMenu">
+            <i class="bi bi-bell"></i>
+            {% if notes.alert_count %}
+            <span class="icon-badge">{{ notes.alert_count if notes.alert_count < 10 else '9+' }}</span>
+            {% endif %}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end admin-notify-menu" aria-labelledby="adminAlertsMenu">
+            <li class="dropdown-header">Alerts</li>
+            {% if notes.alert_items %}
+              {% for item in notes.alert_items %}
+              <li>
+                <a class="dropdown-item admin-notify-item" href="{{ item.url }}">
+                  <i class="bi {{ item.icon }} admin-notify-icon"></i>
+                  <span>
+                    <strong>{{ item.label }}</strong>
+                    <small>{{ item.meta }}</small>
+                  </span>
+                </a>
+              </li>
+              {% endfor %}
+            {% else %}
+              <li><span class="dropdown-item-text text-muted small">No alerts right now</span></li>
+            {% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item small fw-semibold" href="{{ url_for('admin.inventory') }}">View inventory</a></li>
+            <li><a class="dropdown-item small fw-semibold" href="{{ url_for('admin.reviews') }}">View reviews</a></li>
+          </ul>
+        </div>
+        <div class="dropdown">
+          <button class="topbar-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                  title="Orders needing action" id="adminOrdersMenu">
+            <i class="bi bi-bag"></i>
+            {% if notes.order_count %}
+            <span class="icon-badge">{{ notes.order_count if notes.order_count < 10 else '9+' }}</span>
+            {% endif %}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end admin-notify-menu" aria-labelledby="adminOrdersMenu">
+            <li class="dropdown-header">Orders to process</li>
+            {% if notes.order_items %}
+              {% for item in notes.order_items %}
+              <li>
+                <a class="dropdown-item admin-notify-item" href="{{ item.url }}">
+                  <i class="bi bi-receipt admin-notify-icon"></i>
+                  <span>
+                    <strong>{{ item.label }}</strong>
+                    <small>{{ item.meta }}{% if item.when %} · {{ item.when }}{% endif %}</small>
+                  </span>
+                </a>
+              </li>
+              {% endfor %}
+            {% else %}
+              <li><span class="dropdown-item-text text-muted small">No pending orders</span></li>
+            {% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item small fw-semibold" href="{{ url_for('admin.orders', status='pending') }}">View all orders</a></li>
+          </ul>
+        </div>
         <div class="topbar-profile dropdown">
           <button class="profile-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="profile-avatar">

@@ -255,12 +255,53 @@ body.admin-body {
   color: #fff;
   font-size: 0.6rem;
   font-weight: 600;
-  width: 16px;
+  min-width: 16px;
   height: 16px;
-  border-radius: 50%;
+  padding: 0 4px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
+}
+.topbar-icon-btn.dropdown-toggle::after {
+  display: none;
+}
+.admin-notify-menu {
+  width: min(320px, 92vw);
+  max-height: 360px;
+  overflow-y: auto;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+.admin-notify-item {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 10px;
+  white-space: normal;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+}
+.admin-notify-item span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.admin-notify-item strong {
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+.admin-notify-item small {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+.admin-notify-icon {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .topbar-profile .profile-btn {
