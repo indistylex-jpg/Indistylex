@@ -443,8 +443,10 @@
     position: relative;
     background: var(--card-bg);
     aspect-ratio: 1;
+    overflow: hidden;
 }
-.home-product-card-media img {
+.home-product-card-media img,
+.home-product-card-media .product-card-img {
     width: 100%;
     height: 100%;
     object-fit: contain;

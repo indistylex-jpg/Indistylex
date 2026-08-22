@@ -87,6 +87,29 @@ class Product(db.Model):
         return resolve_image_url(self.primary_image, fallback='images/lifestyle/product-placeholder-kids.jpg')
 
     @property
+    def secondary_image(self):
+        """Second gallery image (for hover on product cards)."""
+        imgs = self.images.order_by(ProductImage.sort_order).all()
+        if len(imgs) < 2:
+            return None
+        primary = self.primary_image
+        for img in imgs:
+            if img.image_url != primary:
+                return img.image_url
+        return imgs[1].image_url
+
+    @property
+    def secondary_image_url(self):
+        from app.services.image_service import resolve_image_url
+        if not self.secondary_image:
+            return None
+        return resolve_image_url(self.secondary_image)
+
+    @property
+    def image_count(self):
+        return self.images.count()
+
+    @property
     def all_images(self):
         from app.services.image_service import resolve_image_url
         return [resolve_image_url(img.image_url) for img in self.images.order_by(ProductImage.sort_order).all()]

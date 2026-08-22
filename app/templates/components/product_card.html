@@ -2,8 +2,11 @@
 <div class="col-6 col-md-4 col-lg-2">
     <div class="product-card-minimal">
         <a href="{{ url_for('product.detail', slug=product.slug) }}" class="product-card-img-link">
-            <div class="product-card-img-wrap">
-                <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
+            <div class="product-card-img-wrap product-card-img-stack">
+                <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" class="product-card-img product-card-img--primary" loading="lazy">
+                {% if product.secondary_image %}
+                <img src="{{ image_url(product.secondary_image) }}" alt="{{ product.name }} — lifestyle" class="product-card-img product-card-img--secondary" loading="lazy">
+                {% endif %}
                 {% if product.discount_percent > 0 %}
                 <span class="product-badge-sale">-{{ product.discount_percent }}%</span>
                 {% endif %}

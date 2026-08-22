@@ -1166,6 +1166,63 @@ body.admin-body {
 .product-image-actions .btn { font-size: 0.72rem; }
 .product-image-preview-item.is-selectable { cursor: pointer; }
 .product-image-preview-item.is-selectable:hover { border-color: #93C5FD; }
+.product-upload-dropzone {
+  position: relative;
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: #F8FAFC;
+  transition: border-color 0.2s, background 0.2s;
+}
+.product-upload-dropzone.is-dragover {
+  border-color: #2563EB;
+  background: #EFF6FF;
+}
+.product-upload-dropzone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.product-upload-dropzone {
+  cursor: pointer;
+}
+.product-upload-dropzone-icon {
+  font-size: 2rem;
+  color: #2563EB;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.product-upload-count {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1E40AF;
+  background: #DBEAFE;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+}
+.product-image-preview-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  line-height: 1;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.product-image-preview-item { position: relative; }
 .visibility-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .visibility-badge {
   font-size: 0.62rem;

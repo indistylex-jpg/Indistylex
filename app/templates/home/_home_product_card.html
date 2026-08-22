@@ -17,7 +17,12 @@
             <i class="bi bi-heart"></i>
         </button>
         <a href="{{ url_for('product.detail', slug=product.slug) }}">
-            <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" loading="lazy">
+            <div class="product-card-img-stack">
+                <img src="{{ image_url(product.primary_image) }}" alt="{{ product.name }}" class="product-card-img product-card-img--primary" loading="lazy">
+                {% if product.secondary_image %}
+                <img src="{{ image_url(product.secondary_image) }}" alt="{{ product.name }} — lifestyle" class="product-card-img product-card-img--secondary" loading="lazy">
+                {% endif %}
+            </div>
         </a>
     </div>
     <div class="home-product-card-body">

@@ -88,48 +88,68 @@
   });
 
   const imageInput = document.getElementById('product-images-input');
+  const uploadDropzone = document.getElementById('product-upload-dropzone');
+  const uploadAddBtn = document.getElementById('product-upload-add-btn');
+  const uploadCount = document.getElementById('product-upload-count');
   const preview = document.getElementById('image-preview');
   const primaryNewIndexInput = document.getElementById('primary-new-upload-index');
   let previewUrls = [];
+  let pendingUploadFiles = [];
+  let primaryUploadIndex = 0;
+
+  function fileKey(file) {
+    return [file.name, file.size, file.lastModified].join('|');
+  }
+
+  function syncInputFromPending() {
+    if (!imageInput) return;
+    try {
+      const dt = new DataTransfer();
+      pendingUploadFiles.forEach(function (file) {
+        dt.items.add(file);
+      });
+      imageInput.files = dt.files;
+    } catch (err) {
+      /* DataTransfer unsupported in very old browsers */
+    }
+    updateUploadCount();
+  }
+
+  function updateUploadCount() {
+    if (!uploadCount) return;
+    const count = pendingUploadFiles.length;
+    uploadCount.textContent = count
+      ? count + ' photo' + (count === 1 ? '' : 's') + ' ready to upload'
+      : 'No photos selected yet';
+  }
 
   function clearPreviewUrls() {
     previewUrls.forEach(function (url) { URL.revokeObjectURL(url); });
     previewUrls = [];
   }
 
-  function markNewUploadPrimary(index) {
-    if (primaryNewIndexInput) {
-      primaryNewIndexInput.value = String(index);
-    }
-    preview?.querySelectorAll('.product-image-preview-item').forEach(function (card, i) {
-      card.classList.toggle('is-primary', i === index);
-      const caption = card.querySelector('.product-image-preview-caption');
-      if (!caption) return;
-      caption.innerHTML = '';
-      if (i === index) {
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-primary me-1';
-        badge.textContent = 'Main';
-        caption.appendChild(badge);
-      }
-      caption.appendChild(document.createTextNode('New upload ' + (i + 1)));
-    });
-  }
-
-  imageInput?.addEventListener('change', function () {
+  function renderUploadPreview() {
+    if (!preview) return;
     clearPreviewUrls();
     preview.innerHTML = '';
-    const files = Array.from(this.files || []).filter(function (file) {
-      return file.type.startsWith('image/');
-    });
 
-    files.forEach(function (file, index) {
+    pendingUploadFiles.forEach(function (file, index) {
       const card = document.createElement('div');
-      card.className = 'product-image-preview-item is-selectable' + (index === 0 ? ' is-primary' : '');
+      card.className = 'product-image-preview-item is-selectable' + (index === primaryUploadIndex ? ' is-primary' : '');
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
-      card.setAttribute('aria-label', 'Set new upload ' + (index + 1) + ' as main photo');
+      card.setAttribute('aria-label', 'Set photo ' + (index + 1) + ' as main image');
       card.dataset.uploadIndex = String(index);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'product-image-preview-remove';
+      removeBtn.setAttribute('aria-label', 'Remove photo ' + (index + 1));
+      removeBtn.innerHTML = '&times;';
+      removeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        removePendingFile(index);
+      });
 
       const img = document.createElement('img');
       const url = URL.createObjectURL(file);
@@ -139,27 +159,99 @@
 
       const caption = document.createElement('div');
       caption.className = 'product-image-preview-caption';
-      if (index === 0) {
+      if (index === primaryUploadIndex) {
         const badge = document.createElement('span');
         badge.className = 'badge bg-primary me-1';
         badge.textContent = 'Main';
         caption.appendChild(badge);
       }
-      caption.appendChild(document.createTextNode('New upload ' + (index + 1)));
+      caption.appendChild(document.createTextNode(file.name));
 
+      card.appendChild(removeBtn);
       card.appendChild(img);
       card.appendChild(caption);
       preview.appendChild(card);
     });
 
-    if (files.length) {
-      markNewUploadPrimary(0);
-    } else if (primaryNewIndexInput) {
-      primaryNewIndexInput.value = '';
+    if (primaryNewIndexInput) {
+      primaryNewIndexInput.value = pendingUploadFiles.length ? String(primaryUploadIndex) : '';
+    }
+  }
+
+  function addPendingFiles(fileList) {
+    const seen = new Set(pendingUploadFiles.map(fileKey));
+    Array.from(fileList || []).forEach(function (file) {
+      if (!file || !file.type || !file.type.startsWith('image/')) return;
+      const key = fileKey(file);
+      if (seen.has(key)) return;
+      seen.add(key);
+      pendingUploadFiles.push(file);
+    });
+    if (primaryUploadIndex >= pendingUploadFiles.length) {
+      primaryUploadIndex = Math.max(0, pendingUploadFiles.length - 1);
+    }
+    syncInputFromPending();
+    renderUploadPreview();
+  }
+
+  function removePendingFile(index) {
+    pendingUploadFiles.splice(index, 1);
+    if (primaryUploadIndex >= pendingUploadFiles.length) {
+      primaryUploadIndex = Math.max(0, pendingUploadFiles.length - 1);
+    }
+    syncInputFromPending();
+    renderUploadPreview();
+  }
+
+  function markNewUploadPrimary(index) {
+    if (!pendingUploadFiles.length) return;
+    primaryUploadIndex = Math.max(0, Math.min(index, pendingUploadFiles.length - 1));
+    if (primaryNewIndexInput) {
+      primaryNewIndexInput.value = String(primaryUploadIndex);
+    }
+    renderUploadPreview();
+  }
+
+  function openFilePicker() {
+    if (!imageInput) return;
+    imageInput.click();
+  }
+
+  imageInput?.addEventListener('change', function () {
+    const picked = Array.from(this.files || []);
+    if (!picked.length) return;
+    addPendingFiles(picked);
+  });
+
+  uploadAddBtn?.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    openFilePicker();
+  });
+
+  uploadDropzone?.addEventListener('click', function (e) {
+    if (e.target.closest('#product-upload-add-btn')) return;
+    if (e.target.closest('.product-image-preview-remove')) return;
+    openFilePicker();
+  });
+
+  uploadDropzone?.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    uploadDropzone.classList.add('is-dragover');
+  });
+  uploadDropzone?.addEventListener('dragleave', function () {
+    uploadDropzone.classList.remove('is-dragover');
+  });
+  uploadDropzone?.addEventListener('drop', function (e) {
+    e.preventDefault();
+    uploadDropzone.classList.remove('is-dragover');
+    if (e.dataTransfer && e.dataTransfer.files) {
+      addPendingFiles(e.dataTransfer.files);
     }
   });
 
   preview?.addEventListener('click', function (e) {
+    if (e.target.closest('.product-image-preview-remove')) return;
     const card = e.target.closest('.product-image-preview-item');
     if (!card || card.dataset.uploadIndex === undefined) return;
     markNewUploadPrimary(parseInt(card.dataset.uploadIndex, 10));
@@ -245,17 +337,14 @@
     if (isNewProduct && !completeVariants) {
       errors.push('Add at least one complete variant (size, color, SKU).');
     }
-    if (isNewProduct) {
-      const imageInputEl = document.getElementById('product-images-input');
-      const hasNewImages = imageInputEl && imageInputEl.files && imageInputEl.files.length > 0;
-      if (!hasNewImages) {
-        errors.push('Upload at least one product photo.');
-      }
+    if (isNewProduct && !pendingUploadFiles.length) {
+      errors.push('Upload at least one product photo.');
     }
     return errors;
   }
 
   productForm?.addEventListener('submit', function (e) {
+    syncInputFromPending();
     const validationErrors = validateProductForm();
     if (validationErrors.length) {
       e.preventDefault();
@@ -335,16 +424,8 @@
   }
 
   function attachImageToProductForm(file) {
-    const imageInput = document.getElementById('product-images-input');
-    if (!imageInput || !file) return;
-    try {
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      imageInput.files = dt.files;
-      imageInput.dispatchEvent(new Event('change', { bubbles: true }));
-    } catch (err) {
-      /* older browsers may not support DataTransfer on input */
-    }
+    if (!file) return;
+    addPendingFiles([file]);
   }
 
   function showAiPreview(file) {
@@ -402,7 +483,8 @@
         applyAutofill(data);
         attachImageToProductForm(aiScanFile);
         setAiStatus(
-          'Details filled from photo (' + (data.product_type || 'product') + ', ' + (data.primary_color || 'color detected') + '). Review price & sizes, then save.',
+          'Details filled from photo (' + (data.product_type || 'product') + ', ' + (data.primary_color || 'color detected') + '). '
+          + 'Add more photos in section 4 (use Add more photos or drag several files), then save.',
           'success'
         );
       })

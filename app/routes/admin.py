@@ -77,13 +77,15 @@ def _ensure_primary_image(product):
 
 def _save_product_images(product):
     """Attach uploaded images to a product. Returns (saved_count, failed_count)."""
-    images = request.files.getlist('images')
+    upload_files = request.files.getlist('images')
+    # Backward compat if older forms still post lifestyle_images separately
+    upload_files.extend(request.files.getlist('lifestyle_images'))
     existing_count = product.images.count()
     saved = 0
     failed = 0
     new_image_ids = []
 
-    for img_file in images:
+    for img_file in upload_files:
         if not img_file or not img_file.filename:
             continue
         url = save_image(img_file, subfolder='products')
@@ -543,6 +545,14 @@ def add_product():
                 )
                 if image_failed:
                     flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+                if image_count:
+                    flash(f'{image_count} photo(s) uploaded for this product.', 'success')
+                if product.images.count() == 1:
+                    flash(
+                        'Tip: Add a second photo (product flat-lay + child wearing the outfit) '
+                        'so customers see multiple images on the product page.',
+                        'info',
+                    )
                 for sku in skipped_skus:
                     flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
                 return redirect(url_for('admin.products'))
@@ -612,6 +622,14 @@ def edit_product(product_id):
                 )
                 if image_failed:
                     flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+                if image_count:
+                    flash(f'{image_count} photo(s) uploaded for this product.', 'success')
+                if product.images.count() == 1:
+                    flash(
+                        'This product has only one photo. Upload a model/lifestyle shot below '
+                        'so the product page shows multiple images.',
+                        'info',
+                    )
                 for sku in skipped_skus:
                     flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
                 return redirect(url_for('admin.edit_product', product_id=product.id))
