@@ -118,68 +118,152 @@ def _call_vision_api(image_bytes, mime_type, prompt):
     raise ValueError('AI API key missing.')
 
 
-# Default + fallbacks — gemini-2.0-flash returns 404 for new API keys (retired).
+# Preferred order when ListModels is unavailable. Avoid gemini-2.0-flash (404 for new keys).
 GEMINI_VISION_MODELS = (
     'gemini-2.5-flash',
+    'gemini-flash-latest',
     'gemini-2.5-flash-lite',
+    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash-001',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash-002',
     'gemini-1.5-flash',
 )
 
+_discovered_models_cache = {'expires_at': 0.0, 'models': ()}
+
 
 def _call_gemini(api_key, image_bytes, mime_type, prompt):
+    api_key = (api_key or '').strip()
+    if not api_key:
+        raise ValueError('AI API key missing.')
+
     configured = (current_app.config.get('GEMINI_VISION_MODEL') or '').strip()
-    models = [configured] if configured else []
-    for model in GEMINI_VISION_MODELS:
-        if model not in models:
+    discovered = _discover_gemini_models(api_key)
+    models = []
+    for model in (configured, *GEMINI_VISION_MODELS, *discovered):
+        if model and model not in models:
             models.append(model)
 
+    b64 = base64.b64encode(image_bytes).decode('ascii')
+    last_error = 'Gemini request failed.'
+
+    for model in models:
+        for json_mode in (True, False):
+            payload = _build_gemini_payload(prompt, mime_type, b64, json_mode=json_mode)
+            for api_version in ('v1beta', 'v1'):
+                try:
+                    data = _gemini_generate(api_key, model, payload, api_version)
+                    return data['candidates'][0]['content']['parts'][0]['text']
+                except urllib.error.HTTPError as exc:
+                    err_body = exc.read().decode('utf-8', errors='replace')
+                    last_error = _gemini_http_error(exc.code, err_body, model)
+                    if exc.code == 404:
+                        break  # try next model
+                    if exc.code == 400 and json_mode:
+                        continue  # retry same model without JSON mode
+                    if exc.code in (401, 403):
+                        raise ValueError(last_error) from exc
+                    break
+                except urllib.error.URLError as exc:
+                    raise ValueError('Could not reach AI service. Check server internet.') from exc
+                except (KeyError, IndexError, TypeError) as exc:
+                    raise ValueError('AI returned an unexpected response.') from exc
+            if json_mode:
+                continue
+            break
+
+    raise ValueError(last_error)
+
+
+def _build_gemini_payload(prompt, mime_type, b64_image, json_mode=True):
     payload = {
         'contents': [{
             'parts': [
                 {'text': prompt},
-                {'inline_data': {
-                    'mime_type': mime_type,
-                    'data': base64.b64encode(image_bytes).decode('ascii'),
+                {'inlineData': {
+                    'mimeType': mime_type,
+                    'data': b64_image,
                 }},
             ],
         }],
-        'generationConfig': {
-            'temperature': 0.2,
-            'responseMimeType': 'application/json',
-        },
+        'generationConfig': {'temperature': 0.2},
     }
+    if json_mode:
+        payload['generationConfig']['responseMimeType'] = 'application/json'
+    return payload
+
+
+def _gemini_generate(api_key, model, payload, api_version='v1beta'):
     body = json.dumps(payload).encode('utf-8')
-    last_error = 'Gemini request failed.'
+    url = (
+        f'https://generativelanguage.googleapis.com/{api_version}/models/{model}:generateContent'
+    )
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={
+            'Content-Type': 'application/json',
+            'x-goog-api-key': api_key,
+        },
+        method='POST',
+    )
+    with urllib.request.urlopen(req, timeout=90) as resp:
+        return json.loads(resp.read().decode('utf-8'))
 
-    for model in models:
-        url = (
-            f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
-        )
-        req = urllib.request.Request(
-            url,
-            data=body,
-            headers={
-                'Content-Type': 'application/json',
-                'x-goog-api-key': api_key,
-            },
-            method='POST',
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=90) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-            return data['candidates'][0]['content']['parts'][0]['text']
-        except urllib.error.HTTPError as exc:
-            err_body = exc.read().decode('utf-8', errors='replace')
-            last_error = _gemini_http_error(exc.code, err_body, model)
-            if exc.code == 404:
-                continue
-            raise ValueError(last_error) from exc
-        except urllib.error.URLError as exc:
-            raise ValueError('Could not reach AI service. Check server internet.') from exc
-        except (KeyError, IndexError, TypeError) as exc:
-            raise ValueError('AI returned an unexpected response.') from exc
 
-    raise ValueError(last_error)
+def _discover_gemini_models(api_key):
+    """Fetch models this API key can call; cached for one hour."""
+    import time
+
+    now = time.time()
+    if _discovered_models_cache['models'] and _discovered_models_cache['expires_at'] > now:
+        return _discovered_models_cache['models']
+
+    url = 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=100'
+    req = urllib.request.Request(
+        url,
+        headers={'x-goog-api-key': api_key},
+        method='GET',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+    except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError):
+        return ()
+
+    names = []
+    for item in data.get('models', []):
+        methods = item.get('supportedGenerationMethods') or []
+        if 'generateContent' not in methods:
+            continue
+        name = item.get('name', '')
+        if name.startswith('models/'):
+            name = name[len('models/'):]
+        if name:
+            names.append(name)
+
+    def _rank(model_name):
+        lower = model_name.lower()
+        score = 0
+        if 'flash' in lower:
+            score += 10
+        if '2.5' in lower or '2-5' in lower:
+            score += 5
+        if 'lite' in lower:
+            score += 2
+        if 'latest' in lower:
+            score += 3
+        if 'thinking' in lower or 'tts' in lower or 'live' in lower:
+            score -= 20
+        if 'pro' in lower:
+            score -= 1
+        return -score
+
+    names.sort(key=_rank)
+    _discovered_models_cache['models'] = tuple(names)
+    _discovered_models_cache['expires_at'] = now + 3600
+    return _discovered_models_cache['models']
 
 
 def _gemini_http_error(status_code, err_body, model):
@@ -193,8 +277,14 @@ def _gemini_http_error(status_code, err_body, model):
 
     if status_code == 404:
         if message:
-            return f'Model {model} not available: {message}'
-        return f'Model {model} not available. Try updating the app (gemini-2.5-flash).'
+            return (
+                f'Model {model} not available: {message} '
+                'Enable Generative Language API for your Google Cloud project in AI Studio.'
+            )
+        return (
+            f'Model {model} not available. '
+            'Enable Generative Language API at https://aistudio.google.com/apikey'
+        )
 
     if status_code in (401, 403):
         return 'Invalid GEMINI_API_KEY or API access blocked. Create a new key in Google AI Studio.'
