@@ -428,9 +428,11 @@ class TestAdminRoutes:
         resp = client.get(f'/admin/products/edit/{sample_product.id}')
         assert resp.status_code == 200
         html = resp.data.decode('utf-8')
-        product_form_start = html.find('id="product-form"')
-        product_form_end = html.find('</form>', product_form_start)
-        product_form_chunk = html[product_form_start:product_form_end]
+        form_start = html.find('<form method="POST" enctype="multipart/form-data"')
+        assert form_start != -1
+        assert 'id="product-form"' in html[form_start:form_start + 200]
+        product_form_end = html.find('</form>', form_start)
+        product_form_chunk = html[form_start:product_form_end]
         assert product_form_chunk.count('<form') == 1
 
     def test_admin_bulk_delete_products(self, client, admin_user, sample_product, sample_category):

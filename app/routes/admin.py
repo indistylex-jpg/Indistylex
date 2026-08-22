@@ -16,7 +16,6 @@ from app.services.image_service import save_image, delete_image
 from app.services.inventory_service import (
     get_low_stock_products, record_b2b_sale, cancel_b2b_sale, build_inventory_query,
 )
-from app.services.inventory_export_service import export_inventory_xlsx
 from app.models.b2b_sale import B2BSale, B2BSaleItem
 from app.models.expense import Expense
 from app.models.wishlist import Wishlist
@@ -1108,6 +1107,16 @@ def export_inventory():
         prefix = 'indistylex-inventory-filtered'
 
     variants = query.order_by(Product.name, ProductVariant.size).all()
+
+    try:
+        from app.services.inventory_export_service import export_inventory_xlsx
+    except ImportError:
+        flash(
+            'Excel export is unavailable — install openpyxl on the server (pip install openpyxl) and restart the app.',
+            'danger',
+        )
+        return redirect(request.referrer or url_for('admin.inventory'))
+
     buffer, filename = export_inventory_xlsx(variants, filename_prefix=prefix)
 
     return send_file(
