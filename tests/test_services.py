@@ -7,8 +7,9 @@ from app.extensions import db
 from app.models.product import ProductVariant
 from app.services.inventory_service import (
     check_stock, reduce_stock, restore_stock, get_low_stock_products,
-    record_b2b_sale, cancel_b2b_sale,
+    record_b2b_sale, cancel_b2b_sale, build_inventory_query, inventory_stock_status,
 )
+from app.services.inventory_export_service import export_inventory_xlsx, variant_to_export_row
 
 
 # ────────────────────────── Inventory Service ──────────────────────────
@@ -80,6 +81,30 @@ class TestInventoryService:
         # All have 10 stock, threshold 5 → none
         low = get_low_stock_products(threshold=5)
         assert len(low) == 0
+
+    def test_inventory_stock_status(self):
+        assert inventory_stock_status(0) == 'Out of Stock'
+        assert inventory_stock_status(5) == 'Low Stock'
+        assert inventory_stock_status(11) == 'In Stock'
+
+    def test_build_inventory_query_filters_low_stock(self, db, sample_product):
+        variant = sample_product.variants.first()
+        variant.stock_quantity = 4
+        db.session.commit()
+
+        rows = build_inventory_query(stock_filter='low').all()
+        assert any(v.id == variant.id for v in rows)
+
+    def test_export_inventory_xlsx(self, db, sample_product):
+        variants = build_inventory_query().all()
+        buffer, filename = export_inventory_xlsx(variants)
+        assert filename.endswith('.xlsx')
+        assert buffer.getvalue()[:2] == b'PK'
+
+        variant = sample_product.variants.first()
+        row = variant_to_export_row(variant)
+        assert row['sku'] == variant.sku
+        assert row['product_name'] == sample_product.name
 
     def test_record_b2b_sale(self, db, sample_product, admin_user):
         variant = sample_product.variants.first()

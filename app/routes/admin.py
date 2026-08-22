@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, send_file
 from flask_login import login_required, current_user
 from sqlalchemy import func, extract
 from app.extensions import db, limiter
@@ -14,8 +14,9 @@ from app.forms.product_forms import ProductForm, CategoryForm, ProductVariantFor
 from app.utils.product_ages import AGE_GROUP_SECTIONS
 from app.services.image_service import save_image, delete_image
 from app.services.inventory_service import (
-    get_low_stock_products, record_b2b_sale, cancel_b2b_sale,
+    get_low_stock_products, record_b2b_sale, cancel_b2b_sale, build_inventory_query,
 )
+from app.services.inventory_export_service import export_inventory_xlsx
 from app.models.b2b_sale import B2BSale, B2BSaleItem
 from app.models.expense import Expense
 from app.models.wishlist import Wishlist
@@ -1054,23 +1055,7 @@ def inventory():
     stock_filter = request.args.get('stock', '')  # all, low, out
     category_id = request.args.get('category', '', type=str)
 
-    query = ProductVariant.query.join(Product).filter(Product.is_active == True)
-
-    if search:
-        query = query.filter(
-            db.or_(
-                Product.name.ilike(f'%{search}%'),
-                ProductVariant.sku.ilike(f'%{search}%')
-            )
-        )
-
-    if stock_filter == 'low':
-        query = query.filter(ProductVariant.stock_quantity <= 10, ProductVariant.stock_quantity > 0)
-    elif stock_filter == 'out':
-        query = query.filter(ProductVariant.stock_quantity == 0)
-
-    if category_id:
-        query = query.filter(Product.category_id == int(category_id))
+    query = build_inventory_query(search, stock_filter, category_id)
 
     variants = query.order_by(Product.name, ProductVariant.size).paginate(
         page=page, per_page=per_page, error_out=False
@@ -1103,6 +1088,34 @@ def inventory():
                            search=search,
                            stock_filter=stock_filter,
                            category_id=category_id)
+
+
+@admin_bp.route('/inventory/export')
+@login_required
+@admin_required
+def export_inventory():
+    """Download inventory rows as Excel (.xlsx)."""
+    scope = request.args.get('scope', 'filtered')
+    search = request.args.get('search', '').strip()
+    stock_filter = request.args.get('stock', '')
+    category_id = request.args.get('category', '', type=str)
+
+    if scope == 'all':
+        query = build_inventory_query()
+        prefix = 'indistylex-inventory-all'
+    else:
+        query = build_inventory_query(search, stock_filter, category_id)
+        prefix = 'indistylex-inventory-filtered'
+
+    variants = query.order_by(Product.name, ProductVariant.size).all()
+    buffer, filename = export_inventory_xlsx(variants, filename_prefix=prefix)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
 
 
 @admin_bp.route('/inventory/<int:variant_id>/update-stock', methods=['POST'])

@@ -38,6 +38,7 @@ Pillow==11.1.0
 razorpay==1.4.2
 
 # Utilities
+openpyxl==3.1.5
 python-dotenv==1.0.1
 python-slugify==8.0.4
 bleach==6.2.0

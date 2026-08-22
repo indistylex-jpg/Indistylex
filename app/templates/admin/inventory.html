@@ -117,12 +117,36 @@
       Inventory Items
       <span class="badge bg-secondary ms-2">{{ variants.total }}</span>
     </h6>
-    <form method="POST" action="{{ url_for('admin.bulk_update_stock') }}" id="bulkForm">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="view-all-btn" onclick="return confirm('Save all stock changes?')">
-        <i class="bi bi-save me-1"></i>Save All Changes
-      </button>
-    </form>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export Excel
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item"
+               href="{{ url_for('admin.export_inventory', scope='filtered', search=search, stock=stock_filter, category=category_id) }}">
+              <i class="bi bi-funnel me-2 text-muted"></i>Filtered results
+              <span class="text-muted">({{ variants.total }} SKUs)</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item"
+               href="{{ url_for('admin.export_inventory', scope='all') }}">
+              <i class="bi bi-box-seam me-2 text-muted"></i>All inventory
+              <span class="text-muted">({{ total_variants }} SKUs)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <form method="POST" action="{{ url_for('admin.bulk_update_stock') }}" id="bulkForm" class="mb-0">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="view-all-btn" onclick="return confirm('Save all stock changes?')">
+          <i class="bi bi-save me-1"></i>Save All Changes
+        </button>
+      </form>
+    </div>
   </div>
   <div class="dash-card-body p-0">
     <div class="table-responsive">

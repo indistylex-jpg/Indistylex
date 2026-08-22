@@ -1,7 +1,42 @@
 from flask import current_app
 from datetime import datetime
 from app.extensions import db
-from app.models.product import ProductVariant
+from app.models.product import Product, ProductVariant
+
+
+def inventory_stock_status(stock_quantity):
+    """Human-readable stock status for inventory views and exports."""
+    if stock_quantity == 0:
+        return 'Out of Stock'
+    if stock_quantity <= 10:
+        return 'Low Stock'
+    return 'In Stock'
+
+
+def build_inventory_query(search='', stock_filter='', category_id=''):
+    """Build the shared inventory query used by the admin list and export."""
+    query = ProductVariant.query.join(Product).filter(Product.is_active == True)
+
+    if search:
+        query = query.filter(
+            db.or_(
+                Product.name.ilike(f'%{search}%'),
+                ProductVariant.sku.ilike(f'%{search}%'),
+            )
+        )
+
+    if stock_filter == 'low':
+        query = query.filter(
+            ProductVariant.stock_quantity <= 10,
+            ProductVariant.stock_quantity > 0,
+        )
+    elif stock_filter == 'out':
+        query = query.filter(ProductVariant.stock_quantity == 0)
+
+    if category_id:
+        query = query.filter(Product.category_id == int(category_id))
+
+    return query
 
 
 def check_stock(variant_id, quantity):

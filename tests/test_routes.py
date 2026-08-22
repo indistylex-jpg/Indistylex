@@ -516,6 +516,22 @@ class TestAdminRoutes:
         resp = client.get('/admin/b2b-sales')
         assert resp.status_code == 200
 
+    def test_admin_inventory_page(self, client, admin_user, sample_product):
+        login_admin(client)
+        resp = client.get('/admin/inventory')
+        assert resp.status_code == 200
+        assert b'Export Excel' in resp.data
+
+    def test_admin_export_inventory_xlsx(self, client, admin_user, sample_product):
+        login_admin(client)
+        resp = client.get('/admin/inventory/export?scope=all')
+        assert resp.status_code == 200
+        assert resp.headers['Content-Type'].startswith(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        assert '.xlsx' in resp.headers['Content-Disposition']
+        assert resp.data[:2] == b'PK'
+
     def test_admin_record_b2b_sale(self, client, admin_user, sample_product):
         login_admin(client)
         variant = sample_product.variants.first()
