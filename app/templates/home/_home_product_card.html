@@ -21,55 +21,67 @@
         </a>
     </div>
     <div class="home-product-card-body">
-        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-title">{{ product.name }}</a>
-        {% if product.age_groups_label %}
-        <div class="home-product-pill">🌞 {{ product.age_groups_label.split(', ')[0] }}</div>
-        {% elif product.gender_label %}
-        <div class="home-product-pill">✨ {{ product.gender_label }}</div>
-        {% endif %}
-        {% if colors %}
-        <div class="collection-card-swatches mb-2">
-            {% for color in colors[:4] %}
-            <span class="collection-card-swatch" style="background: {{ color|lower }};" title="{{ color }}"></span>
-            {% endfor %}
+        <div class="home-product-card-top">
+            <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-title">{{ product.name }}</a>
+            <div class="home-product-pill-slot">
+                {% if product.age_groups_label %}
+                <div class="home-product-pill">🌞 {{ product.age_groups_label.split(', ')[0] }}</div>
+                {% elif product.gender_label %}
+                <div class="home-product-pill">✨ {{ product.gender_label }}</div>
+                {% endif %}
+            </div>
+            <div class="home-product-swatches-slot">
+                {% if colors %}
+                <div class="collection-card-swatches">
+                    {% for color in colors[:4] %}
+                    <span class="collection-card-swatch" style="background: {{ color|lower }};" title="{{ color }}"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
         </div>
-        {% endif %}
-        <div class="home-product-prices">
-            <span class="home-product-price">₹ {{ "{:,.2f}".format(product.price) }}</span>
-            {% if product.compare_at_price and product.compare_at_price > product.price %}
-            <span class="home-product-compare">₹ {{ "{:,.0f}".format(product.compare_at_price) }}</span>
-            <span class="home-product-save">Save {{ product.discount_percent }}%</span>
-            {% endif %}
+        <div class="home-product-card-bottom">
+            <div class="home-product-prices">
+                <span class="home-product-price">₹ {{ "{:,.2f}".format(product.price) }}</span>
+                {% if product.compare_at_price and product.compare_at_price > product.price %}
+                <span class="home-product-compare">₹ {{ "{:,.0f}".format(product.compare_at_price) }}</span>
+                <span class="home-product-save">Save {{ product.discount_percent }}%</span>
+                {% endif %}
+            </div>
+            <div class="home-product-action">
+                {% if in_stock_variants %}
+                <form method="POST" action="{{ url_for('cart.add_to_cart') }}" class="home-product-cart-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input type="hidden" name="color" value="{{ in_stock_variants[0].color }}">
+                    <input type="hidden" name="quantity" value="1">
+                    {% if sizes | length == 1 %}
+                    <input type="hidden" name="variant_id" value="{{ in_stock_variants[0].id }}">
+                    <input type="hidden" name="size" value="{{ sizes[0] }}">
+                    <div class="home-product-size-slot" aria-hidden="true"></div>
+                    <button type="submit" class="home-product-add-btn">
+                        <i class="bi bi-cart-plus"></i> ADD TO CART
+                    </button>
+                    {% else %}
+                    <select name="size" class="home-product-size" required aria-label="Select size">
+                        <option value="">Select a size</option>
+                        {% for size in sizes %}
+                        {% set size_variant = in_stock_variants | selectattr('size', 'equalto', size) | list | first %}
+                        <option value="{{ size }}" data-variant-id="{{ size_variant.id }}" data-color="{{ size_variant.color }}">{{ size }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="home-product-add-btn">
+                        <i class="bi bi-cart-plus"></i> ADD TO CART
+                    </button>
+                    {% endif %}
+                </form>
+                {% else %}
+                <div class="home-product-size-slot" aria-hidden="true"></div>
+                <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-add-btn">
+                    VIEW PRODUCT
+                </a>
+                {% endif %}
+            </div>
         </div>
-        {% if in_stock_variants %}
-        <form method="POST" action="{{ url_for('cart.add_to_cart') }}" class="home-product-cart-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            <input type="hidden" name="color" value="{{ in_stock_variants[0].color }}">
-            <input type="hidden" name="quantity" value="1">
-            {% if sizes | length == 1 %}
-            <input type="hidden" name="variant_id" value="{{ in_stock_variants[0].id }}">
-            <input type="hidden" name="size" value="{{ sizes[0] }}">
-            <button type="submit" class="home-product-add-btn">
-                <i class="bi bi-cart-plus"></i> ADD TO CART
-            </button>
-            {% else %}
-            <select name="size" class="home-product-size" required aria-label="Select size">
-                <option value="">Select a size</option>
-                {% for size in sizes %}
-                {% set size_variant = in_stock_variants | selectattr('size', 'equalto', size) | list | first %}
-                <option value="{{ size }}" data-variant-id="{{ size_variant.id }}" data-color="{{ size_variant.color }}">{{ size }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="home-product-add-btn">
-                <i class="bi bi-cart-plus"></i> ADD TO CART
-            </button>
-            {% endif %}
-        </form>
-        {% else %}
-        <a href="{{ url_for('product.detail', slug=product.slug) }}" class="home-product-add-btn">
-            VIEW PRODUCT
-        </a>
-        {% endif %}
     </div>
 </div>
