@@ -37,6 +37,7 @@ def create_razorpay_order(order):
         amount=order.total,
         currency='INR',
         status='pending',
+        channel='online',
     )
     db.session.add(payment)
     db.session.commit()
@@ -61,7 +62,10 @@ def verify_payment(razorpay_payment_id, razorpay_order_id, razorpay_signature):
 
 def capture_payment(payment):
     """Update payment record after successful verification."""
+    from datetime import datetime
     payment.status = 'captured'
+    payment.channel = payment.channel or 'online'
+    payment.collected_at = datetime.utcnow()
     db.session.commit()
     return payment
 

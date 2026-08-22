@@ -50,7 +50,101 @@
         <div class="d-flex justify-content-between mb-1"><span>Shipping</span><span>{{ "Free" if order.shipping_cost == 0 else "₹{:,.0f}".format(order.shipping_cost) }}</span></div>
         <hr>
         <div class="d-flex justify-content-between fw-bold h5 mb-0"><span>Total</span><span>₹{{ "{:,.0f}".format(order.total) }}</span></div>
-        <div class="d-flex justify-content-between mt-2"><span class="text-muted">Payment Method</span><span class="fw-semibold">{{ 'Cash on Delivery' if order.payment_method == 'cod' else 'Online Payment' }}</span></div>
+        <div class="d-flex justify-content-between mt-2"><span class="text-muted">Order payment type</span><span class="fw-semibold">{{ 'Cash on Delivery' if order.payment_method == 'cod' else 'Online (Razorpay)' }}</span></div>
+      </div>
+    </div>
+
+    <!-- Payment details -->
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0">Payment details</h6>
+        {% if payment %}
+        <span class="badge
+          {% if payment.status == 'captured' %}bg-success
+          {% elif payment.status == 'pending' %}bg-warning text-dark
+          {% elif payment.status == 'failed' %}bg-danger
+          {% else %}bg-secondary{% endif %}">
+          {{ payment.status_label }}
+        </span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if payment %}
+          <div class="row g-2 small mb-3">
+            <div class="col-sm-6">
+              <span class="text-muted">Amount</span>
+              <div class="fw-semibold">₹{{ "{:,.0f}".format(payment.amount) }}</div>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted">Collection channel</span>
+              <div class="fw-semibold">{{ payment.channel_label }}</div>
+            </div>
+            {% if payment.collected_at %}
+            <div class="col-sm-6">
+              <span class="text-muted">Collected on</span>
+              <div>{{ payment.collected_at.strftime('%d %b %Y, %H:%M') }}</div>
+            </div>
+            {% endif %}
+            {% if payment.collected_by %}
+            <div class="col-sm-6">
+              <span class="text-muted">Recorded by</span>
+              <div>{{ payment.collected_by.first_name }} {{ payment.collected_by.last_name }}</div>
+            </div>
+            {% endif %}
+            {% if payment.razorpay_payment_id %}
+            <div class="col-sm-6">
+              <span class="text-muted">Razorpay payment ID</span>
+              <div class="font-monospace">{{ payment.razorpay_payment_id }}</div>
+            </div>
+            {% endif %}
+            {% if payment.reference %}
+            <div class="col-sm-6">
+              <span class="text-muted">Reference</span>
+              <div>{{ payment.reference }}</div>
+            </div>
+            {% endif %}
+            {% if payment.notes %}
+            <div class="col-12">
+              <span class="text-muted">Notes</span>
+              <div>{{ payment.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if payment.status == 'pending' and order.payment_method == 'cod' and order.status not in ['cancelled', 'refunded'] %}
+          <hr>
+          <h6 class="fw-semibold mb-2">Mark payment collected</h6>
+          <form method="POST" action="{{ url_for('admin.collect_order_payment', order_id=order.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-2">
+              <div class="col-md-4">
+                <label class="form-label small">How was payment received? *</label>
+                <select name="channel" class="form-select form-select-sm" required>
+                  <option value="">Select…</option>
+                  {% for val, label in collection_channels %}
+                  <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Reference / receipt #</label>
+                <input type="text" name="reference" class="form-control form-control-sm" placeholder="Optional">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Notes</label>
+                <input type="text" name="notes" class="form-control form-control-sm" placeholder="Optional">
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="bi bi-check-circle me-1"></i>Confirm collection
+                </button>
+              </div>
+            </div>
+          </form>
+          {% endif %}
+        {% else %}
+          <p class="text-muted small mb-0">No payment record yet. It will appear after checkout or when you mark COD collected.</p>
+        {% endif %}
       </div>
     </div>
   </div>

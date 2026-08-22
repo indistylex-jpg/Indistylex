@@ -26,6 +26,14 @@ from app.services.expense_service import (
     auto_record_order_shipping, auto_record_order_refund,
 )
 from app.services.dashboard_analytics_service import get_dashboard_analytics
+from app.services.payment_management_service import (
+    backfill_missing_payments,
+    get_payment_summary,
+    get_payments_query,
+    mark_payment_collected,
+    COLLECTION_CHANNELS,
+)
+from app.models.order import PAYMENT_CHANNELS, PAYMENT_STATUS_LABELS
 from app.services.product_catalog_service import (
     AGE_PRESETS,
     STORE_VISIBILITY_OPTIONS,
@@ -214,6 +222,8 @@ def dashboard():
     gross_profit_month = analytics['month_gross_profit']
     net_profit = gross_profit_month - float(total_expenses)
     store_visibility = get_store_visibility_counts()
+    payment_summary = get_payment_summary()
+    backfill_missing_payments()
 
     top_products = []
     for i, name in enumerate(analytics['top_product_names'][:5]):
@@ -271,6 +281,9 @@ def dashboard():
         gross_profit_month=gross_profit_month,
         net_profit=net_profit,
         store_visibility=store_visibility,
+        payment_collected=payment_summary['total_collected'],
+        payment_pending_cod=payment_summary['pending_cod'],
+        payment_by_channel=payment_summary['by_channel'],
         **template_data,
         **chart_json,
     )
@@ -738,7 +751,12 @@ def orders():
     orders = query.order_by(Order.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
-    return render_template('admin/orders.html', orders=orders, current_status=status_filter)
+    return render_template(
+        'admin/orders.html',
+        orders=orders,
+        current_status=status_filter,
+        payment_status_labels=PAYMENT_STATUS_LABELS,
+    )
 
 
 @admin_bp.route('/orders/<int:order_id>')
@@ -747,7 +765,16 @@ def orders():
 def order_detail(order_id):
     order = Order.query.get_or_404(order_id)
     shipping_addr = json.loads(order.shipping_address) if order.shipping_address else {}
-    return render_template('admin/order_detail.html', order=order, shipping_addr=shipping_addr)
+    payment = order.payment
+    collection_channels = [(c, dict(PAYMENT_CHANNELS).get(c, c.title())) for c in COLLECTION_CHANNELS]
+    return render_template(
+        'admin/order_detail.html',
+        order=order,
+        shipping_addr=shipping_addr,
+        payment=payment,
+        collection_channels=collection_channels,
+        payment_status_labels=PAYMENT_STATUS_LABELS,
+    )
 
 
 @admin_bp.route('/orders/<int:order_id>/status', methods=['POST'])
@@ -774,8 +801,12 @@ def update_order_status(order_id):
         from app.services.inventory_service import restore_stock
         for item in order.items.all():
             restore_stock(item.variant_id, item.quantity)
+        if order.payment and order.payment.status == 'pending':
+            order.payment.status = 'failed'
     elif new_status == 'refunded' and old_status != 'refunded':
         auto_record_order_refund(order, created_by_id=current_user.id)
+        if order.payment and order.payment.status != 'refunded':
+            order.payment.status = 'refunded'
 
     order.status = new_status
     db.session.commit()
@@ -785,6 +816,85 @@ def update_order_status(order_id):
 
     flash(f'Order {order.order_number} status updated to {new_status}.', 'success')
     return redirect(url_for('admin.order_detail', order_id=order_id))
+
+
+@admin_bp.route('/orders/<int:order_id>/collect-payment', methods=['POST'])
+@login_required
+@admin_required
+def collect_order_payment(order_id):
+    """Mark COD payment as collected with cash/card/UPI channel."""
+    order = Order.query.get_or_404(order_id)
+    payment = order.payment
+    if not payment:
+        from app.services.payment_management_service import create_cod_payment
+        payment = create_cod_payment(order)
+        db.session.commit()
+
+    channel = request.form.get('channel', '').strip()
+    reference = request.form.get('reference', '').strip()
+    notes = request.form.get('notes', '').strip()
+
+    updated, error = mark_payment_collected(
+        payment,
+        channel=channel,
+        reference=reference,
+        notes=notes,
+        collected_by_id=current_user.id,
+    )
+    if error:
+        flash(error, 'danger')
+    else:
+        flash(
+            f'Payment of ₹{updated.amount:,.0f} recorded via {updated.channel_label}.',
+            'success',
+        )
+    return redirect(url_for('admin.order_detail', order_id=order_id))
+
+
+# ── Payments ──────────────────────────────────────────────────────────
+@admin_bp.route('/payments')
+@login_required
+@admin_required
+def payments():
+    """Payment ledger — collected totals, pending COD, cash/card/UPI breakdown."""
+    backfill_missing_payments()
+
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', '').strip()
+    channel = request.args.get('channel', '').strip()
+    method = request.args.get('method', '').strip()
+    month = request.args.get('month', '').strip()
+    search = request.args.get('q', '').strip()
+
+    today = datetime.utcnow()
+    month_start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    summary_all = get_payment_summary()
+    summary_month = get_payment_summary(start_date=month_start)
+
+    query = get_payments_query(
+        status=status or None,
+        channel=channel or None,
+        method=method or None,
+        month=month or None,
+        search=search or None,
+    )
+    pagination = query.paginate(page=page, per_page=25, error_out=False)
+
+    channel_choices = [(c, label) for c, label in PAYMENT_CHANNELS if c != 'cod']
+    return render_template(
+        'admin/payments.html',
+        payments=pagination,
+        summary_all=summary_all,
+        summary_month=summary_month,
+        status_filter=status,
+        channel_filter=channel,
+        method_filter=method,
+        month_filter=month,
+        search=search,
+        channel_choices=channel_choices,
+        payment_status_labels=PAYMENT_STATUS_LABELS,
+    )
 
 
 # ── Customers ─────────────────────────────────────────────────────────

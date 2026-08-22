@@ -26,6 +26,8 @@
             <th>Customer</th>
             <th>Items</th>
             <th>Total</th>
+            <th>Payment</th>
+            <th>Collection</th>
             <th>Status</th>
             <th>Date</th>
             <th class="text-center">Actions</th>
@@ -38,6 +40,25 @@
               <td class="td-name">{{ order.user.first_name + ' ' + order.user.last_name if order.user else 'Guest' }}</td>
               <td>{{ order.items.count() }}</td>
               <td>₹{{ "{:,.0f}".format(order.total) }}</td>
+              <td>
+                <span class="badge bg-light text-dark border">
+                  {{ 'COD' if order.payment_method == 'cod' else 'Online' }}
+                </span>
+              </td>
+              <td>
+                {% if order.payment %}
+                  <span class="badge
+                    {% if order.payment.status == 'captured' %}bg-success
+                    {% elif order.payment.status == 'pending' %}bg-warning text-dark
+                    {% elif order.payment.status == 'failed' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {{ order.payment.channel_label }}
+                  </span>
+                  <div class="small text-muted">{{ payment_status_labels.get(order.payment.status, order.payment.status) }}</div>
+                {% else %}
+                  <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
               <td>
                 <span class="badge
                   {% if order.status == 'delivered' %}bg-success
@@ -54,7 +75,7 @@
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="7" class="text-center text-muted py-3">No orders found</td></tr>
+            <tr><td colspan="9" class="text-center text-muted py-3">No orders found</td></tr>
           {% endfor %}
         </tbody>
       </table>

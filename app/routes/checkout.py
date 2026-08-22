@@ -127,6 +127,9 @@ def checkout_page():
             # Cash on Delivery — confirm order immediately
             order.status = 'confirmed'
 
+            from app.services.payment_management_service import create_cod_payment
+            create_cod_payment(order)
+
             # Reduce stock
             for item in order.items.all():
                 reduce_stock(item.variant_id, item.quantity)

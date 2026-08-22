@@ -104,6 +104,24 @@ class OrderItem(db.Model):
         return f'<OrderItem {self.product_name} x{self.quantity}>'
 
 
+PAYMENT_CHANNELS = (
+    ('cash', 'Cash'),
+    ('card', 'Card'),
+    ('upi', 'UPI'),
+    ('netbanking', 'Net Banking'),
+    ('wallet', 'Wallet'),
+    ('online', 'Online (Razorpay)'),
+    ('cod', 'COD — pending collection'),
+)
+
+PAYMENT_STATUS_LABELS = {
+    'pending': 'Pending',
+    'captured': 'Collected',
+    'failed': 'Failed',
+    'refunded': 'Refunded',
+}
+
+
 class Payment(db.Model):
     __tablename__ = 'payments'
 
@@ -116,8 +134,29 @@ class Payment(db.Model):
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     currency = db.Column(db.String(10), default='INR')
     status = db.Column(db.String(30), default='pending')  # pending, captured, failed, refunded
+    # How money was actually received (cash, card, upi, online, cod)
+    channel = db.Column(db.String(30), default='cod')
+    collected_at = db.Column(db.DateTime)
+    collected_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    reference = db.Column(db.String(100))
+    notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    collected_by = db.relationship('User', foreign_keys=[collected_by_id])
+
+    @property
+    def channel_label(self):
+        labels = dict(PAYMENT_CHANNELS)
+        return labels.get(self.channel, (self.channel or '—').replace('_', ' ').title())
+
+    @property
+    def status_label(self):
+        return PAYMENT_STATUS_LABELS.get(self.status, self.status.title())
+
+    @property
+    def is_collected(self):
+        return self.status == 'captured'
 
     def __repr__(self):
         return f'<Payment {self.razorpay_payment_id} - {self.status}>'

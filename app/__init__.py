@@ -310,6 +310,11 @@ def create_app(config_name=None):
 
     # Create tables and seed admin
     with app.app_context():
+        from app.utils.db_schema import ensure_payment_columns
+        try:
+            ensure_payment_columns()
+        except Exception:
+            db.session.rollback()
         _seed_admin(app)
 
     return app
