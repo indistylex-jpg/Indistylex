@@ -313,13 +313,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    color: var(--accent);
-    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.home-fit-chip-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 .home-fit-chip:hover .home-fit-chip-icon {
     border-color: var(--accent);
     background: #fff;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
 }
 .home-fit-chip-label {
     font-size: 0.72rem;

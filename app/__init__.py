@@ -156,7 +156,7 @@ def create_app(config_name=None):
             children_by_parent.setdefault(child.parent_id, []).append(child)
 
         from app.utils.product_ages import SHOP_BY_AGE_NAV
-        from app.utils.lifestyle_images import MOMENT_IMAGES, PRODUCT_PLACEHOLDER
+        from app.utils.lifestyle_images import MOMENT_IMAGES, PRODUCT_PLACEHOLDER, FIT_CHIP_ITEMS
         from app.utils.home_categories import (
             nav_display_categories,
             nav_marquee_links,
@@ -202,6 +202,7 @@ def create_app(config_name=None):
             'nav_quick_links': nav_quick_links,
             'shop_by_age_nav': SHOP_BY_AGE_NAV,
             'moment_lifestyle_images': MOMENT_IMAGES,
+            'fit_chip_items': FIT_CHIP_ITEMS,
             'product_placeholder_image': PRODUCT_PLACEHOLDER,
             'currency_symbol': app.config.get('CURRENCY_SYMBOL', '₹'),
             'social_links': {
@@ -231,6 +232,12 @@ def create_app(config_name=None):
         """URL for category tile photo matched to boys/girls/age slug."""
         from app.utils.lifestyle_images import category_lifestyle_image_path
         return url_for('static', filename=category_lifestyle_image_path(slug))
+
+    @app.template_global()
+    def fit_chip_img(chip_key):
+        """URL for homepage fit-chip circular category photo."""
+        from app.utils.lifestyle_images import fit_chip_image_path
+        return url_for('static', filename=fit_chip_image_path(chip_key))
 
     @app.template_global()
     def image_url(path, fallback=None):

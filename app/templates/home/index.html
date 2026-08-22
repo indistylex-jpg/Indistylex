@@ -108,21 +108,12 @@
             <button type="button" class="home-gender-btn" data-gender-filter="boys">Boy</button>
         </div>
         <div class="home-fit-row">
-            {% set fit_items = [
-                ('girls', 'bi-handbag', 'Frocks', 'shop.listing', {'gender': 'girls'}),
-                ('girls', 'bi-stars', 'Dresses', 'shop.listing', {'gender': 'girls'}),
-                ('girls', 'bi-heart', 'Ethnic', 'shop.category', {'slug': 'ethnic-festive'}),
-                ('boys', 'bi-tshirt', 'T-Shirts', 'shop.listing', {'gender': 'boys'}),
-                ('boys', 'bi-lightning', 'Shorts', 'shop.listing', {'gender': 'boys'}),
-                ('boys', 'bi-award', 'Kurtas', 'shop.listing', {'gender': 'boys'}),
-                ('all', 'bi-balloon-heart', 'Newborn', 'shop.listing', {'age_group': '0-3m'}),
-                ('all', 'bi-backpack', 'School', 'shop.category', {'slug': 'school-wear'}),
-                ('all', 'bi-grid', 'Shop All', 'shop.listing', {}),
-            ] %}
-            {% for gender, icon, label, route, kwargs in fit_items %}
-            <a href="{{ url_for(route, **kwargs) }}" class="home-fit-chip" data-shop-gender="{{ gender }}" {% if gender == 'boys' %}hidden{% endif %}>
-                <span class="home-fit-chip-icon"><i class="bi {{ icon }}"></i></span>
-                <span class="home-fit-chip-label">{{ label }}</span>
+            {% for item in fit_chip_items %}
+            <a href="{{ url_for(item.route, **item.kwargs) }}" class="home-fit-chip" data-shop-gender="{{ item.gender }}" {% if item.gender == 'boys' %}hidden{% endif %}>
+                <span class="home-fit-chip-icon">
+                    <img src="{{ fit_chip_img(item.chip) }}" alt="{{ item.label }}" loading="lazy" width="72" height="72">
+                </span>
+                <span class="home-fit-chip-label">{{ item.label }}</span>
             </a>
             {% endfor %}
         </div>

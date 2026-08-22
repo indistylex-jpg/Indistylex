@@ -49,6 +49,90 @@ MOMENT_IMAGES = [
 
 PRODUCT_PLACEHOLDER = LIFESTYLE_IMAGES['product_placeholder']
 
+# Homepage "Find Their Perfect Fit" circular category photos.
+FIT_CHIP_IMAGES = {
+    'girls-frocks': 'images/fit-chips/girls-frocks.jpg',
+    'girls-dresses': 'images/fit-chips/girls-dresses.jpg',
+    'girls-ethnic': 'images/fit-chips/girls-ethnic.jpg',
+    'boys-tshirts': 'images/fit-chips/boys-tshirts.jpg',
+    'boys-shorts': 'images/fit-chips/boys-shorts.jpg',
+    'boys-kurtas': 'images/fit-chips/boys-kurtas.jpg',
+    'newborn': 'images/fit-chips/newborn.jpg',
+    'school': 'images/fit-chips/school.jpg',
+    'shop-all': 'images/fit-chips/shop-all.jpg',
+}
+
+FIT_CHIP_ITEMS = [
+    {
+        'gender': 'girls',
+        'chip': 'girls-frocks',
+        'label': 'Frocks',
+        'route': 'shop.listing',
+        'kwargs': {'gender': 'girls'},
+    },
+    {
+        'gender': 'girls',
+        'chip': 'girls-dresses',
+        'label': 'Dresses',
+        'route': 'shop.listing',
+        'kwargs': {'gender': 'girls'},
+    },
+    {
+        'gender': 'girls',
+        'chip': 'girls-ethnic',
+        'label': 'Ethnic',
+        'route': 'shop.category',
+        'kwargs': {'slug': 'ethnic-festive'},
+    },
+    {
+        'gender': 'boys',
+        'chip': 'boys-tshirts',
+        'label': 'T-Shirts',
+        'route': 'shop.listing',
+        'kwargs': {'gender': 'boys'},
+    },
+    {
+        'gender': 'boys',
+        'chip': 'boys-shorts',
+        'label': 'Shorts',
+        'route': 'shop.listing',
+        'kwargs': {'gender': 'boys'},
+    },
+    {
+        'gender': 'boys',
+        'chip': 'boys-kurtas',
+        'label': 'Kurtas',
+        'route': 'shop.listing',
+        'kwargs': {'gender': 'boys'},
+    },
+    {
+        'gender': 'all',
+        'chip': 'newborn',
+        'label': 'Newborn',
+        'route': 'shop.listing',
+        'kwargs': {'age_group': '0-3m'},
+    },
+    {
+        'gender': 'all',
+        'chip': 'school',
+        'label': 'School',
+        'route': 'shop.category',
+        'kwargs': {'slug': 'school-wear'},
+    },
+    {
+        'gender': 'all',
+        'chip': 'shop-all',
+        'label': 'Shop All',
+        'route': 'shop.listing',
+        'kwargs': {},
+    },
+]
+
+
+def fit_chip_image_path(chip_key):
+    """Return static relative path for a fit-chip image key."""
+    return FIT_CHIP_IMAGES.get(chip_key, FIT_CHIP_IMAGES['shop-all'])
+
 
 def category_lifestyle_image_key(slug):
     """Return lifestyle image key for a category slug (boys/girls aware)."""
