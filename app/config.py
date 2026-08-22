@@ -65,7 +65,7 @@ class Config:
 
     # AI product autofill (admin) — set GEMINI_API_KEY and/or OPENAI_API_KEY
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-    GEMINI_VISION_MODEL = os.environ.get('GEMINI_VISION_MODEL', 'gemini-2.0-flash')
+    GEMINI_VISION_MODEL = os.environ.get('GEMINI_VISION_MODEL', 'gemini-2.5-flash')
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
     OPENAI_VISION_MODEL = os.environ.get('OPENAI_VISION_MODEL', 'gpt-4o-mini')
 

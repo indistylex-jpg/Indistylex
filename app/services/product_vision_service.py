@@ -118,12 +118,21 @@ def _call_vision_api(image_bytes, mime_type, prompt):
     raise ValueError('AI API key missing.')
 
 
+# Default + fallbacks — gemini-2.0-flash returns 404 for new API keys (retired).
+GEMINI_VISION_MODELS = (
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-1.5-flash',
+)
+
+
 def _call_gemini(api_key, image_bytes, mime_type, prompt):
-    model = current_app.config.get('GEMINI_VISION_MODEL', 'gemini-2.0-flash')
-    url = (
-        f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
-        f'?key={api_key}'
-    )
+    configured = (current_app.config.get('GEMINI_VISION_MODEL') or '').strip()
+    models = [configured] if configured else []
+    for model in GEMINI_VISION_MODELS:
+        if model not in models:
+            models.append(model)
+
     payload = {
         'contents': [{
             'parts': [
@@ -140,22 +149,59 @@ def _call_gemini(api_key, image_bytes, mime_type, prompt):
         },
     }
     body = json.dumps(payload).encode('utf-8')
-    req = urllib.request.Request(
-        url, data=body, headers={'Content-Type': 'application/json'}, method='POST',
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            data = json.loads(resp.read().decode('utf-8'))
-    except urllib.error.HTTPError as exc:
-        err_body = exc.read().decode('utf-8', errors='replace')
-        raise ValueError(f'AI service error ({exc.code}). Check GEMINI_API_KEY.') from exc
-    except urllib.error.URLError as exc:
-        raise ValueError('Could not reach AI service. Check server internet.') from exc
+    last_error = 'Gemini request failed.'
 
+    for model in models:
+        url = (
+            f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent'
+        )
+        req = urllib.request.Request(
+            url,
+            data=body,
+            headers={
+                'Content-Type': 'application/json',
+                'x-goog-api-key': api_key,
+            },
+            method='POST',
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+            return data['candidates'][0]['content']['parts'][0]['text']
+        except urllib.error.HTTPError as exc:
+            err_body = exc.read().decode('utf-8', errors='replace')
+            last_error = _gemini_http_error(exc.code, err_body, model)
+            if exc.code == 404:
+                continue
+            raise ValueError(last_error) from exc
+        except urllib.error.URLError as exc:
+            raise ValueError('Could not reach AI service. Check server internet.') from exc
+        except (KeyError, IndexError, TypeError) as exc:
+            raise ValueError('AI returned an unexpected response.') from exc
+
+    raise ValueError(last_error)
+
+
+def _gemini_http_error(status_code, err_body, model):
+    """Turn Gemini HTTP error JSON into a short admin-facing message."""
+    message = ''
     try:
-        return data['candidates'][0]['content']['parts'][0]['text']
-    except (KeyError, IndexError, TypeError) as exc:
-        raise ValueError('AI returned an unexpected response.') from exc
+        parsed = json.loads(err_body)
+        message = parsed.get('error', {}).get('message', '')
+    except json.JSONDecodeError:
+        message = err_body[:200]
+
+    if status_code == 404:
+        if message:
+            return f'Model {model} not available: {message}'
+        return f'Model {model} not available. Try updating the app (gemini-2.5-flash).'
+
+    if status_code in (401, 403):
+        return 'Invalid GEMINI_API_KEY or API access blocked. Create a new key in Google AI Studio.'
+
+    if message:
+        return f'AI service error ({status_code}): {message}'
+    return f'AI service error ({status_code}). Check GEMINI_API_KEY.'
 
 
 def _call_openai(api_key, image_bytes, mime_type, prompt):
