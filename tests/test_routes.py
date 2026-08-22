@@ -453,6 +453,24 @@ class TestAdminRoutes:
         assert Product.query.get(extra.id) is None
         assert b'deleted' in resp.data.lower()
 
+    def test_admin_delete_single_product(self, client, admin_user, sample_category):
+        login_admin(client)
+        product = Product(
+            name='Delete Me Single',
+            slug='delete-me-single',
+            price=Decimal('399'),
+            category_id=sample_category.id,
+            is_active=True,
+        )
+        db.session.add(product)
+        db.session.commit()
+        product_id = product.id
+
+        resp = client.post(f'/admin/products/{product_id}/delete', follow_redirects=True)
+        assert resp.status_code == 200
+        assert Product.query.get(product_id) is None
+        assert b'deleted' in resp.data.lower()
+
     def test_admin_bulk_delete_with_review(self, client, admin_user, sample_product, sample_user):
         from app.models.review import Review
         review = Review(

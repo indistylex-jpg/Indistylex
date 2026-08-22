@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
   /* --- Confirm delete --- */
   document.querySelectorAll('.confirm-delete').forEach(function (form) {
     form.addEventListener('submit', function (e) {
-      if (!confirm('Are you sure you want to delete this item? This cannot be undone.')) {
+      var message = form.getAttribute('data-confirm-message')
+        || 'Are you sure you want to delete this item? This cannot be undone.';
+      if (!confirm(message)) {
         e.preventDefault();
       }
     });
