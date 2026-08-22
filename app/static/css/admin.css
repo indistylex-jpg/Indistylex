@@ -1035,7 +1035,17 @@ body.admin-body {
 }
 
 /* ─── Product form (admin) ─── */
-.product-form-section {
+.product-ai-scan {
+  border: 2px dashed #BFDBFE !important;
+  background: linear-gradient(180deg, #F8FBFF 0%, #fff 100%);
+}
+.product-ai-scan-preview img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #E2EAF5;
+}
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;

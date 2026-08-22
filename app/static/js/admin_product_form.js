@@ -284,4 +284,133 @@
 
   updateGenderHint();
   updateListingPreview();
+
+  /* --- AI product photo autofill --- */
+  const aiInput = document.getElementById('ai-product-scan-input');
+  const aiBtn = document.getElementById('ai-product-scan-btn');
+  const aiStatus = document.getElementById('ai-product-scan-status');
+  const aiPreview = document.getElementById('ai-product-scan-preview');
+  const analyzeUrl = productForm?.dataset.analyzeUrl;
+  let aiScanFile = null;
+
+  function setAiStatus(message, type) {
+    if (!aiStatus) return;
+    aiStatus.textContent = message || '';
+    aiStatus.className = 'small mt-2' + (type ? ' text-' + type : ' text-muted');
+  }
+
+  function setFieldValue(id, value) {
+    if (value === null || value === undefined || value === '') return;
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  }
+
+  function applyAutofill(data) {
+    setFieldValue('name', data.name);
+    if (data.category_id) {
+      const cat = document.getElementById('category_id');
+      if (cat) cat.value = String(data.category_id);
+    }
+    setFieldValue('short_description', data.short_description);
+    setFieldValue('description', data.description);
+    setFieldValue('price', data.price);
+    setFieldValue('compare_at_price', data.compare_at_price);
+    setFieldValue('brand', data.brand || 'Indistylex');
+    setFieldValue('material', data.material);
+    if (data.gender && genderSelect) genderSelect.value = data.gender;
+
+    if (Array.isArray(data.age_groups)) {
+      document.querySelectorAll('input[name="age_groups"]').forEach(function (cb) {
+        cb.checked = data.age_groups.indexOf(cb.value) !== -1;
+      });
+    }
+
+    const colorInput = document.querySelector('#variant-rows input[name="variant_color[]"]');
+    if (colorInput && data.variant_color) colorInput.value = data.variant_color;
+
+    updateGenderHint();
+    updateListingPreview();
+
+    document.querySelector('.product-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function attachImageToProductForm(file) {
+    const imageInput = document.getElementById('product-images-input');
+    if (!imageInput || !file) return;
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      imageInput.files = dt.files;
+      imageInput.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (err) {
+      /* older browsers may not support DataTransfer on input */
+    }
+  }
+
+  function showAiPreview(file) {
+    if (!aiPreview || !file) return;
+    aiPreview.classList.remove('d-none');
+    aiPreview.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    img.alt = 'Product photo for AI analysis';
+    img.onload = function () { URL.revokeObjectURL(img.src); };
+    aiPreview.appendChild(img);
+  }
+
+  aiInput?.addEventListener('change', function () {
+    aiScanFile = aiInput.files && aiInput.files[0] ? aiInput.files[0] : null;
+    if (aiScanFile) {
+      showAiPreview(aiScanFile);
+      setAiStatus('Photo ready — analyzing…', 'primary');
+      if (aiBtn && !aiBtn.disabled) aiBtn.click();
+    } else {
+      aiPreview?.classList.add('d-none');
+      setAiStatus('');
+    }
+  });
+
+  aiBtn?.addEventListener('click', function () {
+    if (!analyzeUrl) return;
+    if (!aiScanFile) {
+      setAiStatus('Choose a product photo first.', 'danger');
+      aiInput?.focus();
+      return;
+    }
+
+    aiBtn.disabled = true;
+    setAiStatus('Analyzing photo… this may take a few seconds.', 'primary');
+
+    const body = new FormData();
+    body.append('image', aiScanFile);
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    fetch(analyzeUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrf },
+      body: body,
+    })
+      .then(function (res) {
+        return res.json().then(function (payload) {
+          if (!res.ok || !payload.success) {
+            throw new Error(payload.message || 'Could not analyze photo.');
+          }
+          return payload.data;
+        });
+      })
+      .then(function (data) {
+        applyAutofill(data);
+        attachImageToProductForm(aiScanFile);
+        setAiStatus(
+          'Details filled from photo (' + (data.product_type || 'product') + ', ' + (data.primary_color || 'color detected') + '). Review price & sizes, then save.',
+          'success'
+        );
+      })
+      .catch(function (err) {
+        setAiStatus(err.message || 'Analysis failed.', 'danger');
+      })
+      .finally(function () {
+        aiBtn.disabled = false;
+      });
+  });
 })();

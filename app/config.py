@@ -63,6 +63,12 @@ class Config:
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@indistylex.com')
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-this-password')
 
+    # AI product autofill (admin) — set GEMINI_API_KEY and/or OPENAI_API_KEY
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+    GEMINI_VISION_MODEL = os.environ.get('GEMINI_VISION_MODEL', 'gemini-2.0-flash')
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+    OPENAI_VISION_MODEL = os.environ.get('OPENAI_VISION_MODEL', 'gpt-4o-mini')
+
     # Social profiles
     SOCIAL_FACEBOOK = os.environ.get('SOCIAL_FACEBOOK', 'https://www.facebook.com/indistylex')
     SOCIAL_INSTAGRAM = os.environ.get('SOCIAL_INSTAGRAM', 'https://www.instagram.com/indistylex_clothing')

@@ -459,6 +459,42 @@ def bulk_delete_products():
     return redirect(url_for('admin.products'))
 
 
+@admin_bp.route('/products/analyze-image', methods=['POST'])
+@login_required
+@admin_required
+@limiter.limit('12 per minute')
+def analyze_product_image():
+    """Analyze a product photo with AI and return suggested form fields."""
+    from app.services.product_vision_service import analyze_product_image as run_analysis
+    from app.services.product_vision_service import product_ai_configured
+
+    if not product_ai_configured():
+        return jsonify({
+            'success': False,
+            'message': 'AI autofill is not configured. Add GEMINI_API_KEY to your server .env file.',
+        }), 503
+
+    image = request.files.get('image')
+    if not image or not image.filename:
+        return jsonify({'success': False, 'message': 'Please choose a product photo.'}), 400
+
+    try:
+        data = run_analysis(
+            image.read(),
+            image.content_type or image.mimetype,
+            get_category_groups(),
+        )
+        return jsonify({'success': True, 'data': data})
+    except ValueError as exc:
+        return jsonify({'success': False, 'message': str(exc)}), 400
+    except Exception:
+        current_app.logger.exception('Product image AI analysis failed')
+        return jsonify({
+            'success': False,
+            'message': 'Could not analyze this photo. Try a clearer image or fill the form manually.',
+        }), 500
+
+
 @admin_bp.route('/products/add', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -515,8 +551,14 @@ def add_product():
         category_groups=category_groups,
         visibility_options=STORE_VISIBILITY_OPTIONS,
         category_meta_json=json.dumps(category_metadata_for_js()),
+        product_ai_enabled=product_ai_configured(),
         **draft,
     )
+
+
+def product_ai_configured():
+    from app.services.product_vision_service import product_ai_configured as _configured
+    return _configured()
 
 
 @admin_bp.route('/products/edit/<int:product_id>', methods=['GET', 'POST'])
@@ -585,6 +627,7 @@ def edit_product(product_id):
         visibility_options=STORE_VISIBILITY_OPTIONS,
         listing_preview=listing_preview(product),
         category_meta_json=json.dumps(category_metadata_for_js()),
+        product_ai_enabled=product_ai_configured(),
         **draft,
     )
 

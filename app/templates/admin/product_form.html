@@ -118,7 +118,39 @@
 </div>
 {% endif %}
 
-<form method="POST" enctype="multipart/form-data" novalidate id="product-form" data-is-new="{{ 'true' if is_new else 'false' }}">
+<div class="product-ai-scan card border-0 shadow-sm mb-4" id="product-ai-scan">
+  <div class="card-body p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+      <div>
+        <h5 class="fw-semibold mb-1"><i class="bi bi-magic me-2 text-primary"></i>Start with a product photo</h5>
+        <p class="text-muted small mb-0">Upload one clear photo — AI detects type (frock, shirt, kurta…), color, fabric, and writes descriptions for you.</p>
+      </div>
+      {% if not product_ai_enabled %}
+      <span class="badge bg-warning text-dark">AI key not set on server</span>
+      {% endif %}
+    </div>
+    <div class="row g-3 align-items-end">
+      <div class="col-md-8">
+        <label class="form-label" for="ai-product-scan-input">Product photo</label>
+        <input type="file" class="form-control" id="ai-product-scan-input"
+               accept="image/jpeg,image/jpg,image/png,image/webp" {% if not product_ai_enabled %}disabled{% endif %}>
+      </div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-primary w-100" id="ai-product-scan-btn" {% if not product_ai_enabled %}disabled{% endif %}>
+          <i class="bi bi-stars me-1"></i>Analyze &amp; autofill
+        </button>
+      </div>
+    </div>
+    <div id="ai-product-scan-preview" class="product-ai-scan-preview mt-3 d-none"></div>
+    <div id="ai-product-scan-status" class="small mt-2" aria-live="polite"></div>
+    {% if not product_ai_enabled %}
+    <p class="small text-muted mb-0 mt-2">Add <code>GEMINI_API_KEY</code> to the server <code>.env</code> file (free key from Google AI Studio), then restart the app.</p>
+    {% endif %}
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" novalidate id="product-form" data-is-new="{{ 'true' if is_new else 'false' }}"
+      data-analyze-url="{{ url_for('admin.analyze_product_image') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <!-- 1. Basics -->
@@ -133,7 +165,7 @@
     <div class="row g-3">
       <div class="col-md-8">
         <label class="form-label">Product Name <span class="text-danger">*</span></label>
-        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Cotton Frock — Floral Pink") }}
+        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), id="name", placeholder="e.g. Cotton Frock — Floral Pink") }}
         {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
       </div>
       <div class="col-md-4">
@@ -152,34 +184,34 @@
       </div>
       <div class="col-12">
         <label class="form-label">Short Description</label>
-        {{ form.short_description(class="form-control", placeholder="One line for product cards (max 500 chars)") }}
+        {{ form.short_description(class="form-control", id="short_description", placeholder="One line for product cards (max 500 chars)") }}
       </div>
       <div class="col-12">
         <label class="form-label">Full Description</label>
-        {{ form.description(class="form-control", rows=4, placeholder="Fabric, fit, occasion, care…") }}
+        {{ form.description(class="form-control", id="description", rows=4, placeholder="Fabric, fit, occasion, care…") }}
       </div>
       <div class="col-md-3">
         <label class="form-label">Selling Price (₹) <span class="text-danger">*</span></label>
-        {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else ""), step="0.01") }}
+        {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else ""), id="price", step="0.01") }}
         {% for error in form.price.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
       </div>
       <div class="col-md-3">
         <label class="form-label">Compare at Price (₹)</label>
-        {{ form.compare_at_price(class="form-control", step="0.01", placeholder="MRP for sale badge") }}
+        {{ form.compare_at_price(class="form-control", id="compare_at_price", step="0.01", placeholder="MRP for sale badge") }}
         <div class="form-text">Must be higher than selling price</div>
       </div>
       <div class="col-md-3">
         <label class="form-label">Cost Price (₹) <span class="badge bg-secondary ms-1">Admin only</span></label>
-        {{ form.cost_price(class="form-control", step="0.01", placeholder="What you paid for this item") }}
+        {{ form.cost_price(class="form-control", id="cost_price", step="0.01", placeholder="What you paid for this item") }}
         <div class="form-text">Hidden from customers — used for profit &amp; dashboard totals</div>
       </div>
       <div class="col-md-3">
         <label class="form-label">Brand</label>
-        {{ form.brand(class="form-control", placeholder="Indistylex") }}
+        {{ form.brand(class="form-control", id="brand", placeholder="Indistylex") }}
       </div>
       <div class="col-md-3">
         <label class="form-label">Material</label>
-        {{ form.material(class="form-control", placeholder="100% Cotton") }}
+        {{ form.material(class="form-control", id="material", placeholder="100% Cotton") }}
       </div>
     </div>
   </div>
@@ -343,5 +375,5 @@
 
 {% block extra_js %}
 <script>window.PRODUCT_CATEGORY_META = {{ category_meta_json | safe }};</script>
-<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=4"></script>
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=5"></script>
 {% endblock %}
