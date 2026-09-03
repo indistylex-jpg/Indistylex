@@ -268,38 +268,69 @@ def create_app(config_name=None):
     # Register error handlers
     @app.errorhandler(404)
     def not_found(error):
-        from flask import render_template
+        from flask import render_template, jsonify
+        from app.utils.request_helpers import wants_json_response
+        if wants_json_response():
+            return jsonify({'success': False, 'message': 'Not found.'}), 404
         return render_template('errors/404.html'), 404
 
     @app.errorhandler(500)
     def server_error(error):
-        from flask import render_template
+        from flask import render_template, jsonify
+        from app.utils.request_helpers import wants_json_response
+        if wants_json_response():
+            return jsonify({
+                'success': False,
+                'message': 'Server error. Try again or fill the form manually.',
+            }), 500
         return render_template('errors/500.html'), 500
 
     @app.errorhandler(403)
     def forbidden(error):
-        from flask import render_template
+        from flask import render_template, jsonify
+        from app.utils.request_helpers import wants_json_response
+        if wants_json_response():
+            return jsonify({'success': False, 'message': 'Access denied.'}), 403
         return render_template('errors/403.html'), 403
 
     @app.errorhandler(429)
     def too_many_requests(error):
-        from flask import render_template, request
-        if request.is_json:
-            return {'error': 'Too many requests. Please slow down.'}, 429
+        from flask import render_template, jsonify
+        from app.utils.request_helpers import wants_json_response
+        if wants_json_response():
+            return jsonify({
+                'success': False,
+                'message': 'Too many requests. Wait a minute and try again.',
+            }), 429
         return render_template('errors/429.html'), 429
 
     @app.errorhandler(400)
     def bad_request(error):
-        from flask import request, flash, redirect
+        from flask import request, flash, redirect, jsonify
+        from app.utils.request_helpers import wants_json_response
         description = str(getattr(error, 'description', '') or error)
         if 'CSRF' in description or 'csrf' in description.lower():
-            if request.is_json:
-                return {'error': 'Session expired. Please refresh and try again.'}, 400
+            if wants_json_response():
+                return jsonify({
+                    'success': False,
+                    'message': 'Session expired. Refresh the page and try again.',
+                }), 400
             flash('Your session expired. Please try saving again.', 'warning')
             return redirect(request.referrer or request.path or '/')
-        if request.is_json:
-            return {'error': description or 'Bad request'}, 400
+        if wants_json_response():
+            return jsonify({'success': False, 'message': description or 'Bad request'}), 400
         return description or 'Bad Request', 400
+
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import request, redirect, url_for, jsonify
+        from app.utils.request_helpers import wants_json_response
+        if wants_json_response():
+            return jsonify({
+                'success': False,
+                'message': 'Session expired. Refresh the page and log in again.',
+            }), 401
+        return redirect(url_for('auth.login', next=request.url))
 
     # Load user callback
     from app.models.user import User

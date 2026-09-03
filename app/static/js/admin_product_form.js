@@ -451,6 +451,36 @@
     }
   });
 
+  function parseAnalyzeResponse(res) {
+    return res.text().then(function (text) {
+      var payload;
+      try {
+        payload = text ? JSON.parse(text) : {};
+      } catch (parseErr) {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Session expired. Refresh the page and log in again.');
+        }
+        if (res.status === 404) {
+          throw new Error('Analyze endpoint not found — deploy latest code on the server (git pull + restart).');
+        }
+        if (res.status === 413) {
+          throw new Error('Photo is too large. Use an image under 5 MB.');
+        }
+        if (res.status === 429) {
+          throw new Error('Too many requests. Wait a minute and try again.');
+        }
+        if (/csrf|session expired/i.test(text || '')) {
+          throw new Error('Session expired. Refresh the page and try again.');
+        }
+        throw new Error('Server returned an unexpected response. Refresh the page and try again.');
+      }
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.message || payload.error || 'Could not analyze photo.');
+      }
+      return payload.data;
+    });
+  }
+
   aiBtn?.addEventListener('click', function () {
     if (!analyzeUrl) return;
     if (!aiScanFile) {
@@ -465,20 +495,21 @@
     const body = new FormData();
     body.append('image', aiScanFile);
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (csrf) {
+      body.append('csrf_token', csrf);
+    }
 
     fetch(analyzeUrl, {
       method: 'POST',
-      headers: { 'X-CSRFToken': csrf },
+      headers: {
+        'X-CSRFToken': csrf,
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
       body: body,
+      credentials: 'same-origin',
     })
-      .then(function (res) {
-        return res.json().then(function (payload) {
-          if (!res.ok || !payload.success) {
-            throw new Error(payload.message || 'Could not analyze photo.');
-          }
-          return payload.data;
-        });
-      })
+      .then(parseAnalyzeResponse)
       .then(function (data) {
         applyAutofill(data);
         attachImageToProductForm(aiScanFile);
