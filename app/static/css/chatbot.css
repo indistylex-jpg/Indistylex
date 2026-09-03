@@ -290,8 +290,8 @@
         max-height: calc(100dvh - 190px);
     }
     .chatbot-toggle {
-        bottom: 16px;
-        right: 16px;
+        bottom: max(16px, env(safe-area-inset-bottom, 16px));
+        right: max(16px, env(safe-area-inset-right, 16px));
         width: 54px;
         height: 54px;
         font-size: 1.35rem;

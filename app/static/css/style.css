@@ -1634,7 +1634,7 @@ img {
     border-bottom: 1px solid var(--border);
 }
 .collection-toolbar-filters {
-    flex: 1 1 520px;
+    flex: 1 1 320px;
     min-width: 0;
 }
 .collection-filter-wrap {
@@ -2180,12 +2180,38 @@ img {
     justify-content: space-between;
 }
 @media (max-width: 991.98px) {
+    .collection-page {
+        padding-bottom: 88px;
+    }
     .collection-toolbar {
         flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .collection-toolbar-filters {
+        flex: 0 0 auto;
+        width: 100%;
     }
     .collection-toolbar-meta {
         width: 100%;
         justify-content: space-between;
+        gap: 10px;
+        padding-right: 64px; /* keep clear of chat widget */
+    }
+    .collection-mobile-filter-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .collection-sort-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        justify-content: flex-end;
+    }
+    .collection-sort-select {
+        min-width: 0;
+        width: 100%;
+        max-width: 170px;
     }
 }
 
