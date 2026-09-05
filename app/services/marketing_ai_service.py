@@ -1,4 +1,6 @@
 """Gemini-powered marketing copy for Indistylex — social, SEO, WhatsApp, email."""
+import json
+
 from flask import url_for
 
 from app.services.gemini_service import generate_text, gemini_configured, parse_json_response
@@ -15,9 +17,17 @@ def marketing_ai_configured():
     return gemini_configured()
 
 
+def _product_url(product):
+    try:
+        return url_for('product.detail', slug=product.slug, _external=True)
+    except Exception:
+        base = 'https://indistylex.com'
+        return f'{base}/product/{product.slug}'
+
+
 def _product_payload(product=None, form_data=None):
     if product:
-        ages = ', '.join(product.age_groups_list()) if hasattr(product, 'age_groups_list') else ''
+        ages = ', '.join(product.age_groups_list) if product.age_groups_list else ''
         sizes = ', '.join(sorted({
             v.size for v in product.variants.filter_by(is_active=True).all() if v.size and v.stock_quantity > 0
         }))
@@ -33,7 +43,7 @@ def _product_payload(product=None, form_data=None):
             'brand': product.brand or 'Indistylex',
             'ages': ages,
             'sizes_in_stock': sizes,
-            'url': url_for('product.detail', slug=product.slug, _external=True),
+            'url': _product_url(product),
         }
     form_data = form_data or {}
     return {
@@ -81,7 +91,10 @@ Product data:
 {payload}
 """
     raw = generate_text(prompt, system=BRAND_VOICE, temperature=0.65, json_mode=True)
-    data = parse_json_response(raw)
+    try:
+        data = parse_json_response(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError('AI returned invalid JSON. Try again.') from exc
     data['product_url'] = payload.get('url')
     return data
 
@@ -109,7 +122,10 @@ Focus on kids fashion, festive season, new arrivals, parent trust, COD/UPI, free
 Indian audience (Prayagraj + all India online).
 """
     raw = generate_text(prompt, system=BRAND_VOICE, temperature=0.7, json_mode=True)
-    return parse_json_response(raw)
+    try:
+        return parse_json_response(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError('AI returned invalid JSON. Try again.') from exc
 
 
 def generate_brand_snippets(content_type='taglines'):
@@ -124,4 +140,7 @@ def generate_brand_snippets(content_type='taglines'):
     }
     prompt = prompts.get(content_type, prompts['taglines'])
     raw = generate_text(prompt, system=BRAND_VOICE, temperature=0.75, json_mode=True)
-    return parse_json_response(raw)
+    try:
+        return parse_json_response(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError('AI returned invalid JSON. Try again.') from exc
