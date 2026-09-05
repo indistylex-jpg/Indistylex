@@ -521,6 +521,28 @@ def analyze_product_image():
         }), 500
 
 
+@admin_bp.route('/products/suggest-skus', methods=['POST'])
+@login_required
+@admin_required
+@limiter.limit('30 per minute')
+def suggest_product_skus():
+    """Generate unique SKU rows from product type, color, and age bands."""
+    from app.utils.sku_hsn import suggest_hsn_code, suggest_variant_rows
+
+    product_type = request.form.get('product_type', 'other').strip() or 'other'
+    color = request.form.get('color', '').strip() or 'Multi'
+    age_groups = [a.strip() for a in request.form.getlist('age_groups') if a.strip()]
+
+    rows = suggest_variant_rows(product_type, color, age_groups or None)
+    return jsonify({
+        'success': True,
+        'data': {
+            'hsn_code': suggest_hsn_code(product_type),
+            'variant_draft_rows': rows,
+        },
+    })
+
+
 @admin_bp.route('/products/add', methods=['GET', 'POST'])
 @login_required
 @admin_required

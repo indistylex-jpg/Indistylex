@@ -51,6 +51,7 @@ class Product(db.Model):
     age_group = db.Column(db.String(20))  # legacy single age (first selected)
     age_groups = db.Column(db.String(500))  # comma-separated granular bands e.g. 6-9m,1-2y
     material = db.Column(db.String(200))
+    hsn_code = db.Column(db.String(10))  # GST HSN e.g. 6204, 6111
     care_instructions = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_featured = db.Column(db.Boolean, default=False)

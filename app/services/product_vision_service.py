@@ -9,6 +9,7 @@ from typing import Any
 from flask import current_app
 
 from app.utils.product_ages import normalize_age_groups
+from app.utils.sku_hsn import suggest_hsn_code, suggest_variant_rows
 
 
 PRODUCT_TYPE_KEYWORDS = {
@@ -368,9 +369,12 @@ def _normalize_result(raw: dict, catalog):
     elif quality:
         material = quality
 
+    product_type = (raw.get('product_type') or 'other').lower()
+    variant_color = _clip(raw.get('variant_color') or raw.get('primary_color'), 50)
+
     return {
         'name': _clip(raw.get('name'), 300),
-        'product_type': (raw.get('product_type') or 'other').lower(),
+        'product_type': product_type,
         'category_id': category_id,
         'gender': gender,
         'primary_color': _clip(raw.get('primary_color') or raw.get('variant_color'), 50),
@@ -379,7 +383,11 @@ def _normalize_result(raw: dict, catalog):
         'description': (raw.get('description') or '').strip(),
         'brand': 'Indistylex',
         'age_groups': age_groups,
-        'variant_color': _clip(raw.get('variant_color') or raw.get('primary_color'), 50),
+        'variant_color': variant_color,
+        'hsn_code': suggest_hsn_code(product_type),
+        'variant_draft_rows': suggest_variant_rows(
+            product_type, variant_color, age_groups,
+        ),
     }
 
 

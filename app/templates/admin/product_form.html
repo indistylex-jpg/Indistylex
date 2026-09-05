@@ -123,7 +123,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
       <div>
         <h5 class="fw-semibold mb-1"><i class="bi bi-magic me-2 text-primary"></i>Start with a product photo</h5>
-        <p class="text-muted small mb-0">Upload one clear photo — AI detects type (frock, shirt, kurta…), color, fabric, and writes descriptions. <strong>You set the price manually.</strong></p>
+        <p class="text-muted small mb-0">Upload one clear photo — AI fills name, category, HSN, SKU rows, color &amp; fabric. <strong>You set sell &amp; purchase price manually.</strong></p>
       </div>
       {% if not product_ai_enabled %}
       <span class="badge bg-warning text-dark">AI key not set on server</span>
@@ -165,6 +165,7 @@
 
 <form method="POST" enctype="multipart/form-data" novalidate id="product-form" data-is-new="{{ 'true' if is_new else 'false' }}"
       data-analyze-url="{{ url_for('admin.analyze_product_image') }}"
+      data-suggest-skus-url="{{ url_for('admin.suggest_product_skus') }}"
       data-marketing-url="{{ url_for('admin.marketing_ai_product') }}"
       data-product-id="{{ product.id if product else '' }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -217,9 +218,14 @@
         <div class="form-text">Must be higher than selling price</div>
       </div>
       <div class="col-md-3">
-        <label class="form-label">Cost Price (₹) <span class="badge bg-secondary ms-1">Admin only</span></label>
-        {{ form.cost_price(class="form-control", id="cost_price", step="0.01", placeholder="What you paid for this item") }}
-        <div class="form-text">Hidden from customers — used for profit &amp; dashboard totals</div>
+        <label class="form-label">Cost Price (₹) <span class="badge bg-secondary ms-1">Purchase</span></label>
+        {{ form.cost_price(class="form-control", id="cost_price", step="0.01", placeholder="What you paid") }}
+        <div class="form-text">Your buying price — profit shown on Products list</div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">HSN Code <span class="badge bg-secondary ms-1">GST</span></label>
+        {{ form.hsn_code(class="form-control", id="hsn_code", placeholder="e.g. 6204", maxlength="10") }}
+        <div class="form-text">For invoices &amp; GST — AI suggests from garment type</div>
       </div>
       <div class="col-md-3">
         <label class="form-label">Brand</label>
@@ -354,8 +360,14 @@
       <span class="product-form-step">5</span>
       <div>
         <h5 class="mb-0">Sizes, colors & stock</h5>
-        <p class="text-muted small mb-0">{% if is_new %}At least one complete variant required{% else %}Add new size/color rows below{% endif %}</p>
+        <p class="text-muted small mb-0">Each row = one SKU (unique code). Same product, different size/color = separate rows.</p>
       </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <button type="button" class="btn btn-sm btn-outline-primary" id="generate-skus-btn">
+        <i class="bi bi-upc-scan me-1"></i>Generate SKUs from ages &amp; color
+      </button>
+      <span class="small text-muted align-self-center">Format: IX-FRK-001-2-3Y-PNK — no duplicate SKUs allowed</span>
     </div>
     <div class="table-responsive">
       <table class="table table-sm align-middle mb-2">
@@ -402,5 +414,5 @@
 
 {% block extra_js %}
 <script>window.PRODUCT_CATEGORY_META = {{ category_meta_json | safe }};</script>
-<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=8"></script>
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}?v=9"></script>
 {% endblock %}

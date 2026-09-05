@@ -280,6 +280,7 @@ def apply_product_fields_from_form(product, form, *, is_new=False):
     product.price = form.price.data
     product.compare_at_price = form.compare_at_price.data or None
     product.cost_price = form.cost_price.data or None
+    product.hsn_code = (form.hsn_code.data or '').strip() or None
     product.category_id = form.category_id.data
     product.brand = form.brand.data or None
     product.gender = form.gender.data or None

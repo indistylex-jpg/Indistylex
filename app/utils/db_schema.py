@@ -30,3 +30,21 @@ def ensure_payment_columns():
             db.session.execute(text(f'ALTER TABLE payments ADD COLUMN {name} {col_def}'))
 
     db.session.commit()
+
+
+def ensure_product_columns():
+    """Add product columns if missing (safe on every startup)."""
+    inspector = inspect(db.engine)
+    if 'products' not in inspector.get_table_names():
+        return
+
+    existing = {c['name'] for c in inspector.get_columns('products')}
+    dialect = db.engine.dialect.name
+
+    if 'hsn_code' not in existing:
+        col_def = 'VARCHAR(10) NULL'
+        if dialect == 'mysql':
+            db.session.execute(text(f'ALTER TABLE products ADD COLUMN hsn_code {col_def}'))
+        else:
+            db.session.execute(text(f'ALTER TABLE products ADD COLUMN hsn_code {col_def}'))
+        db.session.commit()

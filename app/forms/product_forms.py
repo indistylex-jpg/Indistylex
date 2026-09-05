@@ -38,6 +38,7 @@ class ProductForm(FlaskForm):
     brand = StringField('Brand', validators=[Optional(), Length(max=100)])
     gender = SelectField('Gender', choices=GENDER_CHOICES, validators=[Optional()])
     material = StringField('Material', validators=[Optional(), Length(max=200)])
+    hsn_code = StringField('HSN Code', validators=[Optional(), Length(min=4, max=10)])
     care_instructions = TextAreaField('Care Instructions', validators=[Optional()])
     is_active = BooleanField('Active', default=True)
     is_new_arrival = BooleanField('New Arrival')

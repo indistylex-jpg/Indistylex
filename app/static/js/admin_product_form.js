@@ -388,10 +388,34 @@
     aiStatus.className = 'small mt-2' + (type ? ' text-' + type : ' text-muted');
   }
 
+  let lastAiProductType = 'other';
+
   function setFieldValue(id, value) {
     if (value === null || value === undefined || value === '') return;
     const el = document.getElementById(id);
     if (el) el.value = value;
+  }
+
+  function fillVariantRows(rows) {
+    const tbody = document.getElementById('variant-rows');
+    const template = document.getElementById('variant-row-template');
+    if (!tbody || !template || !Array.isArray(rows) || !rows.length) return;
+
+    tbody.innerHTML = '';
+    rows.forEach(function (row, index) {
+      const tr = template.content.cloneNode(true);
+      const sizeInput = tr.querySelector('[name="variant_size[]"]');
+      const colorInput = tr.querySelector('[name="variant_color[]"]');
+      const skuInput = tr.querySelector('[name="variant_sku[]"]');
+      const stockInput = tr.querySelector('[name="variant_stock[]"]');
+      if (sizeInput) sizeInput.value = row.size || '';
+      if (colorInput) colorInput.value = row.color || '';
+      if (skuInput) skuInput.value = row.sku || '';
+      if (stockInput) stockInput.value = row.stock != null ? row.stock : 10;
+      const removeBtn = tr.querySelector('.remove-variant-row');
+      if (removeBtn && index === 0) removeBtn.remove();
+      tbody.appendChild(tr);
+    });
   }
 
   function applyAutofill(data) {
@@ -404,7 +428,9 @@
     setFieldValue('description', data.description);
     setFieldValue('brand', data.brand || 'Indistylex');
     setFieldValue('material', data.material);
+    setFieldValue('hsn_code', data.hsn_code);
     if (data.gender && genderSelect) genderSelect.value = data.gender;
+    if (data.product_type) lastAiProductType = data.product_type;
 
     if (Array.isArray(data.age_groups)) {
       document.querySelectorAll('input[name="age_groups"]').forEach(function (cb) {
@@ -412,8 +438,12 @@
       });
     }
 
-    const colorInput = document.querySelector('#variant-rows input[name="variant_color[]"]');
-    if (colorInput && data.variant_color) colorInput.value = data.variant_color;
+    if (Array.isArray(data.variant_draft_rows) && data.variant_draft_rows.length) {
+      fillVariantRows(data.variant_draft_rows);
+    } else {
+      const colorInput = document.querySelector('#variant-rows input[name="variant_color[]"]');
+      if (colorInput && data.variant_color) colorInput.value = data.variant_color;
+    }
 
     updateGenderHint();
     updateListingPreview();
@@ -512,8 +542,9 @@
         applyAutofill(data);
         attachImageToProductForm(aiScanFile);
         setAiStatus(
-          'Details filled from photo (' + (data.product_type || 'product') + ', ' + (data.primary_color || 'color detected') + '). '
-          + 'Set price manually, then add photos in section 4 and save.',
+          'Details filled — HSN ' + (data.hsn_code || '—') + ', '
+          + ((data.variant_draft_rows && data.variant_draft_rows.length) || 0) + ' SKU row(s). '
+          + 'Set selling & cost price, then save.',
           'success'
         );
       })
@@ -523,6 +554,42 @@
       .finally(function () {
         aiBtn.disabled = false;
       });
+  });
+
+  const generateSkusBtn = document.getElementById('generate-skus-btn');
+  const suggestSkusUrl = productForm?.dataset.suggestSkusUrl;
+
+  generateSkusBtn?.addEventListener('click', function () {
+    if (!suggestSkusUrl) return;
+    const color = document.querySelector('#variant-rows input[name="variant_color[]"]')?.value?.trim()
+      || document.getElementById('name')?.value?.trim()
+      || 'Multi';
+    const ageGroups = Array.from(document.querySelectorAll('input[name="age_groups"]:checked'))
+      .map(function (cb) { return cb.value; });
+    if (!ageGroups.length) {
+      alert('Select at least one age band in section 2, then generate SKUs.');
+      return;
+    }
+    const fd = new FormData();
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (csrf) fd.append('csrf_token', csrf);
+    fd.append('product_type', lastAiProductType);
+    fd.append('color', color);
+    ageGroups.forEach(function (a) { fd.append('age_groups', a); });
+
+    generateSkusBtn.disabled = true;
+    fetch(suggestSkusUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.success) {
+          alert(res.message || 'Could not generate SKUs.');
+          return;
+        }
+        if (res.data.hsn_code) setFieldValue('hsn_code', res.data.hsn_code);
+        fillVariantRows(res.data.variant_draft_rows || []);
+      })
+      .catch(function () { alert('Network error generating SKUs.'); })
+      .finally(function () { generateSkusBtn.disabled = false; });
   });
 
   const mktBtn = document.getElementById('product-marketing-gen-btn');
