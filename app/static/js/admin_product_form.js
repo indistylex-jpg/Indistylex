@@ -526,4 +526,64 @@
         aiBtn.disabled = false;
       });
   });
+
+  const mktBtn = document.getElementById('product-marketing-gen-btn');
+  const mktOut = document.getElementById('product-marketing-output');
+  const mktStatus = document.getElementById('product-marketing-status');
+  const mktUrl = productForm?.dataset.marketingUrl;
+  const productId = productForm?.dataset.productId;
+
+  function setMktStatus(msg, tone) {
+    if (!mktStatus) return;
+    mktStatus.textContent = msg;
+    mktStatus.className = 'small mt-2 text-' + (tone || 'muted');
+  }
+
+  mktBtn?.addEventListener('click', function () {
+    if (!mktUrl) return;
+    const name = document.getElementById('name')?.value?.trim();
+    if (!name && !productId) {
+      setMktStatus('Enter a product name first.', 'danger');
+      return;
+    }
+    mktBtn.disabled = true;
+    setMktStatus('Generating marketing copy…', 'primary');
+    const fd = new FormData();
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (csrf) fd.append('csrf_token', csrf);
+    if (productId) fd.append('product_id', productId);
+    else {
+      fd.append('name', name);
+      fd.append('short_description', document.getElementById('short_description')?.value || '');
+      fd.append('description', document.getElementById('description')?.value || '');
+      fd.append('price', document.getElementById('price')?.value || '');
+      fd.append('compare_at_price', document.getElementById('compare_at_price')?.value || '');
+      fd.append('material', document.getElementById('material')?.value || '');
+      fd.append('brand', document.getElementById('brand')?.value || '');
+      fd.append('gender', document.getElementById('gender')?.value || '');
+    }
+    fetch(mktUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.success) {
+          setMktStatus(res.message || 'Failed', 'danger');
+          return;
+        }
+        const d = res.data;
+        const blocks = [
+          ['Instagram', (d.instagram_caption || '') + '\n\n' + (d.instagram_hashtags || '')],
+          ['WhatsApp', d.whatsapp_broadcast],
+          ['SEO title', d.seo_title],
+          ['SEO description', d.seo_description],
+        ];
+        mktOut.innerHTML = blocks.map(function (b) {
+          return '<div class="border rounded p-3 mb-2"><strong class="small d-block mb-1">' + b[0] +
+            '</strong><pre class="small mb-0" style="white-space:pre-wrap">' + (b[1] || '') + '</pre></div>';
+        }).join('') + '<a href="' + (window.location.origin || '') + '/admin/marketing-ai" class="small">Open full Marketing AI →</a>';
+        mktOut.classList.remove('d-none');
+        setMktStatus('Copy ready — paste to Instagram or WhatsApp.', 'success');
+      })
+      .catch(function () { setMktStatus('Network error.', 'danger'); })
+      .finally(function () { mktBtn.disabled = false; });
+  });
 })();

@@ -10,7 +10,7 @@
         <div class="avatar"><i class="bi bi-bag-heart-fill"></i></div>
         <div class="info">
             <h6>Indistylex Assistant</h6>
-            <small>Online — here to help with orders & sizing</small>
+            <small>{% if gemini_ai_enabled %}AI powered — orders, sizing & products{% else %}Online — here to help{% endif %}</small>
         </div>
         <button class="close-chat" id="chatbotClose" aria-label="Close chat">
             <i class="bi bi-x-lg"></i>

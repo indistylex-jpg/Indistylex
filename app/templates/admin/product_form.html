@@ -149,8 +149,24 @@
   </div>
 </div>
 
+{% if product_ai_enabled %}
+<div class="product-ai-scan card border-0 shadow-sm mb-4" id="product-marketing-ai">
+  <div class="card-body p-4">
+    <h5 class="fw-semibold mb-1"><i class="bi bi-megaphone me-2 text-primary"></i>Marketing copy (AI)</h5>
+    <p class="text-muted small mb-3">Generate Instagram, WhatsApp, SEO & email text from the product details above — copy & paste to social.</p>
+    <button type="button" class="btn btn-outline-primary" id="product-marketing-gen-btn">
+      <i class="bi bi-stars me-1"></i>Generate social & SEO copy
+    </button>
+    <div id="product-marketing-output" class="mt-3 d-none"></div>
+    <div id="product-marketing-status" class="small text-muted mt-2" aria-live="polite"></div>
+  </div>
+</div>
+{% endif %}
+
 <form method="POST" enctype="multipart/form-data" novalidate id="product-form" data-is-new="{{ 'true' if is_new else 'false' }}"
-      data-analyze-url="{{ url_for('admin.analyze_product_image') }}">
+      data-analyze-url="{{ url_for('admin.analyze_product_image') }}"
+      data-marketing-url="{{ url_for('admin.marketing_ai_product') }}"
+      data-product-id="{{ product.id if product else '' }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <!-- 1. Basics -->

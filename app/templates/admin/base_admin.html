@@ -81,6 +81,11 @@
           </a>
         </li>
         <li class="nav-item">
+          <a href="{{ url_for('admin.marketing_ai') }}" class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('admin.marketing_ai') }}">
+            <i class="bi bi-stars"></i><span>Marketing AI</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="{{ url_for('admin.reviews') }}" class="nav-link {{ 'active' if request.endpoint == 'admin.reviews' }}">
             <i class="bi bi-star-fill"></i><span>Reviews</span>
           </a>

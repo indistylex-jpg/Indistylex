@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from app.models.product import Product, Category
 from app.models.order import Order
 from app.extensions import csrf, limiter
@@ -267,8 +267,25 @@ def chat_message():
     if len(user_message) > 500:
         user_message = user_message[:500]
 
-    reply = _match_intent(user_message)
-    return jsonify({'reply': reply})
+    history = data.get('history') or []
+    product_slug = (data.get('product_slug') or '').strip() or None
+
+    reply = None
+    used_ai = False
+    try:
+        from app.services.chatbot_ai_service import chatbot_ai_configured, generate_chat_reply
+        if chatbot_ai_configured():
+            reply = generate_chat_reply(user_message, history=history, product_slug=product_slug)
+            used_ai = True
+    except ValueError as exc:
+        current_app.logger.info('Chatbot AI fallback: %s', exc)
+    except Exception:
+        current_app.logger.exception('Chatbot AI error')
+
+    if not reply:
+        reply = _match_intent(user_message)
+
+    return jsonify({'reply': reply, 'ai': used_ai})
 
 
 @chatbot_bp.route('/suggestions', methods=['GET'])

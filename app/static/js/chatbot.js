@@ -14,6 +14,9 @@
 
     let isOpen = false;
     let isFirstOpen = true;
+    let chatHistory = [];
+
+    var productSlug = document.body.dataset.chatProductSlug || '';
 
     // Toggle chat window
     chatbotToggle.addEventListener('click', function () {
@@ -52,6 +55,7 @@
 
         addUserMessage(text);
         chatInput.value = '';
+        chatHistory.push({ role: 'user', text: text });
         showTyping();
 
         var csrfToken = document.querySelector('meta[name="csrf-token"]');
@@ -62,12 +66,18 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken ? csrfToken.content : '',
             },
-            body: JSON.stringify({ message: text }),
+            body: JSON.stringify({
+                message: text,
+                history: chatHistory.slice(-6),
+                product_slug: productSlug || undefined,
+            }),
         })
         .then(function (res) { return res.json(); })
         .then(function (data) {
             hideTyping();
-            addBotMessage(data.reply || "Sorry, something went wrong.");
+            var reply = data.reply || "Sorry, something went wrong.";
+            addBotMessage(reply);
+            chatHistory.push({ role: 'assistant', text: reply });
         })
         .catch(function () {
             hideTyping();

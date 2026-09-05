@@ -219,6 +219,7 @@ def create_app(config_name=None):
             },
             'admin_notifications': admin_notifications,
             'support_email': app.config.get('SUPPORT_EMAIL', 'indistylex@gmail.com'),
+            'gemini_ai_enabled': bool(app.config.get('GEMINI_API_KEY')),
         }
 
     @app.template_global()

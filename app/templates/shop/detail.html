@@ -7,6 +7,8 @@
 {% block title %}{{ product.name }} — Indistylex{% endblock %}
 {% block meta_description %}{{ (product.description or product.short_description or product.name)[:160] | striptags }}{% endblock %}
 
+{% block body_attrs %}data-chat-product-slug="{{ product.slug }}"{% endblock %}
+
 {% block content %}
 <section class="product-detail-section py-4">
     <div class="container">

@@ -1390,3 +1390,100 @@ def delete_expense_view(expense_id):
     else:
         flash(error, 'danger')
     return redirect(url_for('admin.expenses'))
+
+
+# ── Marketing AI (Gemini) ─────────────────────────────────────────────
+
+@admin_bp.route('/marketing-ai')
+@login_required
+@admin_required
+def marketing_ai():
+    from app.services.marketing_ai_service import marketing_ai_configured
+
+    products = Product.query.filter_by(is_active=True).order_by(Product.name).limit(250).all()
+    return render_template(
+        'admin/marketing_ai.html',
+        products=products,
+        ai_enabled=marketing_ai_configured(),
+    )
+
+
+@admin_bp.route('/marketing-ai/product', methods=['POST'])
+@login_required
+@admin_required
+@limiter.limit('15 per minute')
+def marketing_ai_product():
+    from app.services.marketing_ai_service import generate_product_marketing_pack, marketing_ai_configured
+
+    if not marketing_ai_configured():
+        return jsonify({'success': False, 'message': 'Add GEMINI_API_KEY to server .env'}), 503
+
+    product_id = request.form.get('product_id', type=int)
+    product = Product.query.get(product_id) if product_id else None
+
+    form_data = None
+    if not product:
+        form_data = {
+            'name': request.form.get('name', '').strip(),
+            'category': request.form.get('category', '').strip(),
+            'gender': request.form.get('gender', '').strip(),
+            'price': request.form.get('price'),
+            'compare_at_price': request.form.get('compare_at_price'),
+            'short_description': request.form.get('short_description', '').strip(),
+            'description': request.form.get('description', '').strip(),
+            'material': request.form.get('material', '').strip(),
+            'brand': request.form.get('brand', 'Indistylex').strip(),
+            'ages': request.form.get('ages', '').strip(),
+            'sizes': request.form.get('sizes', '').strip(),
+        }
+
+    try:
+        data = generate_product_marketing_pack(product=product, form_data=form_data)
+        return jsonify({'success': True, 'data': data})
+    except ValueError as exc:
+        return jsonify({'success': False, 'message': str(exc)}), 400
+    except Exception:
+        current_app.logger.exception('Marketing AI product copy failed')
+        return jsonify({'success': False, 'message': 'Could not generate copy. Try again.'}), 500
+
+
+@admin_bp.route('/marketing-ai/campaigns', methods=['POST'])
+@login_required
+@admin_required
+@limiter.limit('8 per minute')
+def marketing_ai_campaigns():
+    from app.services.marketing_ai_service import generate_weekly_campaign_ideas, marketing_ai_configured
+
+    if not marketing_ai_configured():
+        return jsonify({'success': False, 'message': 'Add GEMINI_API_KEY to server .env'}), 503
+
+    try:
+        data = generate_weekly_campaign_ideas()
+        return jsonify({'success': True, 'data': data})
+    except ValueError as exc:
+        return jsonify({'success': False, 'message': str(exc)}), 400
+    except Exception:
+        current_app.logger.exception('Marketing AI campaigns failed')
+        return jsonify({'success': False, 'message': 'Could not generate ideas. Try again.'}), 500
+
+
+@admin_bp.route('/marketing-ai/brand', methods=['POST'])
+@login_required
+@admin_required
+@limiter.limit('8 per minute')
+def marketing_ai_brand():
+    from app.services.marketing_ai_service import generate_brand_snippets, marketing_ai_configured
+
+    if not marketing_ai_configured():
+        return jsonify({'success': False, 'message': 'Add GEMINI_API_KEY to server .env'}), 503
+
+    content_type = request.form.get('type', 'taglines')
+    try:
+        data = generate_brand_snippets(content_type)
+        return jsonify({'success': True, 'data': data})
+    except ValueError as exc:
+        return jsonify({'success': False, 'message': str(exc)}), 400
+    except Exception:
+        current_app.logger.exception('Marketing AI brand snippets failed')
+        return jsonify({'success': False, 'message': 'Could not generate brand copy. Try again.'}), 500
+

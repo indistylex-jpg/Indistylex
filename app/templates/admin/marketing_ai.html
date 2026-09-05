@@ -1,0 +1,106 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Marketing AI{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h4 class="fw-bold mb-1"><i class="bi bi-stars text-primary me-2"></i>Marketing AI</h4>
+    <p class="text-muted mb-0">Gemini-powered copy for Instagram, WhatsApp, SEO, email & weekly campaigns.</p>
+  </div>
+  {% if not ai_enabled %}
+  <span class="badge bg-warning text-dark">Add GEMINI_API_KEY to server .env</span>
+  {% else %}
+  <span class="badge bg-success">Gemini active</span>
+  {% endif %}
+</div>
+
+<ul class="nav nav-tabs mb-4" id="marketingAiTabs" role="tablist">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-product" type="button">Product copy</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-week" type="button">Weekly plan</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-brand" type="button">Brand & ads</button></li>
+</ul>
+
+<div class="tab-content">
+  <!-- Product copy -->
+  <div class="tab-pane fade show active" id="tab-product">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <p class="text-muted small">Pick a live product or paste details — get ready-to-post captions, hashtags, WhatsApp text, and SEO.</p>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Select product</label>
+            <select class="form-select" id="mkt-product-id" {% if not ai_enabled %}disabled{% endif %}>
+              <option value="">— Or fill manually below —</option>
+              {% for p in products %}
+              <option value="{{ p.id }}">{{ p.name }} (₹{{ p.price | int }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 d-flex align-items-end">
+            <button type="button" class="btn btn-primary w-100" id="mkt-generate-product" {% if not ai_enabled %}disabled{% endif %}>
+              <i class="bi bi-magic me-1"></i>Generate marketing pack
+            </button>
+          </div>
+        </div>
+        <div id="mkt-product-results" class="d-none">
+          <div class="row g-3" id="mkt-product-cards"></div>
+        </div>
+        <div id="mkt-product-status" class="small text-muted mt-2" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly campaigns -->
+  <div class="tab-pane fade" id="tab-week">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <p class="text-muted small">7-day social + WhatsApp content plan tailored for Indistylex kids fashion.</p>
+        <button type="button" class="btn btn-primary" id="mkt-generate-campaigns" {% if not ai_enabled %}disabled{% endif %}>
+          <i class="bi bi-calendar-week me-1"></i>Generate this week's plan
+        </button>
+        <div id="mkt-campaign-results" class="mt-4 d-none"></div>
+        <div id="mkt-campaign-status" class="small text-muted mt-2" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brand -->
+  <div class="tab-pane fade" id="tab-brand">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <p class="text-muted small">Taglines, social bios, and ad headlines in Indistylex brand voice.</p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button type="button" class="btn btn-outline-primary mkt-brand-btn" data-type="taglines" {% if not ai_enabled %}disabled{% endif %}>Taglines</button>
+          <button type="button" class="btn btn-outline-primary mkt-brand-btn" data-type="bios" {% if not ai_enabled %}disabled{% endif %}>Social bios</button>
+          <button type="button" class="btn btn-outline-primary mkt-brand-btn" data-type="ads" {% if not ai_enabled %}disabled{% endif %}>Ad headlines</button>
+        </div>
+        <div id="mkt-brand-results" class="d-none"></div>
+        <div id="mkt-brand-status" class="small text-muted mt-2" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4 bg-light">
+  <div class="card-body p-4">
+    <h6 class="fw-semibold">What Gemini AI does for Indistylex</h6>
+    <ul class="small text-muted mb-0">
+      <li><strong>Admin → Products:</strong> Photo autofill (name, category, price, description)</li>
+      <li><strong>Marketing AI:</strong> Instagram, WhatsApp, Facebook, SEO, email copy</li>
+      <li><strong>Website chat:</strong> Smart shopping assistant (sizing, products, policies)</li>
+      <li><strong>Tip:</strong> Copy text → paste in Instagram / WhatsApp Business / Meta Ads</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.MARKETING_AI_URLS = {
+  product: {{ url_for('admin.marketing_ai_product') | tojson }},
+  campaigns: {{ url_for('admin.marketing_ai_campaigns') | tojson }},
+  brand: {{ url_for('admin.marketing_ai_brand') | tojson }},
+};
+</script>
+<script src="{{ url_for('static', filename='js/admin_marketing_ai.js') }}?v=1"></script>
+{% endblock %}
