@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="font-family:'Segoe UI',Arial,sans-serif; background:#f8f9fa; margin:0; padding:20px;">
+  <div style="max-width:600px; margin:0 auto; background:#fff; border-radius:8px; overflow:hidden;">
+    <div style="background:#1E4D8C; padding:24px; text-align:center;">
+      <h1 style="color:#fff; margin:0; font-size:20px;">New contact form message</h1>
+    </div>
+    <div style="padding:24px;">
+      <p style="margin:0 0 8px;"><strong>From:</strong> {{ name }}</p>
+      <p style="margin:0 0 8px;"><strong>Email:</strong> <a href="mailto:{{ email }}">{{ email }}</a></p>
+      <p style="margin:0 0 16px;"><strong>Subject:</strong> {{ subject_line }}</p>
+      <div style="background:#f8f9fa; padding:16px; border-radius:6px; white-space:pre-wrap;">{{ message }}</div>
+      <p style="color:#666; font-size:13px; margin-top:20px;">Reply directly to this email to respond to the customer.</p>
+    </div>
+  </div>
+</body></html>

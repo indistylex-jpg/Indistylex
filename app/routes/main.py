@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, make_response, url_for, flash, redirect
+from flask import Blueprint, render_template, request, make_response, url_for, flash, redirect, current_app
 from app.models.product import Product, Category
 from app.extensions import cache, limiter
+from app.services.email_service import send_contact_form_email
 from datetime import datetime
 
 main_bp = Blueprint('main', __name__)
@@ -57,13 +58,19 @@ def contact():
             flash('Please fill in all required fields.', 'danger')
             return render_template('pages/contact.html')
 
-        # Log the contact message (could be emailed or saved to DB later)
-        import logging
-        logging.getLogger(__name__).info(
-            f'Contact form: name={name}, email={email}, subject={subject}'
+        current_app.logger.info(
+            'Contact form: name=%s, email=%s, subject=%s',
+            name, email, subject or '(none)',
         )
-
-        flash('Thank you for your message! We\'ll get back to you soon.', 'success')
+        sent = send_contact_form_email(name, email, subject, message)
+        if sent:
+            flash('Thank you for your message! We\'ll get back to you soon.', 'success')
+        else:
+            support = current_app.config.get('SUPPORT_EMAIL', 'indistylex@gmail.com')
+            flash(
+                f'Thank you — we saved your message. If you don\'t hear back soon, email us at {support}.',
+                'warning',
+            )
         return redirect(url_for('main.contact'))
 
     return render_template('pages/contact.html')

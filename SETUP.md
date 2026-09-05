@@ -60,9 +60,11 @@ Create a `.env` file in the project root for custom configuration:
 SECRET_KEY=your-secret-key-here
 FLASK_ENV=development
 
-# Mail (optional)
-MAIL_USERNAME=your-email@gmail.com
+# Mail (Gmail — use indistylex@gmail.com + App Password)
+SUPPORT_EMAIL=indistylex@gmail.com
+MAIL_USERNAME=indistylex@gmail.com
 MAIL_PASSWORD=your-app-password
+MAIL_DEFAULT_SENDER=Indistylex <indistylex@gmail.com>
 
 # Razorpay (optional, for payments)
 RAZORPAY_KEY_ID=your-key-id
@@ -116,7 +118,7 @@ The app will be available at: **http://127.0.0.1:5000**
 
 | Field    | Value                  |
 |----------|------------------------|
-| Email    | `admin@indistylex.com`  |
+| Email    | `indistylex@gmail.com`  |
 | Password | `change-this-password` |
 
 > The admin user is auto-created on first run using `ADMIN_EMAIL` and `ADMIN_PASSWORD` from your `.env` file (or the defaults above). You can change these by setting the environment variables before starting the app.

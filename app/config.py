@@ -9,13 +9,18 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Mail
+    # Mail — single inbox: indistylex@gmail.com (Gmail SMTP + App Password)
+    SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL', 'indistylex@gmail.com')
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', SUPPORT_EMAIL)
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@indistylex.com')
+    # Gmail requires From address to match MAIL_USERNAME
+    MAIL_DEFAULT_SENDER = os.environ.get(
+        'MAIL_DEFAULT_SENDER',
+        ('Indistylex', SUPPORT_EMAIL),
+    )
 
     # Razorpay
     RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
@@ -60,7 +65,7 @@ class Config:
     CURRENCY_SYMBOL = '₹'
 
     # Admin
-    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@indistylex.com')
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'indistylex@gmail.com')
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-this-password')
 
     # AI product autofill (admin) — set GEMINI_API_KEY and/or OPENAI_API_KEY

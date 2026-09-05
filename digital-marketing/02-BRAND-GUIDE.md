@@ -15,7 +15,7 @@
 | **Logo** | Kids tee icon on **blue gradient tile** + wordmark **INDISTYLEX** + blue underline bar |
 | **Logo files** | `app/static/images/logo.svg`, `logo-white.svg`, `logo-icon.svg`, `favicon.svg` |
 | **Domain** | indistylex.com |
-| **Email** | support@indistylex.com |
+| **Email** | indistylex@gmail.com |
 | **Instagram** | [@indistylex_clothing](https://www.instagram.com/indistylex_clothing) |
 | **WhatsApp** | +91 63941 42176 |
 

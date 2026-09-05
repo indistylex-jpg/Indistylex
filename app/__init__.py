@@ -218,6 +218,7 @@ def create_app(config_name=None):
                 'whatsapp': app.config.get('SOCIAL_WHATSAPP'),
             },
             'admin_notifications': admin_notifications,
+            'support_email': app.config.get('SUPPORT_EMAIL', 'indistylex@gmail.com'),
         }
 
     @app.template_global()

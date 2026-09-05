@@ -69,12 +69,14 @@ SECRET_KEY=PASTE_64_CHAR_RANDOM_STRING_HERE
 DATABASE_URL=mysql+pymysql://indistylex:YourStrongPassword123!@localhost:3306/indistylex
 REDIS_URL=redis://localhost:6379/0
 
-# Mail (Gmail example)
+# Mail (Gmail — indistylex@gmail.com + App Password)
+SUPPORT_EMAIL=indistylex@gmail.com
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
+MAIL_USERNAME=indistylex@gmail.com
 MAIL_PASSWORD=your-app-password
+MAIL_DEFAULT_SENDER=Indistylex <indistylex@gmail.com>
 
 # Razorpay
 RAZORPAY_KEY_ID=your_razorpay_key
@@ -88,7 +90,7 @@ FACEBOOK_APP_ID=
 FACEBOOK_APP_SECRET=
 
 # Admin
-ADMIN_EMAIL=admin@indistylex.com
+ADMIN_EMAIL=indistylex@gmail.com
 ADMIN_PASSWORD=YourAdminPassword!
 
 # Security

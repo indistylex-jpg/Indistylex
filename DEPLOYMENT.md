@@ -66,18 +66,20 @@ SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
 DATABASE_URL=sqlite:////var/www/indistylex/instance/indistylex.db
 
 # Email (configure for order confirmations)
+SUPPORT_EMAIL=indistylex@gmail.com
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
+MAIL_USERNAME=indistylex@gmail.com
 MAIL_PASSWORD=your-app-password
+MAIL_DEFAULT_SENDER=Indistylex <indistylex@gmail.com>
 
 # Payment (configure for online payments)
 RAZORPAY_KEY_ID=rzp_live_xxxxx
 RAZORPAY_KEY_SECRET=your_secret
 
 # Admin
-ADMIN_EMAIL=admin@indistylex.com
+ADMIN_EMAIL=indistylex@gmail.com
 ADMIN_PASSWORD=IndistyAdmin2026!
 
 # Misc

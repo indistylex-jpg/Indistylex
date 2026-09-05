@@ -209,7 +209,7 @@ Configuration is managed via environment variables and `app/config.py`.
 | `REDIS_URL`              | Redis connection URL                 | redis://localhost:6379|
 | `GOOGLE_CLIENT_ID`       | Google OAuth client ID               | (optional)           |
 | `GOOGLE_CLIENT_SECRET`   | Google OAuth secret                  | (optional)           |
-| `ADMIN_EMAIL`            | Admin user email                     | admin@indistylex.com  |
+| `ADMIN_EMAIL`            | Admin user email                     | indistylex@gmail.com  |
 | `ADMIN_PASSWORD`         | Admin user password                  | (set on first run)   |
 
 ---
@@ -385,7 +385,7 @@ Proprietary — Indistylex (Prop: Satyam Pandey). All rights reserved.
 
 ## Contact
 
-- **Email:** support@indistylex.com
+- **Email:** indistylex@gmail.com
 - **Phone:** +91 63941 42176
 - **Address:** MIG 79, Dhoomanganj, Preetam Nagar, Prayagraj, UP 211011
 # Silkensway_Clothing_final_flask

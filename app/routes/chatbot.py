@@ -7,16 +7,18 @@ from flask_login import current_user
 chatbot_bp = Blueprint('chatbot', __name__)
 
 # Knowledge base for the chatbot
-STORE_INFO = {
-    'name': 'Indistylex',
-    'email': 'support@indistylex.com',
-    'phone': '+91-6394142176',
-    'hours': 'Mon–Sun, 10 AM – 9:30 PM IST',
-    'shipping_time': '3–7 business days',
-    'free_shipping_above': 999,
-    'return_window': '7 days',
-    'currency': '₹',
-}
+def get_store_info():
+    from flask import current_app
+    return {
+        'name': 'Indistylex',
+        'email': current_app.config.get('SUPPORT_EMAIL', 'indistylex@gmail.com'),
+        'phone': '+91-6394142176',
+        'hours': 'Mon–Sun, 10 AM – 9:30 PM IST',
+        'shipping_time': '3–7 business days',
+        'free_shipping_above': 999,
+        'return_window': '7 days',
+        'currency': '₹',
+    }
 
 # Intent patterns — keyword lists mapped to response generators
 INTENTS = [
@@ -111,27 +113,27 @@ def _handle_order_tracking(msg):
     return (
         "Please [log in](/auth/login) to track your orders.\n"
         "If you checked out as a guest, please contact us at "
-        f"{STORE_INFO['email']} with your order number."
+        f"{get_store_info()['email']} with your order number."
     )
 
 
 def _handle_returns(msg):
     return (
         f"🔄 **Returns & Refunds Policy:**\n\n"
-        f"• Return window: **{STORE_INFO['return_window']}** from delivery\n"
+        f"• Return window: **{get_store_info()['return_window']}** from delivery\n"
         "• Items must be unworn, unwashed, with tags attached\n"
         "• Refunds are processed within 5–7 business days\n"
         "• Exchange available for different size/colour\n\n"
         "To initiate a return, visit [My Orders](/orders) or contact us at "
-        f"{STORE_INFO['email']}."
+        f"{get_store_info()['email']}."
     )
 
 
 def _handle_shipping(msg):
     return (
         f"🚚 **Shipping Information:**\n\n"
-        f"• Standard delivery: **{STORE_INFO['shipping_time']}**\n"
-        f"• Free shipping on orders above **{STORE_INFO['currency']}{STORE_INFO['free_shipping_above']}**\n"
+        f"• Standard delivery: **{get_store_info()['shipping_time']}**\n"
+        f"• Free shipping on orders above **{get_store_info()['currency']}{get_store_info()['free_shipping_above']}**\n"
         "• We ship across India\n"
         "• You'll receive a tracking link via email once shipped\n\n"
         "Need faster delivery? Check express options at checkout!"
@@ -177,9 +179,9 @@ def _handle_discounts(msg):
 def _handle_contact(msg):
     return (
         f"📞 **Contact Us:**\n\n"
-        f"• Email: **{STORE_INFO['email']}**\n"
-        f"• Phone: **{STORE_INFO['phone']}**\n"
-        f"• Business hours: **{STORE_INFO['hours']}**\n\n"
+        f"• Email: **{get_store_info()['email']}**\n"
+        f"• Phone: **{get_store_info()['phone']}**\n"
+        f"• Business hours: **{get_store_info()['hours']}**\n\n"
         "You can also visit our [Contact](/contact) page to send us a message. "
         "We typically respond within 24 hours."
     )
@@ -211,7 +213,7 @@ def _handle_pricing(msg):
         "We offer fashion for every budget!\n"
         "• Browse by price on our [shop page](/shop)\n"
         "• Use the price filter to find items in your range\n"
-        f"• Free shipping on orders above ₹{STORE_INFO['free_shipping_above']}\n\n"
+        f"• Free shipping on orders above ₹{get_store_info()['free_shipping_above']}\n\n"
         "Look for sale tags for the best deals!"
     )
 
@@ -248,7 +250,7 @@ def _match_intent(message):
         "• **Sizing** — \"What size should I get?\"\n"
         "• **Payments** — \"What payment methods do you accept?\"\n"
         "• **Products** — Try typing a product name!\n\n"
-        "Or contact our support at " + STORE_INFO['email']
+        "Or contact our support at " + get_store_info()['email']
     )
 
 
