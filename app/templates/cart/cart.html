@@ -79,7 +79,12 @@
                         <span>₹{{ "{:,.0f}".format(cart.subtotal - discount + shipping) }}</span>
                     </div>
 
+                    {% if current_user.is_authenticated %}
                     <a href="{{ url_for('checkout.checkout_page') }}" class="btn-checkout">PROCEED TO CHECKOUT</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login', next=url_for('checkout.checkout_page')) }}" class="btn-checkout">LOG IN TO CHECKOUT</a>
+                    <p class="small text-muted mt-2 mb-0">An account is required to place orders.</p>
+                    {% endif %}
 
                     <div class="order-summary-payment">
                         <span>We accept</span>

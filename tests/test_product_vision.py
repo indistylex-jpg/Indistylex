@@ -31,8 +31,6 @@ class TestProductVisionService:
             'short_description': 'Pretty pink frock for parties',
             'description': 'Light cotton frock. Machine wash cold.',
             'category_id': 1,
-            'suggested_price': 499,
-            'suggested_compare_price': 899,
             'age_groups': ['3-4y', '4-5y'],
             'variant_color': 'Pink',
         }
@@ -40,7 +38,7 @@ class TestProductVisionService:
         assert result['name'] == 'Cotton Frock — Floral Pink'
         assert result['category_id'] == 1
         assert result['gender'] == 'girls'
-        assert result['price'] == 499.0
+        assert 'price' not in result
         assert '3-4y' in result['age_groups']
         assert 'Cotton' in result['material']
 

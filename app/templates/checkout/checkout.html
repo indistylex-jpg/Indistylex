@@ -12,20 +12,11 @@
                 <form method="POST" action="{{ url_for('checkout.checkout_page') }}" id="checkoutForm" novalidate>
                     {{ form.hidden_tag() }}
 
-                    <!-- Contact Information -->
+                    <!-- Contact -->
                     <div class="checkout-section">
-                        <h5 class="checkout-section-title">Contact Information</h5>
-                        {% if not current_user.is_authenticated %}
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <input type="email" class="checkout-input {{ 'is-invalid' if form.email.errors }}" name="email" placeholder="Email address" value="{{ form.email.data or '' }}">
-                                {% for error in form.email.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
-                            </div>
-                        </div>
-                        {% else %}
+                        <h5 class="checkout-section-title">Contact</h5>
+                        <p class="text-muted small mb-2">Signed in as <strong>{{ current_user.email }}</strong></p>
                         {{ form.email(type="hidden", value=current_user.email) }}
-                        {{ form.phone(type="hidden", value=current_user.phone or "") }}
-                        {% endif %}
                     </div>
 
                     <!-- Shipping Address -->
@@ -36,12 +27,10 @@
                                 {{ form.full_name(class="checkout-input" + (" is-invalid" if form.full_name.errors else ""), placeholder="Full Name") }}
                                 {% for error in form.full_name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
                             </div>
-                            {% if not current_user.is_authenticated %}
                             <div class="col-md-6">
-                                {{ form.phone(class="checkout-input" + (" is-invalid" if form.phone.errors else ""), placeholder="Phone Number") }}
+                                {{ form.phone(class="checkout-input" + (" is-invalid" if form.phone.errors else ""), placeholder="Phone Number (10 digits)") }}
                                 {% for error in form.phone.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
                             </div>
-                            {% endif %}
                             <div class="col-12">
                                 {{ form.address_line1(class="checkout-input" + (" is-invalid" if form.address_line1.errors else ""), placeholder="Address") }}
                                 {% for error in form.address_line1.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}

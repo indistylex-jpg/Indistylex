@@ -35,8 +35,7 @@ def _catalog_snippet(limit=12):
     if products:
         lines.append('Popular products:')
         for p in products:
-            price = int(p.price) if p.price else 0
-            lines.append(f"- {p.name} ₹{price} (/product/{p.slug})")
+            lines.append(f"- {p.name} (/product/{p.slug})")
     return '\n'.join(lines)
 
 
@@ -50,13 +49,13 @@ def _product_context(slug):
     return f"""
 Customer is viewing this product page:
 Name: {product.name}
-Price: ₹{int(product.price or 0)}
 Category: {product.category.name if product.category else 'N/A'}
 Gender: {product.gender or 'kids'}
 Material: {product.material or 'N/A'}
 Short: {product.short_description or ''}
 Sizes in stock: {', '.join(sizes) or 'check product page'}
 URL: /product/{product.slug}
+Do NOT quote prices — prices are shown on the product page only (set by admin).
 Help with sizing, styling, fabric care, and whether it fits their child.
 """
 
@@ -85,7 +84,8 @@ def generate_chat_reply(user_message, history=None, product_slug=None):
 Rules:
 - Answer in friendly English (light Hindi ok for warmth: "ji", "bilkul").
 - Use **bold** for emphasis. Use markdown links: [text](/path) for internal site links only.
-- Never invent products, prices, or policies not in context below.
+- Never invent products or policies not in context below.
+- Never state product prices — tell customers to check the product page for current price.
 - For order tracking, tell users to check [My Orders](/orders) or email {info['email']} with order number.
 - Keep replies under 120 words unless sizing guide needed.
 - Do not mention you are Gemini/Google. You are Indistylex Assistant.

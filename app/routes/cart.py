@@ -106,6 +106,9 @@ def add_to_cart():
     flash('Item added to cart!', 'success')
 
     if buy_now:
+        if not current_user.is_authenticated:
+            flash('Please log in or create an account to checkout.', 'info')
+            return redirect(url_for('auth.login', next=url_for('checkout.checkout_page')))
         return redirect(url_for('checkout.checkout_page'))
     return redirect(url_for('cart.view'))
 

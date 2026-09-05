@@ -402,8 +402,6 @@
     }
     setFieldValue('short_description', data.short_description);
     setFieldValue('description', data.description);
-    setFieldValue('price', data.price);
-    setFieldValue('compare_at_price', data.compare_at_price);
     setFieldValue('brand', data.brand || 'Indistylex');
     setFieldValue('material', data.material);
     if (data.gender && genderSelect) genderSelect.value = data.gender;
@@ -515,7 +513,7 @@
         attachImageToProductForm(aiScanFile);
         setAiStatus(
           'Details filled from photo (' + (data.product_type || 'product') + ', ' + (data.primary_color || 'color detected') + '). '
-          + 'Add more photos in section 4 (use Add more photos or drag several files), then save.',
+          + 'Set price manually, then add photos in section 4 and save.',
           'success'
         );
       })

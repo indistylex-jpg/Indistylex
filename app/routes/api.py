@@ -16,6 +16,7 @@ from app.models.order import Order, OrderItem, Payment
 from app.models.review import Review
 from app.models.coupon import Coupon
 from app.utils.helpers import sanitize_input
+from app.services.order_fraud_service import validate_checkout
 import jwt
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
@@ -610,6 +611,10 @@ def create_order(user):
             coupon.used_count += 1
 
     total = subtotal + tax + shipping_cost - discount
+
+    ok, fraud_msg = validate_checkout(user, total, payment_method)
+    if not ok:
+        return jsonify({'error': fraud_msg}), 403
 
     # Create order
     order = Order(

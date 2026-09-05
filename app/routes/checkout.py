@@ -1,66 +1,60 @@
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, abort
 from flask_login import current_user, login_required
 from app.extensions import db, limiter
 from app.models.cart import Cart
 from app.models.order import Order, OrderItem
 from app.models.coupon import Coupon
-from app.forms.checkout_forms import ShippingAddressForm, GuestCheckoutForm
+from app.forms.checkout_forms import ShippingAddressForm
 from app.services.payment_service import create_razorpay_order, verify_payment, capture_payment
 from app.services.inventory_service import check_stock, reduce_stock
 from app.services.email_service import send_order_confirmation
+from app.services.order_fraud_service import validate_checkout
 
 checkout_bp = Blueprint('checkout', __name__)
 
 
 @checkout_bp.route('/', methods=['GET', 'POST'])
+@login_required
 @limiter.limit("10 per minute")
 def checkout_page():
-    """Checkout page — supports both logged-in and guest checkout."""
-    # Get cart
-    if current_user.is_authenticated:
-        cart = Cart.query.filter_by(user_id=current_user.id).first()
-    else:
-        session_id = session.get('session_id')
-        cart = Cart.query.filter_by(session_id=session_id).first() if session_id else None
+    """Checkout — login required (no guest orders)."""
+    if not current_user.is_active:
+        flash('Your account is disabled. Contact support.', 'danger')
+        return redirect(url_for('main.index'))
+
+    cart = Cart.query.filter_by(user_id=current_user.id).first()
 
     if not cart or cart.item_count == 0:
         flash('Your cart is empty.', 'warning')
         return redirect(url_for('shop.listing'))
 
-    # Verify stock for all items
     for item in cart.items.all():
         in_stock, msg = check_stock(item.variant_id, item.quantity)
         if not in_stock:
             flash(f'{item.variant.product.name} ({item.variant.size}/{item.variant.color}): {msg}', 'warning')
             return redirect(url_for('cart.view'))
 
-    # Use appropriate form
-    if current_user.is_authenticated:
-        form = ShippingAddressForm()
-        # Pre-fill from default address
-        if request.method == 'GET':
-            addr = current_user.default_address()
-            if addr:
-                form.full_name.data = addr.full_name
-                form.phone.data = addr.phone
-                form.email.data = current_user.email
-                form.address_line1.data = addr.address_line1
-                form.address_line2.data = addr.address_line2
-                form.city.data = addr.city
-                form.state.data = addr.state
-                form.postal_code.data = addr.postal_code
-            else:
-                form.full_name.data = current_user.full_name
-                form.email.data = current_user.email
-                form.phone.data = current_user.phone
-    else:
-        form = GuestCheckoutForm()
+    form = ShippingAddressForm()
+    if request.method == 'GET':
+        addr = current_user.default_address()
+        if addr:
+            form.full_name.data = addr.full_name
+            form.phone.data = addr.phone
+            form.email.data = current_user.email
+            form.address_line1.data = addr.address_line1
+            form.address_line2.data = addr.address_line2
+            form.city.data = addr.city
+            form.state.data = addr.state
+            form.postal_code.data = addr.postal_code
+        else:
+            form.full_name.data = current_user.full_name
+            form.email.data = current_user.email
+            form.phone.data = current_user.phone
 
     if form.validate_on_submit():
-        # Calculate totals server-side
         subtotal = float(cart.subtotal)
-        shipping_cost = 0 if subtotal >= 999 else 79  # Free shipping over ₹999
+        shipping_cost = 0 if subtotal >= 999 else 79
         discount = 0
 
         coupon_code = session.get('coupon_code')
@@ -69,14 +63,27 @@ def checkout_page():
             if coupon and coupon.is_valid:
                 discount = float(coupon.calculate_discount(subtotal))
 
-        tax = round((subtotal - discount) * 0.05, 2)  # 5% GST
+        tax = round((subtotal - discount) * 0.05, 2)
         total = subtotal - discount + tax + shipping_cost
 
-        # Build shipping address JSON
+        ok, fraud_msg = validate_checkout(current_user, total, form.payment_method.data)
+        if not ok:
+            flash(fraud_msg, 'danger')
+            return render_template(
+                'checkout/checkout.html',
+                form=form,
+                cart=cart,
+                discount=session.get('discount', 0),
+                coupon_code=session.get('coupon_code'),
+            )
+
+        if form.phone.data:
+            current_user.phone = form.phone.data.strip()
+
         shipping_address = json.dumps({
             'full_name': form.full_name.data,
             'phone': form.phone.data,
-            'email': form.email.data,
+            'email': current_user.email,
             'address_line1': form.address_line1.data,
             'address_line2': form.address_line2.data or '',
             'city': form.city.data,
@@ -85,11 +92,10 @@ def checkout_page():
             'country': 'India',
         })
 
-        # Create order
         order = Order(
-            user_id=current_user.id if current_user.is_authenticated else None,
-            guest_email=form.email.data if not current_user.is_authenticated else None,
-            guest_phone=form.phone.data if not current_user.is_authenticated else None,
+            user_id=current_user.id,
+            guest_email=None,
+            guest_phone=None,
             subtotal=subtotal,
             tax=tax,
             shipping_cost=shipping_cost,
@@ -104,7 +110,6 @@ def checkout_page():
         db.session.add(order)
         db.session.flush()
 
-        # Create order items
         for item in cart.items.all():
             order_item = OrderItem(
                 order_id=order.id,
@@ -122,19 +127,15 @@ def checkout_page():
 
         db.session.commit()
 
-        # ---- Payment routing ----
         if form.payment_method.data == 'cod':
-            # Cash on Delivery — confirm order immediately
             order.status = 'confirmed'
 
             from app.services.payment_management_service import create_cod_payment
             create_cod_payment(order)
 
-            # Reduce stock
             for item in order.items.all():
                 reduce_stock(item.variant_id, item.quantity)
 
-            # Increment coupon usage
             if order.coupon_code:
                 coupon = Coupon.query.filter_by(code=order.coupon_code).first()
                 if coupon:
@@ -142,11 +143,7 @@ def checkout_page():
 
             db.session.commit()
 
-            # Clear cart
-            if current_user.is_authenticated:
-                c = Cart.query.filter_by(user_id=current_user.id).first()
-            else:
-                c = Cart.query.filter_by(session_id=session.get('session_id')).first()
+            c = Cart.query.filter_by(user_id=current_user.id).first()
             if c:
                 for ci in c.items.all():
                     db.session.delete(ci)
@@ -161,13 +158,11 @@ def checkout_page():
             flash('Order placed successfully! Pay on delivery.', 'success')
             return redirect(url_for('checkout.success', order_number=order.order_number))
 
-        # ---- Online payment via Razorpay ----
         try:
             razorpay_order = create_razorpay_order(order)
         except Exception as e:
             current_app.logger.error(f'Razorpay order creation failed: {e}')
             flash('Online payment is currently unavailable. Please choose Cash on Delivery.', 'danger')
-            # Delete the order so user can retry
             db.session.delete(order)
             db.session.commit()
             return redirect(url_for('checkout.checkout_page'))
@@ -184,6 +179,7 @@ def checkout_page():
 
 
 @checkout_bp.route('/verify', methods=['POST'])
+@login_required
 def verify():
     """Verify Razorpay payment after checkout."""
     razorpay_payment_id = request.form.get('razorpay_payment_id')
@@ -200,7 +196,10 @@ def verify():
         flash('Payment not found.', 'danger')
         return redirect(url_for('cart.view'))
 
-    # Verify signature
+    order = payment.order
+    if order.user_id != current_user.id and not current_user.is_admin:
+        abort(403)
+
     is_valid = verify_payment(razorpay_payment_id, razorpay_order_id, razorpay_signature)
     if not is_valid:
         flash('Payment verification failed. Please contact support.', 'danger')
@@ -208,20 +207,15 @@ def verify():
         db.session.commit()
         return redirect(url_for('cart.view'))
 
-    # Update payment
     payment.razorpay_payment_id = razorpay_payment_id
     payment.razorpay_signature = razorpay_signature
     capture_payment(payment)
 
-    # Update order status
-    order = payment.order
     order.status = 'confirmed'
 
-    # Reduce stock
     for item in order.items.all():
         reduce_stock(item.variant_id, item.quantity)
 
-    # Increment coupon usage
     if order.coupon_code:
         coupon = Coupon.query.filter_by(code=order.coupon_code).first()
         if coupon:
@@ -229,23 +223,16 @@ def verify():
 
     db.session.commit()
 
-    # Clear cart
-    if current_user.is_authenticated:
-        cart = Cart.query.filter_by(user_id=current_user.id).first()
-    else:
-        cart = Cart.query.filter_by(session_id=session.get('session_id')).first()
-
+    cart = Cart.query.filter_by(user_id=current_user.id).first()
     if cart:
         for item in cart.items.all():
             db.session.delete(item)
         db.session.delete(cart)
         db.session.commit()
 
-    # Clear coupon from session
     session.pop('coupon_code', None)
     session.pop('discount', None)
 
-    # Send confirmation email
     send_order_confirmation(order)
 
     flash('Payment successful! Your order has been placed.', 'success')
@@ -253,14 +240,12 @@ def verify():
 
 
 @checkout_bp.route('/success/<order_number>')
+@login_required
 def success(order_number):
-    """Order success page."""
+    """Order success page — owner only."""
     order = Order.query.filter_by(order_number=order_number).first_or_404()
 
-    # Security: only show to the order owner or guest
-    if current_user.is_authenticated:
-        if order.user_id and order.user_id != current_user.id and not current_user.is_admin:
-            from flask import abort
-            abort(403)
+    if order.user_id != current_user.id and not current_user.is_admin:
+        abort(403)
 
     return render_template('checkout/success.html', order=order)

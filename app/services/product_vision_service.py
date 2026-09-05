@@ -91,8 +91,6 @@ Look at the product photo and return ONLY valid JSON (no markdown) with these ke
   "short_description": "one line under 140 chars for product cards",
   "description": "2-4 sentences: fabric, fit, occasion, care tips",
   "category_id": integer id from list below (best match),
-  "suggested_price": number in INR (realistic retail),
-  "suggested_compare_price": number in INR (MRP, higher than price) or null,
   "age_groups": ["3-4y", "4-5y"] using codes like 0-3m, 1-2y, 3-4y, 9-10y, 13-14y,
   "variant_color": "color for SKU e.g. Pink"
 }}
@@ -104,7 +102,7 @@ Rules:
 - Indian kids wear context; be specific about garment type (frock vs shirt vs kurta).
 - If unsure of gender, use kids.
 - age_groups: pick 1-4 bands that fit the garment size shown.
-- Prices realistic for mid-range Indian kids clothing (₹199-₹2499).
+- Do NOT suggest prices — admin sets pricing manually.
 """
 
 
@@ -370,11 +368,6 @@ def _normalize_result(raw: dict, catalog):
     elif quality:
         material = quality
 
-    price = _safe_price(raw.get('suggested_price'))
-    compare = _safe_price(raw.get('suggested_compare_price'))
-    if compare and price and compare <= price:
-        compare = round(price * 1.4, 2)
-
     return {
         'name': _clip(raw.get('name'), 300),
         'product_type': (raw.get('product_type') or 'other').lower(),
@@ -384,8 +377,6 @@ def _normalize_result(raw: dict, catalog):
         'material': _clip(material, 200),
         'short_description': _clip(raw.get('short_description'), 500),
         'description': (raw.get('description') or '').strip(),
-        'price': price,
-        'compare_at_price': compare,
         'brand': 'Indistylex',
         'age_groups': age_groups,
         'variant_color': _clip(raw.get('variant_color') or raw.get('primary_color'), 50),
@@ -414,14 +405,6 @@ def _resolve_category_id(raw, catalog):
             return cat['id']
 
     return catalog[0]['id'] if catalog else None
-
-
-def _safe_price(value):
-    try:
-        num = float(value)
-        return round(num, 2) if num > 0 else None
-    except (TypeError, ValueError):
-        return None
 
 
 def _clip(value, max_len):
