@@ -1248,6 +1248,8 @@ body.admin-body {
 }
 .admin-filter-pill:hover { border-color: #2563EB; color: #2563EB; }
 .admin-filter-pill.is-active { background: #2563EB; color: #fff; border-color: #2563EB; }
+.admin-category-filter { min-width: 200px; max-width: 260px; }
+.admin-product-count strong { color: var(--text-primary); }
 .store-visibility-strip {
   display: flex;
   flex-wrap: wrap;

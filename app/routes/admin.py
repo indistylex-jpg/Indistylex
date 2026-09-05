@@ -392,15 +392,21 @@ def toggle_category(category_id):
 @login_required
 @admin_required
 def products():
+    from app.services.product_catalog_service import get_category_groups
+
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('ADMIN_ITEMS_PER_PAGE', 20)
 
     query = Product.query
     search = request.args.get('q', '').strip()
     visibility = request.args.get('visibility', '').strip()
+    category_id = request.args.get('category', type=int)
 
     if search:
         query = query.filter(Product.name.ilike(f'%{search}%'))
+
+    if category_id:
+        query = query.filter(Product.category_id == category_id)
 
     if visibility == 'featured':
         query = query.filter_by(is_featured=True, is_active=True)
@@ -414,11 +420,16 @@ def products():
     products = query.order_by(Product.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
+    selected_category = Category.query.get(category_id) if category_id else None
     return render_template(
         'admin/products.html',
         products=products,
         search=search,
         visibility=visibility,
+        category_id=category_id,
+        selected_category=selected_category,
+        category_groups=get_category_groups(include_inactive=True),
+        total_all=Product.query.count(),
     )
 
 

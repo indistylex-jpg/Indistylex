@@ -38,7 +38,13 @@
                 </div>
             </div>
             <div class="collection-toolbar-meta">
-                <span class="collection-result-count">{{ products.total }} Product{{ 's' if products.total != 1 }}</span>
+                <span class="collection-result-count">
+                    {% if products.total != total_all_products and active_filters %}
+                    {{ products.total }} of {{ total_all_products }} products
+                    {% else %}
+                    {{ products.total }} product{{ 's' if products.total != 1 }}
+                    {% endif %}
+                </span>
                 <div class="collection-sort-wrap">
                     <label for="sortSelect" class="collection-sort-label">Sort by</label>
                     <select class="collection-sort-select" id="sortSelect">

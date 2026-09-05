@@ -1,10 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 
 from app.models.product import Category
+from app.services.product_catalog_service import get_category_groups
 from app.services.shop_filter_service import (
     GENDER_FILTER_CHOICES,
     SORT_OPTIONS,
     active_filter_count,
+    base_product_query,
     build_listing_query,
     get_filter_colors,
     get_filter_sizes,
@@ -29,6 +31,8 @@ def _listing_context(args, category=None):
     return {
         'products': products,
         'categories': categories,
+        'category_groups': get_category_groups(),
+        'total_all_products': base_product_query().count(),
         'age_group_sections': AGE_GROUP_SECTIONS,
         'gender_choices': GENDER_FILTER_CHOICES,
         'sort_options': SORT_OPTIONS,

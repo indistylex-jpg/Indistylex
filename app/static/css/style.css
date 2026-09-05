@@ -1731,6 +1731,18 @@ img {
     max-height: 240px;
     overflow: auto;
 }
+.collection-filter-group-label {
+    padding: 10px 4px 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    list-style: none;
+}
+.collection-filter-group-label:first-child {
+    padding-top: 0;
+}
 .collection-filter-option {
     display: flex;
     align-items: center;

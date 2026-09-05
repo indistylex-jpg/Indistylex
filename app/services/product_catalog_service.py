@@ -99,11 +99,12 @@ def suggested_gender_for_category(category_id):
     return None
 
 
-def get_category_groups():
+def get_category_groups(*, include_inactive=False):
     """Categories grouped for optgroup select in admin form."""
-    all_cats = Category.query.filter_by(is_active=True).order_by(
-        Category.sort_order, Category.name
-    ).all()
+    q = Category.query
+    if not include_inactive:
+        q = q.filter_by(is_active=True)
+    all_cats = q.order_by(Category.sort_order, Category.name).all()
     by_id = {c.id: c for c in all_cats}
     parents = [c for c in all_cats if c.parent_id is None]
     grouped = []

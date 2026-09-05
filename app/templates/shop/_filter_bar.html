@@ -42,6 +42,20 @@
                     <button type="button" class="collection-filter-clear" data-clear-group="category">Clear</button>
                 </div>
                 <ul class="collection-filter-options">
+                    {% if category_groups %}
+                    {% for group in category_groups %}
+                    <li class="collection-filter-group-label">{{ group.label }}</li>
+                    {% for opt in group.options %}
+                    <li>
+                        <label class="collection-filter-option">
+                            <input type="radio" name="category" value="{{ opt.slug }}"
+                                   {{ 'checked' if (request.args.get('category') or current_category) == opt.slug }}>
+                            <span>{{ opt.name }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                    {% endfor %}
+                    {% else %}
                     {% for cat in categories %}
                     <li>
                         <label class="collection-filter-option">
@@ -51,6 +65,7 @@
                         </label>
                     </li>
                     {% endfor %}
+                    {% endif %}
                 </ul>
                 <button type="submit" class="collection-filter-apply">Apply</button>
             </div>
