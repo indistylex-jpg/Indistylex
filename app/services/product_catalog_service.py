@@ -236,9 +236,10 @@ def parse_variant_rows_from_request(form_data):
     return rows
 
 
-def validate_product_submission(form, form_data, files, *, is_new=False, product=None):
+def validate_product_submission(form, form_data, files, *, is_new=False, product=None, pending_image_paths=None):
     """Return list of user-facing validation error strings."""
     errors = []
+    pending_image_paths = pending_image_paths or []
 
     age_values = form_data.getlist('age_groups')
     normalized_ages = normalize_age_groups(age_values)
@@ -260,8 +261,11 @@ def validate_product_submission(form, form_data, files, *, is_new=False, product
 
     if is_new and product is None:
         has_images = any(f and f.filename for f in files.getlist('images'))
-        if not has_images:
-            errors.append('Upload at least one product photo before publishing.')
+        if not has_images and not pending_image_paths:
+            errors.append('Upload at least one product photo in section 4 (Photos).')
+
+    if not (form.price.data and form.price.data > 0):
+        errors.append('Enter a selling price (₹) greater than zero.')
 
     if form.compare_at_price.data and form.price.data:
         if form.compare_at_price.data <= form.price.data:

@@ -1,6 +1,8 @@
 import json
+import os
+import shutil
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, send_file, session
 from flask_login import login_required, current_user
 from sqlalchemy import func, extract
 from app.extensions import db, limiter
@@ -49,6 +51,112 @@ from app.services.product_catalog_service import (
 )
 
 admin_bp = Blueprint('admin', __name__)
+
+SESSION_PENDING_PRODUCT_IMAGES = 'pending_product_uploads'
+
+
+def _get_pending_upload_paths():
+    return list(session.get(SESSION_PENDING_PRODUCT_IMAGES) or [])
+
+
+def _stash_uploads_for_retry(files):
+    """Keep uploaded photos in session when form validation fails (browser clears file inputs)."""
+    paths = _get_pending_upload_paths()
+    changed = False
+    for img_file in files.getlist('images'):
+        if not img_file or not img_file.filename:
+            continue
+        try:
+            url = save_image(img_file, subfolder='products/_pending')
+        except Exception:
+            current_app.logger.exception('Failed to stage product image %s', img_file.filename)
+            continue
+        if url and url not in paths:
+            paths.append(url)
+            changed = True
+    for img_file in files.getlist('lifestyle_images'):
+        if not img_file or not img_file.filename:
+            continue
+        try:
+            url = save_image(img_file, subfolder='products/_pending')
+        except Exception:
+            continue
+        if url and url not in paths:
+            paths.append(url)
+            changed = True
+    if changed:
+        session[SESSION_PENDING_PRODUCT_IMAGES] = paths
+    return paths
+
+
+def _stage_upload_file(img_file):
+    """Save one upload to the pending folder and track it in session."""
+    if not img_file or not img_file.filename:
+        return None
+    try:
+        url = save_image(img_file, subfolder='products/_pending')
+    except Exception:
+        current_app.logger.exception('Failed to stage product image %s', img_file.filename)
+        return None
+    if not url:
+        return None
+    paths = _get_pending_upload_paths()
+    if url not in paths:
+        paths.append(url)
+        session[SESSION_PENDING_PRODUCT_IMAGES] = paths
+    return url
+
+
+def _clear_pending_uploads():
+    paths = session.pop(SESSION_PENDING_PRODUCT_IMAGES, None) or []
+    upload_root = current_app.config['UPLOAD_FOLDER']
+    for rel in paths:
+        if rel and rel.startswith('products/_pending/'):
+            delete_image(rel)
+
+
+def _promote_pending_image(stored_path):
+    """Move a staged pending upload into the live products folder."""
+    if not stored_path:
+        return None
+    if not stored_path.startswith('products/_pending/'):
+        return stored_path
+    upload_root = current_app.config['UPLOAD_FOLDER']
+    src = os.path.join(upload_root, stored_path)
+    if not os.path.isfile(src):
+        return None
+    dest_rel = f'products/{os.path.basename(stored_path)}'
+    dest = os.path.join(upload_root, dest_rel)
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    shutil.move(src, dest)
+    return dest_rel
+
+
+def _attach_staged_images_to_product(product):
+    """Promote session-staged uploads onto a product. Returns (saved, failed, new_image_ids)."""
+    paths = session.pop(SESSION_PENDING_PRODUCT_IMAGES, None) or []
+    existing_count = product.images.count()
+    saved = 0
+    failed = 0
+    new_image_ids = []
+
+    for rel in paths:
+        final_path = _promote_pending_image(rel)
+        if not final_path:
+            failed += 1
+            continue
+        img = ProductImage(
+            product_id=product.id,
+            image_url=final_path,
+            is_primary=False,
+            sort_order=existing_count + saved,
+        )
+        db.session.add(img)
+        db.session.flush()
+        new_image_ids.append(img.id)
+        saved += 1
+
+    return saved, failed, new_image_ids
 
 
 def _set_primary_image(product, image_id):
@@ -107,6 +215,11 @@ def _save_product_images(product):
         db.session.flush()
         new_image_ids.append(img.id)
         saved += 1
+
+    staged_saved, staged_failed, staged_ids = _attach_staged_images_to_product(product)
+    saved += staged_saved
+    failed += staged_failed
+    new_image_ids.extend(staged_ids)
 
     primary_id = request.form.get('primary_image_id', type=int)
     primary_new_index = request.form.get('primary_new_upload_index', type=int)
@@ -526,10 +639,25 @@ def analyze_product_image():
     if not image or not image.filename:
         return jsonify({'success': False, 'message': 'Please choose a product photo.'}), 400
 
+    image_bytes = image.read()
+    mime = image.content_type or image.mimetype or 'image/jpeg'
+
+    from io import BytesIO
+    from werkzeug.datastructures import FileStorage
+    staged = save_image(
+        FileStorage(BytesIO(image_bytes), filename=image.filename, content_type=mime),
+        subfolder='products/_pending',
+    )
+    if staged:
+        paths = _get_pending_upload_paths()
+        if staged not in paths:
+            paths.append(staged)
+            session[SESSION_PENDING_PRODUCT_IMAGES] = paths
+
     try:
         data = run_analysis(
-            image.read(),
-            image.content_type or image.mimetype,
+            image_bytes,
+            mime,
             get_category_groups(),
         )
         return jsonify({'success': True, 'data': data})
@@ -573,14 +701,17 @@ def add_product():
     form.category_id.choices = get_category_choices_flat()
     category_groups = get_category_groups()
     validation_errors = []
+    pending_upload_paths = _get_pending_upload_paths()
     draft = product_form_draft_context(
         request.form if request.method == 'POST' else None,
     )
+    save_succeeded = False
 
     if request.method == 'POST':
         if form.validate_on_submit():
             validation_errors = validate_product_submission(
                 form, request.form, request.files, is_new=True,
+                pending_image_paths=pending_upload_paths,
             )
             if not validation_errors:
                 try:
@@ -594,6 +725,7 @@ def add_product():
                     image_count, image_failed = _save_product_images(product)
                     variant_count, skipped_skus = _save_variants_from_request(product)
                     db.session.commit()
+                    save_succeeded = True
 
                     places = listing_preview(product)
                     flash(
@@ -621,8 +753,13 @@ def add_product():
         else:
             validation_errors = validate_product_submission(
                 form, request.form, request.files, is_new=True,
+                pending_image_paths=pending_upload_paths,
             )
             _flash_product_form_errors(form, validation_errors)
+
+        if not save_succeeded:
+            _stash_uploads_for_retry(request.files)
+            pending_upload_paths = _get_pending_upload_paths()
 
     return render_template(
         'admin/product_form.html',
@@ -630,6 +767,7 @@ def add_product():
         title='Add Product',
         is_new=True,
         validation_errors=validation_errors,
+        pending_upload_paths=pending_upload_paths,
         age_group_sections=AGE_GROUP_SECTIONS,
         age_presets=AGE_PRESETS,
         category_groups=category_groups,

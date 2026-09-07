@@ -96,6 +96,7 @@
   let previewUrls = [];
   let pendingUploadFiles = [];
   let primaryUploadIndex = 0;
+  const stagedUploadCount = Number(window.PENDING_UPLOAD_COUNT || 0);
 
   function fileKey(file) {
     return [file.name, file.size, file.lastModified].join('|');
@@ -117,11 +118,13 @@
 
   function updateUploadCount() {
     if (!uploadCount) return;
-    const count = pendingUploadFiles.length;
+    const count = pendingUploadFiles.length + stagedUploadCount;
     uploadCount.textContent = count
       ? count + ' photo' + (count === 1 ? '' : 's') + ' ready to upload'
       : 'No photos selected yet';
   }
+
+  updateUploadCount();
 
   function clearPreviewUrls() {
     previewUrls.forEach(function (url) { URL.revokeObjectURL(url); });
@@ -337,8 +340,8 @@
     if (isNewProduct && !completeVariants) {
       errors.push('Add at least one complete variant (size, color, SKU).');
     }
-    if (isNewProduct && !pendingUploadFiles.length) {
-      errors.push('Upload at least one product photo.');
+    if (isNewProduct && !pendingUploadFiles.length && !stagedUploadCount) {
+      errors.push('Upload at least one product photo in section 4 (Photos).');
     }
     return errors;
   }

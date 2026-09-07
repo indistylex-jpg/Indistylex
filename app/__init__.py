@@ -36,7 +36,7 @@ def create_app(config_name=None):
         upload_folder = os.path.normpath(os.path.join(app.root_path, upload_folder))
     app.config['UPLOAD_FOLDER'] = upload_folder
     os.makedirs(upload_folder, exist_ok=True)
-    for sub in ('products', 'categories', 'thumbnails'):
+    for sub in ('products', 'products/_pending', 'categories', 'thumbnails'):
         os.makedirs(os.path.join(upload_folder, sub), exist_ok=True)
 
     # Serve uploaded files through Flask (works even when nginx static alias differs)
