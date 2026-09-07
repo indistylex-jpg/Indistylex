@@ -1,7 +1,11 @@
 """Lightweight schema patches for production DBs created via db.create_all()."""
+import logging
+
 from sqlalchemy import inspect, text
 
 from app.extensions import db
+
+logger = logging.getLogger(__name__)
 
 
 def ensure_payment_columns():
@@ -39,12 +43,14 @@ def ensure_product_columns():
         return
 
     existing = {c['name'] for c in inspector.get_columns('products')}
-    dialect = db.engine.dialect.name
 
     if 'hsn_code' not in existing:
         col_def = 'VARCHAR(10) NULL'
-        if dialect == 'mysql':
+        try:
             db.session.execute(text(f'ALTER TABLE products ADD COLUMN hsn_code {col_def}'))
-        else:
-            db.session.execute(text(f'ALTER TABLE products ADD COLUMN hsn_code {col_def}'))
-        db.session.commit()
+            db.session.commit()
+            logger.info('Added products.hsn_code column')
+        except Exception as exc:
+            db.session.rollback()
+            logger.error('Could not add products.hsn_code column: %s', exc)
+            raise

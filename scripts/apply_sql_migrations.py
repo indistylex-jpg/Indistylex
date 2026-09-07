@@ -17,6 +17,7 @@ DEFAULT_SCRIPTS = [
     'scripts/create_expenses_table.sql',
     'scripts/alter_product_cost_price.sql',
     'scripts/alter_order_item_cost_price.sql',
+    'scripts/alter_product_hsn_code.sql',
 ]
 
 

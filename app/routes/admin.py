@@ -88,7 +88,12 @@ def _save_product_images(product):
     for img_file in upload_files:
         if not img_file or not img_file.filename:
             continue
-        url = save_image(img_file, subfolder='products')
+        try:
+            url = save_image(img_file, subfolder='products')
+        except Exception:
+            current_app.logger.exception('Product image save failed for %s', img_file.filename)
+            failed += 1
+            continue
         if not url:
             failed += 1
             continue
@@ -159,8 +164,25 @@ def _save_variants_from_request(product):
     return added, skipped
 
 
-def _apply_product_age_groups(product):
-    apply_age_groups_from_request(product, request.form)
+def _ensure_product_schema():
+    """Apply missing product columns before save (e.g. hsn_code on older DBs)."""
+    from app.utils.db_schema import ensure_product_columns
+    ensure_product_columns()
+
+
+def _product_save_error_message(exc):
+    """User-facing message for failed product save."""
+    err = str(exc).lower()
+    if 'hsn_code' in err or 'unknown column' in err:
+        return (
+            'Database is missing the HSN code column. On the server run: '
+            'python scripts/apply_sql_migrations.py then restart the app.'
+        )
+    if 'permission denied' in err or 'read-only' in err:
+        return 'Cannot write uploaded images — check uploads folder permissions on the server.'
+    if 'duplicate entry' in err and 'sku' in err:
+        return 'That SKU already exists on another product. Use a unique SKU for each variant.'
+    return 'Could not save this product. Try again with fewer or smaller photos (under 5 MB each).'
 
 
 def _flash_product_form_errors(form, validation_errors=None):
@@ -561,34 +583,40 @@ def add_product():
                 form, request.form, request.files, is_new=True,
             )
             if not validation_errors:
-                product = Product()
-                apply_product_fields_from_form(product, form, is_new=True)
-                db.session.add(product)
-                db.session.flush()
-                apply_age_groups_from_request(product, request.form)
+                try:
+                    _ensure_product_schema()
+                    product = Product()
+                    apply_product_fields_from_form(product, form, is_new=True)
+                    db.session.add(product)
+                    db.session.flush()
+                    apply_age_groups_from_request(product, request.form)
 
-                image_count, image_failed = _save_product_images(product)
-                variant_count, skipped_skus = _save_variants_from_request(product)
-                db.session.commit()
+                    image_count, image_failed = _save_product_images(product)
+                    variant_count, skipped_skus = _save_variants_from_request(product)
+                    db.session.commit()
 
-                places = listing_preview(product)
-                flash(
-                    f'Product "{product.name}" saved successfully. Visible on: {"; ".join(places)}.',
-                    'success',
-                )
-                if image_failed:
-                    flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
-                if image_count:
-                    flash(f'{image_count} photo(s) uploaded for this product.', 'success')
-                if product.images.count() == 1:
+                    places = listing_preview(product)
                     flash(
-                        'Tip: Add a second photo (product flat-lay + child wearing the outfit) '
-                        'so customers see multiple images on the product page.',
-                        'info',
+                        f'Product "{product.name}" saved successfully. Visible on: {"; ".join(places)}.',
+                        'success',
                     )
-                for sku in skipped_skus:
-                    flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
-                return redirect(url_for('admin.products'))
+                    if image_failed:
+                        flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+                    if image_count:
+                        flash(f'{image_count} photo(s) uploaded for this product.', 'success')
+                    if product.images.count() == 1:
+                        flash(
+                            'Tip: Add a second photo (product flat-lay + child wearing the outfit) '
+                            'so customers see multiple images on the product page.',
+                            'info',
+                        )
+                    for sku in skipped_skus:
+                        flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+                    return redirect(url_for('admin.products'))
+                except Exception as exc:
+                    db.session.rollback()
+                    current_app.logger.exception('Failed to save new product')
+                    validation_errors.append(_product_save_error_message(exc))
             _flash_product_form_errors(form, validation_errors)
         else:
             validation_errors = validate_product_submission(
@@ -637,35 +665,41 @@ def edit_product(product_id):
                 form, request.form, request.files, is_new=False, product=product,
             )
             if not validation_errors:
-                apply_product_fields_from_form(product, form, is_new=False)
-                apply_age_groups_from_request(product, request.form)
+                try:
+                    _ensure_product_schema()
+                    apply_product_fields_from_form(product, form, is_new=False)
+                    apply_age_groups_from_request(product, request.form)
 
-                image_count, image_failed = _save_product_images(product)
-                primary_id = request.form.get('primary_image_id', type=int)
-                if primary_id:
-                    _set_primary_image(product, primary_id)
-                _ensure_primary_image(product)
-                variant_count, skipped_skus = _save_variants_from_request(product)
-                db.session.commit()
+                    image_count, image_failed = _save_product_images(product)
+                    primary_id = request.form.get('primary_image_id', type=int)
+                    if primary_id:
+                        _set_primary_image(product, primary_id)
+                    _ensure_primary_image(product)
+                    variant_count, skipped_skus = _save_variants_from_request(product)
+                    db.session.commit()
 
-                places = listing_preview(product)
-                flash(
-                    f'Product "{product.name}" saved successfully. Visible on: {"; ".join(places)}.',
-                    'success',
-                )
-                if image_failed:
-                    flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
-                if image_count:
-                    flash(f'{image_count} photo(s) uploaded for this product.', 'success')
-                if product.images.count() == 1:
+                    places = listing_preview(product)
                     flash(
-                        'This product has only one photo. Upload a model/lifestyle shot below '
-                        'so the product page shows multiple images.',
-                        'info',
+                        f'Product "{product.name}" saved successfully. Visible on: {"; ".join(places)}.',
+                        'success',
                     )
-                for sku in skipped_skus:
-                    flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
-                return redirect(url_for('admin.edit_product', product_id=product.id))
+                    if image_failed:
+                        flash(f'{image_failed} image(s) could not be saved — use JPG, PNG or WebP under 5 MB.', 'warning')
+                    if image_count:
+                        flash(f'{image_count} photo(s) uploaded for this product.', 'success')
+                    if product.images.count() == 1:
+                        flash(
+                            'This product has only one photo. Upload a model/lifestyle shot below '
+                            'so the product page shows multiple images.',
+                            'info',
+                        )
+                    for sku in skipped_skus:
+                        flash(f'SKU "{sku}" already exists — variant skipped.', 'warning')
+                    return redirect(url_for('admin.edit_product', product_id=product.id))
+                except Exception as exc:
+                    db.session.rollback()
+                    current_app.logger.exception('Failed to save product %s', product_id)
+                    validation_errors.append(_product_save_error_message(exc))
             _flash_product_form_errors(form, validation_errors)
         else:
             validation_errors = validate_product_submission(

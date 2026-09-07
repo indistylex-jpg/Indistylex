@@ -323,6 +323,22 @@ def create_app(config_name=None):
             return jsonify({'success': False, 'message': description or 'Bad request'}), 400
         return description or 'Bad Request', 400
 
+    from werkzeug.exceptions import RequestEntityTooLarge
+
+    @app.errorhandler(RequestEntityTooLarge)
+    def request_entity_too_large(error):
+        from flask import request, flash, redirect, url_for, jsonify
+        from app.utils.request_helpers import wants_json_response
+        max_mb = app.config.get('MAX_CONTENT_LENGTH', 0) // (1024 * 1024)
+        message = (
+            f'Upload too large (max {max_mb} MB total per save). '
+            'Upload fewer photos at once or resize images before uploading.'
+        )
+        if wants_json_response():
+            return jsonify({'success': False, 'message': message}), 413
+        flash(message, 'danger')
+        return redirect(request.referrer or url_for('admin.products'))
+
     @login_manager.unauthorized_handler
     def unauthorized():
         from flask import request, redirect, url_for, jsonify
@@ -344,11 +360,18 @@ def create_app(config_name=None):
     # Create tables and seed admin
     with app.app_context():
         from app.utils.db_schema import ensure_payment_columns, ensure_product_columns
+        import logging
+        schema_log = logging.getLogger('app.schema')
         try:
             ensure_payment_columns()
-            ensure_product_columns()
-        except Exception:
+        except Exception as exc:
             db.session.rollback()
+            schema_log.error('Payment schema patch failed: %s', exc)
+        try:
+            ensure_product_columns()
+        except Exception as exc:
+            db.session.rollback()
+            schema_log.error('Product schema patch failed: %s', exc)
         _seed_admin(app)
 
     return app
