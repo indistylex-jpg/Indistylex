@@ -63,6 +63,7 @@ def _stash_uploads_for_retry(files):
     """Keep uploaded photos in session when form validation fails (browser clears file inputs)."""
     paths = _get_pending_upload_paths()
     changed = False
+    failed = 0
     for img_file in files.getlist('images'):
         if not img_file or not img_file.filename:
             continue
@@ -70,6 +71,7 @@ def _stash_uploads_for_retry(files):
             url = save_image(img_file, subfolder='products/_pending')
         except Exception:
             current_app.logger.exception('Failed to stage product image %s', img_file.filename)
+            failed += 1
             continue
         if url and url not in paths:
             paths.append(url)
@@ -80,12 +82,20 @@ def _stash_uploads_for_retry(files):
         try:
             url = save_image(img_file, subfolder='products/_pending')
         except Exception:
+            failed += 1
             continue
         if url and url not in paths:
             paths.append(url)
             changed = True
     if changed:
         session[SESSION_PENDING_PRODUCT_IMAGES] = paths
+        session.modified = True
+    if failed and not paths:
+        flash(
+            'Photos could not be saved on the server — check uploads folder permissions '
+            '(app/static/uploads must be writable by the app user).',
+            'danger',
+        )
     return paths
 
 
@@ -653,6 +663,7 @@ def analyze_product_image():
         if staged not in paths:
             paths.append(staged)
             session[SESSION_PENDING_PRODUCT_IMAGES] = paths
+            session.modified = True
 
     try:
         data = run_analysis(
